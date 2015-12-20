@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="Test1.xcdatamodel" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <elements/>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9057" systemVersion="15C50" minimumToolsVersion="Automatic">
+    <entity name="TodoItem" representedClassName=".TodoItem" syncable="YES">
+        <attribute name="comment" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="expireDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="hasNotification" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isDone" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isRepeated" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="notifyDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="startDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="title" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TodoItemCategory" inverseName="items" inverseEntity="TodoItemCategory" syncable="YES"/>
+    </entity>
+    <entity name="TodoItemCategory" representedClassName=".TodoItemCategory" syncable="YES">
+        <attribute name="color" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="priority" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TodoItem" inverseName="category" inverseEntity="TodoItem" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="TodoItem" positionX="-63" positionY="-18" width="128" height="180"/>
+        <element name="TodoItemCategory" positionX="-63" positionY="36" width="128" height="105"/>
+    </elements>
 </model>
