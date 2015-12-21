@@ -11,7 +11,7 @@ import UIKit
 
 
 class TodoItemCell: UITableViewCell {
-
-    @IBOutlet weak var titleLabel: UILabel!    
-    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var detailLabel: UILabel!
+    @IBOutlet weak var categoryLabel: UILabel!
 }

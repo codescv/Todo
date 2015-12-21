@@ -37,12 +37,36 @@ class TodoListViewController: UIViewController {
 }
 
 class TodoListTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
-    // MARK: outlets
-    //@IBOutlet weak var tableView: UITableView!
-    
     // MARK: properties
     let session = DataManager.instance.session
-    let identifier = "TodoItemCellIdentifier"
+    
+    enum CellType: String{
+        case ItemCell = "TodoItemCellIdentifier"
+        case ActionCell = "TodoItemActionCellIdentifier"
+        
+        func identifier() -> String {
+            return self.rawValue
+        }
+        
+        func rowHeight() -> CGFloat {
+            switch self {
+            case .ActionCell:
+                return 44
+            case .ItemCell:
+                return 60
+            }
+        }
+    }
+    
+    // the cell selected
+    var selectedIndexPath: NSIndexPath?
+    // action cell is the cell below the selected cell
+    var actionCellIndexPath: NSIndexPath? {
+        if let selected = selectedIndexPath {
+            return NSIndexPath(forRow: selected.row + 1, inSection: selected.section)
+        }
+        return nil
+    }
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
         return self.session.query(TodoItem).fetchedResultsController()
@@ -61,27 +85,91 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         return 1
     }
     
+    func cellTypeForIndexPath(indexPath: NSIndexPath) -> CellType {
+        if let acIndexPath = actionCellIndexPath {
+            if acIndexPath.compare(indexPath) == .OrderedSame {
+                return .ActionCell
+            }
+        }
+        return .ItemCell
+    }
+    
+    func itemIndexPathForCellIndexPath(indexPath: NSIndexPath) -> NSIndexPath? {
+        if let acIndexPath = actionCellIndexPath {
+            switch (acIndexPath.compare(indexPath)) {
+            case .OrderedSame:
+                return nil
+            case .OrderedAscending:
+                return NSIndexPath(forRow: indexPath.row - 1, inSection: indexPath.section)
+            case .OrderedDescending:
+                return indexPath
+            }
+        }
+        return indexPath
+    }
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
-        let cell: TodoItemCell = tableView.dequeueReusableCellWithIdentifier(identifier) as! TodoItemCell
-        cell.titleLabel.text = item.title
-        //cell.dateLabel.text = "xlkajfdladsk"
-        return cell
+        let cellType = cellTypeForIndexPath(indexPath)
+        let cell = tableView.dequeueReusableCellWithIdentifier(cellType.identifier())
+        if cellType == .ActionCell {
+            return cell!
+        } else {
+            let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
+            let itemCell = cell as! TodoItemCell
+            itemCell.titleLabel.text = item.title
+            return itemCell
+        }
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.fetchedResultsController.sections![section].numberOfObjects
+        let itemCount = self.fetchedResultsController.sections![section].numberOfObjects
+        if selectedIndexPath != nil {
+            return itemCount + 1
+        }
+        return itemCount
     }
     
     // MARK: tableviewdelegate
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+        let cellType = cellTypeForIndexPath(indexPath)
+        return cellType.rowHeight()
+    }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        
+        guard let itemIndexPath = itemIndexPathForCellIndexPath(indexPath)
+            else { return }
+        
+        if selectedIndexPath?.compare(itemIndexPath) == .OrderedSame {
+            // selected the same cell again, fold the action
+            if let acIndexPath = actionCellIndexPath {
+                selectedIndexPath = nil
+                tableView.beginUpdates()
+                tableView.deleteRowsAtIndexPaths([acIndexPath], withRowAnimation: .Automatic)
+                tableView.endUpdates()
+            }
+            return
+        }
+        
+        tableView.beginUpdates()
+        // if action view exists, remove it
+        if let acIndexPath = actionCellIndexPath {
+            tableView.deleteRowsAtIndexPaths([acIndexPath], withRowAnimation: .Automatic)
+        }
+        
+        // expand new action cell
+        selectedIndexPath = itemIndexPath
+        tableView.insertRowsAtIndexPaths([actionCellIndexPath!], withRowAnimation: .Automatic)
+        tableView.endUpdates()
     }
     
     // MARK: fetchedresultscontrollerdelegate
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         tableView.reloadData()
     }
+    
+    
 }
 
 
