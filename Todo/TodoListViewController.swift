@@ -78,6 +78,9 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         // Do any additional setup after loading the view, typically from a nib.
         self.fetchedResultsController.delegate = self
         try! self.fetchedResultsController.performFetch()
+        
+        tableView.estimatedRowHeight = 44
+        tableView.rowHeight = UITableViewAutomaticDimension
     }
 
     // MARK: datasource
@@ -109,59 +112,49 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cellType = cellTypeForIndexPath(indexPath)
-        let cell = tableView.dequeueReusableCellWithIdentifier(cellType.identifier())
-        if cellType == .ActionCell {
-            return cell!
+        let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
+        let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
+        itemCell.titleLabel.text = item.title
+        if selectedIndexPath?.compare(indexPath) == .OrderedSame {
+            itemCell.showActions = true
         } else {
-            let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
-            let itemCell = cell as! TodoItemCell
-            itemCell.titleLabel.text = item.title
-            return itemCell
+            itemCell.showActions = false
         }
+        return itemCell
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let itemCount = self.fetchedResultsController.sections![section].numberOfObjects
-        if selectedIndexPath != nil {
-            return itemCount + 1
-        }
         return itemCount
     }
     
-    // MARK: tableviewdelegate
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        let cellType = cellTypeForIndexPath(indexPath)
-        return cellType.rowHeight()
-    }
-    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRowAtIndexPath(indexPath, animated: false)
         
-        guard let itemIndexPath = itemIndexPathForCellIndexPath(indexPath)
-            else { return }
-        
-        if selectedIndexPath?.compare(itemIndexPath) == .OrderedSame {
-            // selected the same cell again, fold the action
-            if let acIndexPath = actionCellIndexPath {
-                selectedIndexPath = nil
-                tableView.beginUpdates()
-                tableView.deleteRowsAtIndexPaths([acIndexPath], withRowAnimation: .Automatic)
-                tableView.endUpdates()
-            }
-            return
-        }
         
         tableView.beginUpdates()
-        // if action view exists, remove it
-        if let acIndexPath = actionCellIndexPath {
-            tableView.deleteRowsAtIndexPaths([acIndexPath], withRowAnimation: .Automatic)
+        if let selected = selectedIndexPath {
+            if selected.compare(indexPath) == .OrderedSame {
+                // fold
+                print("fold")
+                selectedIndexPath = nil
+                tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            } else {
+                // fold old and expand new
+                print("fold and expand")
+                tableView.reloadRowsAtIndexPaths([selected, indexPath], withRowAnimation: .Automatic)
+                selectedIndexPath = indexPath
+            }
+        } else {
+            // expand new
+            print("expand")
+            selectedIndexPath = indexPath
+            tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
         }
         
-        // expand new action cell
-        selectedIndexPath = itemIndexPath
-        tableView.insertRowsAtIndexPaths([actionCellIndexPath!], withRowAnimation: .Automatic)
+        
         tableView.endUpdates()
+        
     }
     
     // MARK: fetchedresultscontrollerdelegate
