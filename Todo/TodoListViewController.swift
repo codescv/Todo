@@ -136,18 +136,15 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         if let selected = selectedIndexPath {
             if selected.compare(indexPath) == .OrderedSame {
                 // fold
-                print("fold")
                 selectedIndexPath = nil
                 tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             } else {
                 // fold old and expand new
-                print("fold and expand")
                 tableView.reloadRowsAtIndexPaths([selected, indexPath], withRowAnimation: .Automatic)
                 selectedIndexPath = indexPath
             }
         } else {
             // expand new
-            print("expand")
             selectedIndexPath = indexPath
             tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
         }
