@@ -115,6 +115,7 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
+        itemCell.titleLabel.sizeToFit()
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
             itemCell.showActions = true
         } else {
@@ -126,6 +127,14 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let itemCount = self.fetchedResultsController.sections![section].numberOfObjects
         return itemCount
+    }
+    
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        if selectedIndexPath?.compare(indexPath) == .OrderedSame {
+            return 66
+        } else {
+            return 44
+        }
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -140,8 +149,8 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
                 tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             } else {
                 // fold old and expand new
-                tableView.reloadRowsAtIndexPaths([selected, indexPath], withRowAnimation: .Automatic)
                 selectedIndexPath = indexPath
+                tableView.reloadRowsAtIndexPaths([selected, indexPath], withRowAnimation: .Automatic)
             }
         } else {
             // expand new

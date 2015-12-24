@@ -20,7 +20,15 @@ class TodoItemCell: UITableViewCell {
     @IBOutlet weak var actionViewHeightConstraint: NSLayoutConstraint!
     
     override func awakeFromNib() {
-        self.actionView.hidden = true
+        self.button.hidden = true
+    }
+    
+    func expandActions() {
+    
+    }
+    
+    func hideActions() {
+        
     }
     
     var showActions: Bool? {
@@ -30,16 +38,29 @@ class TodoItemCell: UITableViewCell {
             }
             
             if showActions! {
-                self.actionView.hidden = false
                 let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
-                let trans = CGAffineTransformScale(translate, 0.3, 0.3)
+                let trans = CGAffineTransformScale(translate, 0.01, 0.01)
                 self.button.transform = trans
-                UIView.animateWithDuration(0.5, animations: { () -> Void in
+                self.button.hidden = false
+                UIView.animateWithDuration(0.3, animations: { () -> Void in
                     self.button.transform = CGAffineTransformIdentity
+                    }, completion: { (success) in
                 })
                 
             } else {
-                self.actionView.hidden = true
+                if self.button.hidden == true {
+                    return
+                }
+                
+                self.button.transform = CGAffineTransformIdentity
+                let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
+                let trans = CGAffineTransformScale(translate, 0.01, 0.01)
+                self.button.hidden = false
+                UIView.animateWithDuration(0.3, animations: { () -> Void in
+                    self.button.transform = trans
+                    }, completion: { (success) in
+                        self.button.hidden = true
+                })
             }
             
         }
