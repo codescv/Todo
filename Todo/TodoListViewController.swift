@@ -60,13 +60,10 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     
     // the cell selected
     var selectedIndexPath: NSIndexPath?
-    // action cell is the cell below the selected cell
-    var actionCellIndexPath: NSIndexPath? {
-        if let selected = selectedIndexPath {
-            return NSIndexPath(forRow: selected.row + 1, inSection: selected.section)
-        }
-        return nil
-    }
+    
+    // the cell to be moved
+    var sourceIndexPath: NSIndexPath?
+    var sourceCellSnapshot: UIView?
     
     lazy var fetchedResultsController: NSFetchedResultsController = {
         return self.session.query(TodoItem).fetchedResultsController()
@@ -81,34 +78,110 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
+        tableView.addGestureRecognizer(longPress)
+    }
+    
+    // MARK: gesture recognizer
+    func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
+        //print("long press! \(longPress)")
+        let state = longPress.state;
+        let location = longPress.locationInView(tableView)
+        let indexPath = tableView.indexPathForRowAtPoint(location)
+        
+        switch (state) {
+        case .Began:
+            if let pressedIndexPath = indexPath {
+                self.sourceIndexPath = pressedIndexPath;
+                let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
+                sourceCellSnapshot = cell.resizableSnapshotViewFromRect(cell.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
+                
+                // Add the snapshot as subview, centered at cell's center...
+                let center: CGPoint = cell.center
+                
+                let snapshot: UIView! = sourceCellSnapshot
+                snapshot.center = center
+                snapshot.alpha = 1.0
+                snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                self.tableView.addSubview(snapshot)
+                
+                UIView.animateWithDuration(0.25,
+                    animations: {
+                        // Offset for gesture location.
+                        snapshot.center = CGPointMake(center.x, location.y)
+                        snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                        snapshot.alpha = 0.98
+                        
+                        // Fade out.
+                        cell.alpha = 0.0;
+                    },
+                    completion: { (success) in
+                        cell.hidden = true;
+                    }
+                )
+                
+            }
+            
+        case .Changed:
+            guard
+                let snapshot = sourceCellSnapshot,
+                let _ = sourceIndexPath
+                else {
+                    print("error! source index path: \(sourceIndexPath) snapshot: \(sourceCellSnapshot)")
+                    return
+            }
+            
+            let center = snapshot.center
+            snapshot.center = CGPointMake(center.x, location.y);
+            
+            if let targetIndexPath = indexPath {
+                if targetIndexPath.compare(sourceIndexPath!) != .OrderedSame {
+                    
+                    // TODO update model
+                    tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: targetIndexPath)
+                    sourceIndexPath = indexPath
+                }
+            }
+            
+
+        default:
+            guard
+                let _ = sourceIndexPath
+                else {
+                    print("error! source index path is nil")
+                    return
+            }
+            
+            let cell = tableView.cellForRowAtIndexPath(sourceIndexPath!) as! TodoItemCell
+            cell.hidden = false
+            cell.alpha = 0.0
+            
+            UIView.animateWithDuration(0.25,
+                animations: {
+                    if let snapshot = self.sourceCellSnapshot {
+                        snapshot.center = cell.center;
+                        snapshot.transform = CGAffineTransformIdentity;
+                        snapshot.alpha = 0.0;
+                    }
+                    
+                    // Undo fade out.
+                    cell.alpha = 1.0
+
+                },
+                completion: { (success) in
+                    self.sourceIndexPath = nil
+                    self.sourceCellSnapshot?.removeFromSuperview()
+                    self.sourceCellSnapshot = nil
+                    self.tableView.reloadData()
+            })
+            
+        }
     }
 
     // MARK: datasource
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
-    }
-    
-    func cellTypeForIndexPath(indexPath: NSIndexPath) -> CellType {
-        if let acIndexPath = actionCellIndexPath {
-            if acIndexPath.compare(indexPath) == .OrderedSame {
-                return .ActionCell
-            }
-        }
-        return .ItemCell
-    }
-    
-    func itemIndexPathForCellIndexPath(indexPath: NSIndexPath) -> NSIndexPath? {
-        if let acIndexPath = actionCellIndexPath {
-            switch (acIndexPath.compare(indexPath)) {
-            case .OrderedSame:
-                return nil
-            case .OrderedAscending:
-                return NSIndexPath(forRow: indexPath.row - 1, inSection: indexPath.section)
-            case .OrderedDescending:
-                return indexPath
-            }
-        }
-        return indexPath
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
