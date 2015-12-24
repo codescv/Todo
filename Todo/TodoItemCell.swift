@@ -19,50 +19,41 @@ class TodoItemCell: UITableViewCell {
     @IBOutlet weak var button: UIButton!
     @IBOutlet weak var actionViewHeightConstraint: NSLayoutConstraint!
     
-    override func awakeFromNib() {
-        self.button.hidden = true
-    }
+    let animationDuration = 0.2
     
-    func expandActions() {
-    
-    }
-    
-    func hideActions() {
+    func expandActionsAnimated(animated: Bool = true) {
+        self.button.hidden = false
         
+        if animated {
+            let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
+            let scale = CGAffineTransformMakeScale(0.01, 0.01)
+            self.button.transform = CGAffineTransformConcat(scale, translate)
+            UIView.animateWithDuration(animationDuration,
+                animations: {
+                self.button.transform = CGAffineTransformIdentity
+                },
+                completion: { (success) in
+                self.button.hidden = false
+            })
+        }
     }
     
-    var showActions: Bool? {
-        didSet {
-            if oldValue == nil && showActions == false {
-                return
-            }
-            
-            if showActions! {
-                let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
-                let trans = CGAffineTransformScale(translate, 0.01, 0.01)
-                self.button.transform = trans
-                self.button.hidden = false
-                UIView.animateWithDuration(0.3, animations: { () -> Void in
+    func hideActionsAnimated(animated: Bool = true) {
+        if animated {
+            self.button.hidden = false
+            self.button.transform = CGAffineTransformIdentity
+            UIView.animateWithDuration(animationDuration,
+                animations: {
+                    let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
+                    let scale = CGAffineTransformMakeScale(0.01, 0.01)
+                    self.button.transform = CGAffineTransformConcat(scale, translate)
+                },
+                completion: { (success) in
+                    self.button.hidden = true
                     self.button.transform = CGAffineTransformIdentity
-                    }, completion: { (success) in
-                })
-                
-            } else {
-                if self.button.hidden == true {
-                    return
-                }
-                
-                self.button.transform = CGAffineTransformIdentity
-                let translate = CGAffineTransformMakeTranslation(0, -self.button.frame.height/2)
-                let trans = CGAffineTransformScale(translate, 0.01, 0.01)
-                self.button.hidden = false
-                UIView.animateWithDuration(0.3, animations: { () -> Void in
-                    self.button.transform = trans
-                    }, completion: { (success) in
-                        self.button.hidden = true
-                })
-            }
-            
+            })
+        } else {
+            self.button.hidden = true
         }
     }
 }

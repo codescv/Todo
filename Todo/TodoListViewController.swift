@@ -115,11 +115,10 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
-        itemCell.titleLabel.sizeToFit()
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
-            itemCell.showActions = true
+            itemCell.expandActionsAnimated(false)
         } else {
-            itemCell.showActions = false
+            itemCell.hideActionsAnimated(false)
         }
         return itemCell
     }
@@ -140,25 +139,32 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: false)
         
-        
-        tableView.beginUpdates()
         if let selected = selectedIndexPath {
             if selected.compare(indexPath) == .OrderedSame {
                 // fold
                 selectedIndexPath = nil
                 tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+                cell?.hideActionsAnimated()
             } else {
                 // fold old and expand new
                 selectedIndexPath = indexPath
                 tableView.reloadRowsAtIndexPaths([selected, indexPath], withRowAnimation: .Automatic)
+                let oldCell = tableView.cellForRowAtIndexPath(selected) as? TodoItemCell
+                let newCell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+                oldCell?.hideActionsAnimated()
+                newCell?.expandActionsAnimated()
             }
         } else {
             // expand new
             selectedIndexPath = indexPath
-            tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+            let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+            cell?.expandActionsAnimated()
+            
         }
         
-        
+        tableView.beginUpdates()
         tableView.endUpdates()
         
     }
