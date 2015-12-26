@@ -9,7 +9,7 @@
         <!--Todo List Container-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController title="Todo" automaticallyAdjustsScrollViewInsets="NO" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Todo" automaticallyAdjustsScrollViewInsets="NO" definesPresentationContext="YES" providesPresentationContextTransitionStyle="YES" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -28,7 +28,7 @@
                                 <rect key="frame" x="549" y="550" width="31" height="30"/>
                                 <state key="normal" title="New"/>
                                 <connections>
-                                    <segue destination="0nv-GQ-PVw" kind="presentation" id="PaH-qf-6Zw"/>
+                                    <segue destination="PdK-F9-PgD" kind="presentation" modalPresentationStyle="overCurrentContext" id="u8q-nd-P2k"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -179,7 +179,7 @@
         <!--New Todo Item-->
         <scene sceneID="LZP-Hf-4je">
             <objects>
-                <viewController id="PdK-F9-PgD" userLabel="New Todo Item" customClass="NewTodoItemController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController automaticallyAdjustsScrollViewInsets="NO" modalPresentationStyle="currentContext" id="PdK-F9-PgD" userLabel="New Todo Item" customClass="NewTodoItemController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="7Cc-uD-EKH"/>
                         <viewControllerLayoutGuide type="bottom" id="tWv-6Z-Gro"/>
@@ -188,41 +188,46 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="y9f-oY-piG">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="300"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            </textView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hpX-SA-Egz" userLabel="Text View Container">
+                                <rect key="frame" x="8" y="362" width="584" height="38"/>
+                                <subviews>
+                                    <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Input Content" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="y9f-oY-piG">
+                                        <rect key="frame" x="0.0" y="2" width="584" height="36"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="36" id="86o-0D-h1B"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                    </textView>
+                                </subviews>
+                                <color key="backgroundColor" red="1" green="0.1243278474" blue="0.077538040069999994" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstItem="y9f-oY-piG" firstAttribute="top" secondItem="hpX-SA-Egz" secondAttribute="top" constant="2" id="UYq-Z8-woq"/>
+                                    <constraint firstAttribute="trailing" secondItem="y9f-oY-piG" secondAttribute="trailing" id="V8h-dU-tt4"/>
+                                    <constraint firstAttribute="bottom" secondItem="y9f-oY-piG" secondAttribute="bottom" id="V9U-LR-g3k"/>
+                                    <constraint firstItem="y9f-oY-piG" firstAttribute="leading" secondItem="hpX-SA-Egz" secondAttribute="leading" id="uuv-bG-69Y"/>
+                                </constraints>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="y9f-oY-piG" firstAttribute="leading" secondItem="G4j-9q-E4P" secondAttribute="leading" id="Abj-xE-eDv"/>
-                            <constraint firstItem="y9f-oY-piG" firstAttribute="bottom" secondItem="tWv-6Z-Gro" secondAttribute="top" constant="-300" id="Ai5-NC-ZI1"/>
-                            <constraint firstAttribute="trailing" secondItem="y9f-oY-piG" secondAttribute="trailing" id="Pe2-jW-cAY"/>
-                            <constraint firstAttribute="topMargin" secondItem="y9f-oY-piG" secondAttribute="top" id="dlp-Yv-7sL"/>
+                            <constraint firstItem="hpX-SA-Egz" firstAttribute="leading" secondItem="G4j-9q-E4P" secondAttribute="leading" constant="8" id="3sz-rE-zdM"/>
+                            <constraint firstItem="tWv-6Z-Gro" firstAttribute="top" secondItem="hpX-SA-Egz" secondAttribute="bottom" constant="200" id="dpg-Lq-et6"/>
+                            <constraint firstAttribute="trailing" secondItem="hpX-SA-Egz" secondAttribute="trailing" constant="8" id="fBP-xu-jVX"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="New" id="Z5s-7v-5q4">
-                        <barButtonItem key="leftBarButtonItem" title="Cancel" id="f3M-SS-1Us">
-                            <connections>
-                                <segue destination="1Zc-1I-pu0" kind="unwind" unwindAction="cancelNewTodoItem:" id="b1F-uj-eXZ"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="Save" id="r1x-Gb-CT4">
-                            <connections>
-                                <segue destination="1Zc-1I-pu0" kind="unwind" unwindAction="saveNewTodoItem:" id="kUV-oH-vat"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
                     <connections>
                         <outlet property="textView" destination="y9f-oY-piG" id="4KQ-e4-9Xz"/>
+                        <outlet property="textViewBottomConstraint" destination="dpg-Lq-et6" id="WQN-4m-aHT"/>
+                        <outlet property="textViewHeightConstraint" destination="86o-0D-h1B" id="7F2-iG-aUP"/>
+                        <segue destination="1Zc-1I-pu0" kind="unwind" identifier="saveNewTodoItem" unwindAction="saveNewTodoItem:" id="s8D-ik-haW"/>
+                        <segue destination="1Zc-1I-pu0" kind="unwind" identifier="cancelNewTodoItem" unwindAction="cancelNewTodoItem:" id="245-rQ-AyQ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kYJ-uV-EKa" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="1Zc-1I-pu0" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="3550" y="-1254"/>
+            <point key="canvasLocation" x="2861" y="-1254"/>
         </scene>
         <!--Todo List Table View Controller-->
         <scene sceneID="Eej-FH-EKl">
@@ -280,24 +285,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="w8m-Fy-VJT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="2087" y="-494"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="Skx-cn-wMG">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0nv-GQ-PVw" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="gcY-6Z-eVI">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="PdK-F9-PgD" kind="relationship" relationship="rootViewController" id="0Pe-Nu-nk5"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="0JB-Ej-4O1" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2830" y="-1254"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="lka-Ha-4No">

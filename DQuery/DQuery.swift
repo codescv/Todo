@@ -342,11 +342,9 @@ public extension NSManagedObjectContext {
     }
     
     public func dq_objectsWithIDs<T: NSManagedObject>(ids: [NSManagedObjectID]) -> [T] {
-        var objects = [T]()
-        for id in ids {
-            objects.append(dq_objectWithID(id))
+        return ids.map { (id) -> T in
+            dq_objectWithID(id)
         }
-        return objects
     }
 }
 

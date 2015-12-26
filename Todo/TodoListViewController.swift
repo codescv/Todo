@@ -25,13 +25,15 @@ class TodoListViewController: UIViewController {
     @IBAction func saveNewTodoItem(segue: UIStoryboardSegue) {
         if let newTodoItemVC = segue.sourceViewController as? NewTodoItemController {
             let content = newTodoItemVC.textView.text
-            session.write({ (context) in
-                let item: TodoItem = TodoItem.dq_insertInContext(context)
-                item.title = content
-                item.dueDate = NSDate.today()
-                item.displayOrder = TodoItem.topDisplayOrder(context)
-                item.category = context.dq_objectWithID(self.categoryId) as TodoItemCategory
-            })
+            if content != "" {
+                session.write({ (context) in
+                    let item: TodoItem = TodoItem.dq_insertInContext(context)
+                    item.title = content
+                    item.dueDate = NSDate.today()
+                    item.displayOrder = TodoItem.topDisplayOrder(context)
+                    item.category = context.dq_objectWithID(self.categoryId) as TodoItemCategory
+                })
+            }
         }
     }
 
