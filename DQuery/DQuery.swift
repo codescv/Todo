@@ -150,6 +150,7 @@ public class DQQuery<T:NSManagedObject> {
     let dq: DQ
     var predicate: NSPredicate?
     var sortDescriptors = []
+    var section: String?
     
     private var fetchRequest: NSFetchRequest {
         get {
@@ -177,6 +178,11 @@ public class DQQuery<T:NSManagedObject> {
             predicate = pred
         }
         
+        return self
+    }
+    
+    public func groupBy(section: String) -> Self {
+        self.section = section
         return self
     }
     
@@ -283,7 +289,7 @@ public class DQQuery<T:NSManagedObject> {
     public func fetchedResultsController() -> NSFetchedResultsController {
         return NSFetchedResultsController(fetchRequest: self.fetchRequest,
             managedObjectContext: self.dq.defaultContext,
-            sectionNameKeyPath: nil, cacheName: entityName)
+            sectionNameKeyPath: self.section, cacheName: entityName)
     }
 }
 

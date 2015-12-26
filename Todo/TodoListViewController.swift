@@ -36,6 +36,14 @@ class TodoListViewController: UIViewController {
 
 }
 
+extension NSDate {
+    func yyyymmdd(separator separator: String = "-") -> String {
+        let fm = NSDateFormatter()
+        fm.dateFormat = ["YYYY", "mm", "dd"].joinWithSeparator(separator)
+        return fm.stringFromDate(self)
+    }
+}
+
 class TodoListTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
     // MARK: properties
     let session = DataManager.instance.session
@@ -65,16 +73,32 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     var sourceIndexPath: NSIndexPath?
     var sourceCellSnapshot: UIView?
     
+    // items
+    var todoItems = [[NSManagedObjectID]]()
+    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         return self.session.query(TodoItem).fetchedResultsController()
     }()
+    
+    func reloadData(refetch refetch: Bool = true) {
+        if refetch {
+            try! self.fetchedResultsController.performFetch()
+        }
+        if let sections = self.fetchedResultsController.sections {
+            todoItems = [[NSManagedObjectID]]()
+            for section in sections {
+                todoItems.append(section.objects!.map { $0.objectID })
+            }
+        }
+        tableView.reloadData()
+    }
     
     // MARK: viewcontroller lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.fetchedResultsController.delegate = self
-        try! self.fetchedResultsController.performFetch()
+        reloadData(refetch:true)
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -86,41 +110,58 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
         //print("long press! \(longPress)")
-        let state = longPress.state;
+        let state = longPress.state
         let location = longPress.locationInView(tableView)
         let indexPath = tableView.indexPathForRowAtPoint(location)
         
         switch (state) {
         case .Began:
-            if let pressedIndexPath = indexPath {
-                self.sourceIndexPath = pressedIndexPath;
-                let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
-                sourceCellSnapshot = cell.resizableSnapshotViewFromRect(cell.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
-                
-                // Add the snapshot as subview, centered at cell's center...
-                let center: CGPoint = cell.center
-                
-                let snapshot: UIView! = sourceCellSnapshot
-                snapshot.center = center
-                snapshot.alpha = 1.0
-                snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
-                self.tableView.addSubview(snapshot)
-                
-                UIView.animateWithDuration(0.25,
-                    animations: {
-                        // Offset for gesture location.
-                        snapshot.center = CGPointMake(center.x, location.y)
-                        snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
-                        snapshot.alpha = 0.98
-                        
-                        // Fade out.
-                        cell.alpha = 0.0;
-                    },
-                    completion: { (success) in
-                        cell.hidden = true;
-                    }
-                )
-                
+            
+            let blk = {
+                if let pressedIndexPath = indexPath {
+                    self.sourceIndexPath = pressedIndexPath
+                    let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
+                    
+                    
+                    let rect = cell.convertRect(cell.bounds, toView: self.view)
+                    // using cell to create snapshot can sometimes lead to error
+                    self.sourceCellSnapshot = self.view.resizableSnapshotViewFromRect(rect, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
+                    
+                    // Add the snapshot as subview, centered at cell's center...
+                    let center: CGPoint = cell.center
+                    
+                    let snapshot: UIView! = self.sourceCellSnapshot
+                    snapshot.center = center
+                    snapshot.alpha = 1.0
+                    snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                    self.tableView.addSubview(snapshot)
+                    
+                    UIView.animateWithDuration(0.25,
+                        animations: {
+                            // Offset for gesture location.
+                            snapshot.center = CGPointMake(center.x, location.y)
+                            snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                            snapshot.alpha = 0.98
+                            
+                            // Fade out.
+                            cell.alpha = 0.0
+                        },
+                        completion: { (success) in
+                            cell.hidden = true
+                        }
+                    )
+                    
+                }
+            }
+            
+            if selectedIndexPath != nil {
+                selectedIndexPath = nil
+                tableView.reloadData()
+                dispatch_async(dispatch_get_main_queue(), {
+                    blk();
+                })
+            } else {
+                blk();
             }
             
         case .Changed:
@@ -140,6 +181,7 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
                     
                     // TODO update model
                     tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: targetIndexPath)
+                    self.tableView(tableView, moveRowAtIndexPath: sourceIndexPath!, toIndexPath: targetIndexPath)
                     sourceIndexPath = indexPath
                 }
             }
@@ -160,9 +202,9 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
             UIView.animateWithDuration(0.25,
                 animations: {
                     if let snapshot = self.sourceCellSnapshot {
-                        snapshot.center = cell.center;
-                        snapshot.transform = CGAffineTransformIdentity;
-                        snapshot.alpha = 0.0;
+                        snapshot.center = cell.center
+                        snapshot.transform = CGAffineTransformIdentity
+                        snapshot.alpha = 0.0
                     }
                     
                     // Undo fade out.
@@ -181,11 +223,12 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
 
     // MARK: datasource
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return todoItems.count
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let item: TodoItem = self.fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItem
+        let itemId = todoItems[indexPath.section][indexPath.row]
+        let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
@@ -197,7 +240,7 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let itemCount = self.fetchedResultsController.sections![section].numberOfObjects
+        let itemCount = self.todoItems[section].count
         return itemCount
     }
     
@@ -209,6 +252,14 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         }
     }
     
+    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        let source = todoItems[sourceIndexPath.section][sourceIndexPath.row]
+        let dest = todoItems[destinationIndexPath.section][destinationIndexPath.row]
+        todoItems[sourceIndexPath.section][sourceIndexPath.row] = dest
+        todoItems[destinationIndexPath.section][destinationIndexPath.row] = source
+    }
+    
+    // delegate
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: false)
         
@@ -244,7 +295,8 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     
     // MARK: fetchedresultscontrollerdelegate
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        tableView.reloadData()
+        print("did change content")
+        reloadData(refetch: false)
     }
     
     
