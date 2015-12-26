@@ -28,7 +28,8 @@ class TodoListViewController: UIViewController {
             session.write({ (context) in
                 let item: TodoItem = TodoItem.dq_insertInContext(context)
                 item.title = content
-                item.startDate = NSDate()
+                item.dueDate = NSDate.today()
+                item.displayOrder = TodoItem.topDisplayOrder(context)
                 item.category = context.dq_objectWithID(self.categoryId) as TodoItemCategory
             })
         }
@@ -36,15 +37,7 @@ class TodoListViewController: UIViewController {
 
 }
 
-extension NSDate {
-    func yyyymmdd(separator separator: String = "-") -> String {
-        let fm = NSDateFormatter()
-        fm.dateFormat = ["YYYY", "mm", "dd"].joinWithSeparator(separator)
-        return fm.stringFromDate(self)
-    }
-}
-
-class TodoListTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
+class TodoListTableViewController: UITableViewController {
     // MARK: properties
     let session = DataManager.instance.session
     
@@ -76,35 +69,38 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
     // items
     var todoItems = [[NSManagedObjectID]]()
     
-    lazy var fetchedResultsController: NSFetchedResultsController = {
-        return self.session.query(TodoItem).fetchedResultsController()
-    }()
+    var autoReloadOnChange = true
     
-    func reloadData(refetch refetch: Bool = true) {
-        if refetch {
-            try! self.fetchedResultsController.performFetch()
-        }
-        if let sections = self.fetchedResultsController.sections {
-            todoItems = [[NSManagedObjectID]]()
-            for section in sections {
-                todoItems.append(section.objects!.map { $0.objectID })
-            }
-        }
-        tableView.reloadData()
+    func reloadDataFromDB() {
+        print("reload db")
+        self.session.query(TodoItem).orderBy("displayOrder").execute({ (context, objectIds) -> Void in
+            self.todoItems = [[NSManagedObjectID]]()
+            self.todoItems.append(objectIds)
+            dispatch_async(dispatch_get_main_queue(), {
+                self.tableView.reloadData()
+            })
+        })
     }
     
     // MARK: viewcontroller lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        self.fetchedResultsController.delegate = self
-        reloadData(refetch:true)
+        reloadDataFromDB()
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
         
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
+    }
+    
+    func dataChanged(notification: NSNotification) {
+        if autoReloadOnChange {
+            reloadDataFromDB()
+        }
     }
     
     // MARK: gesture recognizer
@@ -257,6 +253,16 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         let dest = todoItems[destinationIndexPath.section][destinationIndexPath.row]
         todoItems[sourceIndexPath.section][sourceIndexPath.row] = dest
         todoItems[destinationIndexPath.section][destinationIndexPath.row] = source
+        self.autoReloadOnChange = false
+        session.write({ (context) in
+            let srcItem: TodoItem = context.dq_objectWithID(source)
+            let destItem: TodoItem = context.dq_objectWithID(dest)
+            swap(&srcItem.displayOrder, &destItem.displayOrder)
+            },
+            sync: false,
+            completion: {
+                self.autoReloadOnChange = true
+        })
     }
     
     // delegate
@@ -292,14 +298,6 @@ class TodoListTableViewController: UITableViewController, NSFetchedResultsContro
         tableView.endUpdates()
         
     }
-    
-    // MARK: fetchedresultscontrollerdelegate
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        print("did change content")
-        reloadData(refetch: false)
-    }
-    
-    
 }
 
 

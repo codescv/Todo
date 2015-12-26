@@ -106,7 +106,12 @@ public class DQ {
     
     public func query<T:NSManagedObject>(entity: T.Type) -> DQQuery<T> {
         let entityName:String = NSStringFromClass(entity).componentsSeparatedByString(".").last!
-        return DQQuery<T>(entityName: entityName, dq: self)
+        return DQQuery<T>(entityName: entityName, context: self.defaultContext)
+    }
+    
+    public func query<T:NSManagedObject>(entity: T.Type, context: NSManagedObjectContext) -> DQQuery<T> {
+        let entityName:String = NSStringFromClass(entity).componentsSeparatedByString(".").last!
+        return DQQuery<T>(entityName: entityName, context: context)
     }
     
     public func insertObject<T:NSManagedObject>(entity: T.Type, context: NSManagedObjectContext) -> T {
@@ -147,10 +152,11 @@ public class DQ {
 
 public class DQQuery<T:NSManagedObject> {
     let entityName: String
-    let dq: DQ
+    let context: NSManagedObjectContext
     var predicate: NSPredicate?
-    var sortDescriptors = []
+    var sortDescriptors = [NSSortDescriptor]()
     var section: String?
+    var limit: Int?
     
     private var fetchRequest: NSFetchRequest {
         get {
@@ -159,13 +165,16 @@ public class DQQuery<T:NSManagedObject> {
                 request.predicate = pred
             }
             //let idSort = NSSortDescriptor(key: "id", ascending: true)
-            request.sortDescriptors = [] //[idSort]
+            request.sortDescriptors = self.sortDescriptors
+            if let limit = self.limit {
+                request.fetchLimit = limit
+            }
             return request
         }
     }
 
-    public init(entityName: String, dq: DQ) {
-        self.dq = dq
+    public init(entityName: String, context: NSManagedObjectContext) {
+        self.context = context
         self.entityName = entityName
     }
     
@@ -186,14 +195,31 @@ public class DQQuery<T:NSManagedObject> {
         return self
     }
     
+    public func orderBy(key: String, ascending: Bool = true) -> Self {
+        self.sortDescriptors.append(NSSortDescriptor(key: key, ascending: ascending))
+        return self
+    }
+    
+    public func limit(limit: Int) -> Self {
+        self.limit = limit
+        return self
+    }
+    
+    public func max(key: String) -> Self {
+        return orderBy(key, ascending: false).limit(1)
+    }
+    
+    public func min(key: String) -> Self {
+        return orderBy(key, ascending: true).limit(1)
+    }
+    
     // sync fetch
     public func all() -> [T] {
-        let context = dq.defaultContext
         var results = [T]()
         
         context.performBlockAndWait({
             let request = self.fetchRequest
-            if let r = try? context.executeFetchRequest(request) {
+            if let r = try? self.context.executeFetchRequest(request) {
                 results = r as! [T]
             }
         })
@@ -203,12 +229,11 @@ public class DQQuery<T:NSManagedObject> {
     
     // sync count
     public func count() -> Int {
-        let context = dq.defaultContext
         var result = 0
         
         context.performBlockAndWait({
             let request = self.fetchRequest
-            if let r = try? context.executeFetchRequest(request) {
+            if let r = try? self.context.executeFetchRequest(request) {
                 result = r.count
             }
         })
@@ -217,15 +242,14 @@ public class DQQuery<T:NSManagedObject> {
     }
     
     // return fist object
-    public func first() -> T {
-        let context = dq.defaultContext
-        var result: T!
+    public func first() -> T? {
+        var result: T?
         
         context.performBlockAndWait({
             let request = self.fetchRequest
-            if let r = try? context.executeFetchRequest(request) {
+            if let r = try? self.context.executeFetchRequest(request) {
                 for rr in r {
-                    result = rr as! T
+                    result = rr as? T
                     break
                 }
             }
@@ -238,8 +262,8 @@ public class DQQuery<T:NSManagedObject> {
     // async fetch
     public func execute(complete: ((NSManagedObjectContext, [NSManagedObjectID]) -> Void)? = nil) {
         let privateContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        privateContext.parentContext = dq.defaultContext
-        let defaultContext = dq.defaultContext
+        privateContext.parentContext = self.context
+        let defaultContext = self.context
         
         privateContext.performBlock {
             let request = self.fetchRequest
@@ -257,38 +281,38 @@ public class DQQuery<T:NSManagedObject> {
     }
     
     // delete all objects matching query
-    public func delete(sync sync: Bool = false, complete: (() -> Void)? = nil) {
-        let privateContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
-        privateContext.parentContext = dq.defaultContext
-        
-        let deleteBlock = {
-            let request = self.fetchRequest
-            if let results = try? privateContext.executeFetchRequest(request) {
-                for r in results {
-                    r.dq_delete()
-                }
-                do {
-                    try privateContext.save()
-                } catch {
-                    print("unable to delete")
-                }
-                self.dq.saveContext()
-                dispatch_async(dispatch_get_main_queue(), {
-                    complete?()
-                })
-            }
-        }
-        
-        if sync {
-            privateContext.performBlockAndWait(deleteBlock)
-        } else {
-            privateContext.performBlock(deleteBlock)
-        }
-    }
+//    public func delete(sync sync: Bool = false, complete: (() -> Void)? = nil) {
+//        let privateContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+//        privateContext.parentContext = dq.defaultContext
+//        
+//        let deleteBlock = {
+//            let request = self.fetchRequest
+//            if let results = try? privateContext.executeFetchRequest(request) {
+//                for r in results {
+//                    r.dq_delete()
+//                }
+//                do {
+//                    try privateContext.save()
+//                } catch {
+//                    print("unable to delete")
+//                }
+//                self.dq.saveContext()
+//                dispatch_async(dispatch_get_main_queue(), {
+//                    complete?()
+//                })
+//            }
+//        }
+//        
+//        if sync {
+//            privateContext.performBlockAndWait(deleteBlock)
+//        } else {
+//            privateContext.performBlock(deleteBlock)
+//        }
+//    }
     
     public func fetchedResultsController() -> NSFetchedResultsController {
         return NSFetchedResultsController(fetchRequest: self.fetchRequest,
-            managedObjectContext: self.dq.defaultContext,
+            managedObjectContext: self.context,
             sectionNameKeyPath: self.section, cacheName: entityName)
     }
 }

@@ -13,5 +13,13 @@ import CoreData
 class TodoItem: NSManagedObject {
 
 // Insert code here to add functionality to your managed object subclass
-    func foo() {}
+    class func topDisplayOrder(context: NSManagedObjectContext) -> Int {
+        let session = DataManager.instance.session
+        if let item = session.query(self, context: context).min("displayOrder").first() {
+            if let order = item.displayOrder?.integerValue {
+                return order - 1
+            }
+        }
+        return 0
+    }
 }

@@ -18,7 +18,7 @@ class TodoItemCategory: NSManagedObject {
         let query = session.query(TodoItemCategory.self).filter("name = %@", name)
         var categoryId: NSManagedObjectID!
         if query.count() > 0 {
-            categoryId = query.first().objectID
+            categoryId = query.first()!.objectID
         } else {
             session.write({ (context) in
                 let category = TodoItemCategory.dq_insertInContext(context)
