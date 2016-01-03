@@ -45,43 +45,30 @@ class TodoListTableViewController: UITableViewController {
     
     enum CellType: String{
         case ItemCell = "TodoItemCellIdentifier"
-        case ActionCell = "TodoItemActionCellIdentifier"
+        case DoneItemCell = "DoneItemCellIdentifier"
         
         func identifier() -> String {
             return self.rawValue
         }
-        
-        func rowHeight() -> CGFloat {
-            switch self {
-            case .ActionCell:
-                return 44
-            case .ItemCell:
-                return 60
-            }
-        }
     }
     
-    // the cell selected
+    // the cell expanded
     var selectedIndexPath: NSIndexPath?
-    
     // the cell to be moved
-    var sourceIndexPath: NSIndexPath?
+    var firstMovingIndexPath: NSIndexPath?
+    var currentMovingIndexPath: NSIndexPath?
+    // snapshot of current moving cell
     var sourceCellSnapshot: UIView?
-    
-    // items
-    var todoItems = [[NSManagedObjectID]]()
     
     var autoReloadOnChange = true
     
+    // view model
+    let todoItemsModel = TodoItemViewModel()
+    
     func reloadDataFromDB() {
-        print("reload db")
-        self.session.query(TodoItem).orderBy("displayOrder").execute({ (context, objectIds) -> Void in
-            self.todoItems = [[NSManagedObjectID]]()
-            self.todoItems.append(objectIds)
-            dispatch_async(dispatch_get_main_queue(), {
-                self.tableView.reloadData()
-            })
-        })
+        todoItemsModel.reloadDataFromDB {
+            self.tableView.reloadData()
+        }
     }
     
     // MARK: viewcontroller lifecycle
@@ -89,6 +76,9 @@ class TodoListTableViewController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         reloadDataFromDB()
+        self.todoItemsModel.onChange = {
+            self.tableView.reloadData()
+        }
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -97,14 +87,6 @@ class TodoListTableViewController: UITableViewController {
         
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
-        
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
-    }
-    
-    func dataChanged(notification: NSNotification) {
-        if autoReloadOnChange {
-            reloadDataFromDB()
-        }
     }
     
     // MARK: gesture recognizer
@@ -119,7 +101,8 @@ class TodoListTableViewController: UITableViewController {
             
             let blk = {
                 if let pressedIndexPath = indexPath {
-                    self.sourceIndexPath = pressedIndexPath
+                    self.firstMovingIndexPath = pressedIndexPath
+                    self.currentMovingIndexPath = pressedIndexPath
                     let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
                     
                     
@@ -167,9 +150,9 @@ class TodoListTableViewController: UITableViewController {
         case .Changed:
             guard
                 let snapshot = sourceCellSnapshot,
-                let _ = sourceIndexPath
+                let _ = currentMovingIndexPath
                 else {
-                    print("error! source index path: \(sourceIndexPath) snapshot: \(sourceCellSnapshot)")
+                    print("error! current index path: \(currentMovingIndexPath) snapshot: \(sourceCellSnapshot)")
                     return
             }
             
@@ -177,25 +160,23 @@ class TodoListTableViewController: UITableViewController {
             snapshot.center = CGPointMake(center.x, location.y);
             
             if let targetIndexPath = indexPath {
-                if targetIndexPath.compare(sourceIndexPath!) != .OrderedSame {
-                    
-                    // TODO update model
-                    tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: targetIndexPath)
-                    self.tableView(tableView, moveRowAtIndexPath: sourceIndexPath!, toIndexPath: targetIndexPath)
-                    sourceIndexPath = indexPath
+                if targetIndexPath.compare(currentMovingIndexPath!) != .OrderedSame {
+                    tableView.moveRowAtIndexPath(currentMovingIndexPath!, toIndexPath: targetIndexPath)
+                    currentMovingIndexPath = indexPath
                 }
             }
             
 
         default:
             guard
-                let _ = sourceIndexPath
+                currentMovingIndexPath != nil &&
+                firstMovingIndexPath != nil
                 else {
-                    print("error! source index path is nil")
+                    print("error! current index path \(currentMovingIndexPath) first index path \(firstMovingIndexPath)")
                     return
             }
             
-            let cell = tableView.cellForRowAtIndexPath(sourceIndexPath!) as! TodoItemCell
+            let cell = tableView.cellForRowAtIndexPath(currentMovingIndexPath!) as! TodoItemCell
             cell.hidden = false
             cell.alpha = 0.0
             
@@ -212,10 +193,19 @@ class TodoListTableViewController: UITableViewController {
 
                 },
                 completion: { (success) in
-                    self.sourceIndexPath = nil
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
-                    self.tableView.reloadData()
+                    if state == .Ended {
+                        self.todoItemsModel.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row,
+                            completion: {
+                                self.firstMovingIndexPath = nil
+                                self.currentMovingIndexPath = nil
+                                self.tableView.reloadData()
+                        })
+                    } else {
+                        print("state: \(state)")
+                        self.tableView.reloadData()
+                    }
             })
             
         }
@@ -223,12 +213,12 @@ class TodoListTableViewController: UITableViewController {
 
     // MARK: datasource
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return todoItems.count
+        return 1
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        print("get cell")
-        let itemId = todoItems[indexPath.section][indexPath.row]
+//        print("get cell")
+        let itemId = self.todoItemsModel.todoItems[indexPath.row]
         let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
@@ -241,7 +231,7 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let itemCount = self.todoItems[section].count
+        let itemCount = self.todoItemsModel.todoItems.count
         return itemCount
     }
     
@@ -250,20 +240,10 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-        let source = todoItems[sourceIndexPath.section][sourceIndexPath.row]
-        let dest = todoItems[destinationIndexPath.section][destinationIndexPath.row]
-        todoItems[sourceIndexPath.section][sourceIndexPath.row] = dest
-        todoItems[destinationIndexPath.section][destinationIndexPath.row] = source
         self.autoReloadOnChange = false
-        session.write({ (context) in
-            let srcItem: TodoItem = context.dq_objectWithID(source)
-            let destItem: TodoItem = context.dq_objectWithID(dest)
-            swap(&srcItem.displayOrder, &destItem.displayOrder)
-            },
-            sync: false,
-            completion: {
-                self.autoReloadOnChange = true
-        })
+        self.todoItemsModel.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row) {
+            self.autoReloadOnChange = true
+        }
     }
     
     // delegate

@@ -263,7 +263,7 @@ public class DQQuery<T:NSManagedObject> {
     public func execute(complete: ((NSManagedObjectContext, [NSManagedObjectID]) -> Void)? = nil) {
         let privateContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
         privateContext.parentContext = self.context
-        let defaultContext = self.context
+//        let defaultContext = self.context
         
         privateContext.performBlock {
             let request = self.fetchRequest
@@ -273,9 +273,11 @@ public class DQQuery<T:NSManagedObject> {
                     objectIDs.append(r.objectID)
                 }
                 
-                dispatch_async(dispatch_get_main_queue(), {
-                    complete?(defaultContext, objectIDs)
-                })
+                complete?(privateContext, objectIDs)
+                
+//                dispatch_async(dispatch_get_main_queue(), {
+//                    complete?(defaultContext, objectIDs)
+//                })
             }
         }
     }
