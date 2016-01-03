@@ -12,20 +12,45 @@ import UIKit
 
 class TodoItemCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var detailLabel: UILabel!
-    @IBOutlet weak var categoryLabel: UILabel!
-    @IBOutlet weak var actionView: UIStackView!
-    
     @IBOutlet weak var button: UIButton!
-    @IBOutlet weak var actionViewHeightConstraint: NSLayoutConstraint!
-    
     @IBOutlet weak var actionsView: UIStackView!
     
+    @IBOutlet weak var doneButton: UIButton!
+    @IBOutlet weak var doneLabel: UILabel!
+    @IBOutlet weak var doneLabelWidthConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var cardBackgroundView: UIView!
     let animationDuration = 0.3
     
     override func awakeFromNib() {
-        self.contentView.clipsToBounds = false
-        self.clipsToBounds = false
+        self.doneButton.imageView?.contentMode = .ScaleAspectFit
+        self.doneLabelWidthConstraint.constant = 0
+        let gestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
+        self.contentView.addGestureRecognizer(gestureRecognizer)
+        
+        self.backgroundColor = UIColor.clearColor()
+        self.contentView.backgroundColor = UIColor.clearColor()
+        self.cardBackgroundView.layer.cornerRadius = 5.0
+        self.cardBackgroundView.clipsToBounds = true
+    }
+    
+    var panStartPos: CGPoint?
+    
+    func pan(gesture: UIPanGestureRecognizer) {
+        let maxDistance: CGFloat = 100
+        switch (gesture.state) {
+        case .Began:
+            panStartPos = gesture.locationInView(self.contentView)
+        case .Changed:
+            let pos = gesture.locationInView(self.contentView)
+            let distance = pos.x - panStartPos!.x
+            if distance > 0 && distance < maxDistance {
+                self.doneLabelWidthConstraint.constant = distance
+            }
+        default:
+            panStartPos = nil
+            self.doneLabelWidthConstraint.constant = 0
+        }
     }
     
     func expandActionsAnimated(animated: Bool = true) {

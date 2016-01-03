@@ -92,6 +92,8 @@ class TodoListTableViewController: UITableViewController {
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.separatorStyle = .None
+        tableView.backgroundColor = UIColor.purpleColor()
         
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
