@@ -296,6 +296,9 @@
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J1x-yY-SoL">
                                                                     <rect key="frame" x="519" y="0.0" width="19" height="22"/>
                                                                     <state key="normal" image="delete"/>
+                                                                    <connections>
+                                                                        <action selector="actionButtonTouched:" destination="Jwg-II-eKj" eventType="touchUpInside" id="3Dt-ad-3Gk"/>
+                                                                    </connections>
                                                                 </button>
                                                             </subviews>
                                                         </stackView>
@@ -332,9 +335,13 @@
                                     <outlet property="actionsView" destination="tFY-CW-f1P" id="Ce9-2r-qhv"/>
                                     <outlet property="button" destination="wvw-15-3Vr" id="43L-uM-fV4"/>
                                     <outlet property="cardBackgroundView" destination="XRx-2F-bpL" id="uMD-4m-DmP"/>
+                                    <outlet property="categoryButton" destination="vnd-5c-SEn" id="B0H-IM-Vqu"/>
+                                    <outlet property="deleteButton" destination="J1x-yY-SoL" id="Siv-PF-tKZ"/>
+                                    <outlet property="detailButton" destination="00d-B0-vwd" id="Olc-Mh-sYg"/>
                                     <outlet property="doneButton" destination="wvw-15-3Vr" id="dcw-G6-Eqv"/>
                                     <outlet property="doneLabel" destination="zIb-yv-dXu" id="9WN-uT-0H5"/>
                                     <outlet property="doneLabelWidthConstraint" destination="q8J-w0-wlV" id="Gm4-Tj-8Fe"/>
+                                    <outlet property="reminderButton" destination="gU6-IO-Gld" id="XPo-D0-DWu"/>
                                     <outlet property="titleLabel" destination="OsV-qI-Pg5" id="JRR-bO-m25"/>
                                 </connections>
                             </tableViewCell>

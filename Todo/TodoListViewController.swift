@@ -11,10 +11,21 @@ import CoreData
 
 class TodoListViewController: UIViewController {
     let session = DataManager.instance.session
-    var categoryId = TodoItemCategory.defaultCategory().objectID
+    var categoryId: NSManagedObjectID? {
+        get {
+            return innerTableViewController?.categoryId
+        }
+        
+        set {
+            innerTableViewController?.categoryId = newValue
+        }
+    }
+    
+    var innerTableViewController: TodoListTableViewController?
     
     // from select category controller
     @IBAction func unwindFromSelectCategory(segue: UIStoryboardSegue) {
+        // TODO: set category id
     }
     
     // MARK: unwind actions from new item controller
@@ -22,6 +33,7 @@ class TodoListViewController: UIViewController {
         
     }
     
+    // unwind from saving new todo item
     @IBAction func saveNewTodoItem(segue: UIStoryboardSegue) {
         if let newTodoItemVC = segue.sourceViewController as? NewTodoItemController {
             let content = newTodoItemVC.textView.text
@@ -31,7 +43,9 @@ class TodoListViewController: UIViewController {
                     item.title = content
                     item.dueDate = NSDate.today()
                     item.displayOrder = TodoItem.topDisplayOrder(context)
-                    item.category = context.dq_objectWithID(self.categoryId) as TodoItemCategory
+                    if let categoryId = self.categoryId {
+                        item.category = context.dq_objectWithID(categoryId) as TodoItemCategory
+                    }
                 })
             }
         }
@@ -52,6 +66,16 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    // the category id
+    var categoryId: NSManagedObjectID? {
+        didSet {
+            self.todoItemsModel = TodoItemViewModel(categoryId: self.categoryId)
+            self.todoItemsModel.reloadDataFromDB({
+                self.tableView.reloadData()
+            })
+        }
+    }
+    
     // the cell expanded
     var selectedIndexPath: NSIndexPath?
     // the cell to be moved
@@ -60,14 +84,18 @@ class TodoListTableViewController: UITableViewController {
     // snapshot of current moving cell
     var sourceCellSnapshot: UIView?
     
-    var autoReloadOnChange = true
-    
     // view model
-    let todoItemsModel = TodoItemViewModel()
+    var todoItemsModel = TodoItemViewModel()
     
     func reloadDataFromDB() {
         todoItemsModel.reloadDataFromDB {
             self.tableView.reloadData()
+        }
+    }
+    
+    override func didMoveToParentViewController(parent: UIViewController?) {
+        if let parentVC = parent as? TodoListViewController {
+            parentVC.innerTableViewController = self
         }
     }
     
@@ -227,6 +255,14 @@ class TodoListTableViewController: UITableViewController {
         } else {
             itemCell.hideActionsAnimated(false)
         }
+        itemCell.actionTriggered = { action in
+            switch action {
+            case .Delete:
+                self.deleteItemForCell(itemCell)
+            default:
+                break
+            }
+        }
         return itemCell
     }
     
@@ -240,10 +276,7 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-        self.autoReloadOnChange = false
-        self.todoItemsModel.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row) {
-            self.autoReloadOnChange = true
-        }
+        self.todoItemsModel.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
     }
     
     // delegate
@@ -274,6 +307,16 @@ class TodoListTableViewController: UITableViewController {
         
         tableView.beginUpdates()
         tableView.endUpdates()
+    }
+    
+    // table cell actions
+    func deleteItemForCell(cell: TodoItemCell) {
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            self.todoItemsModel.deleteTodoItemAtRow(indexPath.row) {
+                self.selectedIndexPath = nil
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            }
+        }
     }
 }
 

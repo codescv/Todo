@@ -13,17 +13,23 @@ class TodoItemViewModel {
     let session = DataManager.instance.session
     var todoItems = [NSManagedObjectID]()
     var doneItems = [NSManagedObjectID]()
+    var categoryId: NSManagedObjectID?
     
+    // data change callback
     var onChange: (()->())?
-    
     var shouldAutoReloadOnDataChange = true
     
     init(categoryId: NSManagedObjectID? = nil) {
+        self.categoryId = categoryId
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
     }
     
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
+    }
+    
     @objc func dataChanged(notification: NSNotification) {
-//        print("changed: \(notification)")
+        //        print("changed: \(notification)")
         if shouldAutoReloadOnDataChange {
             self.reloadDataFromDB({
                 self.onChange?()
@@ -31,12 +37,13 @@ class TodoItemViewModel {
         }
     }
     
-    deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
-    }
-    
     func reloadDataFromDB(completion: (() -> ())? = nil) {
-        self.session.query(TodoItem).orderBy("displayOrder").execute({ (context, objectIds) -> Void in
+        var query = self.session.query(TodoItem).orderBy("displayOrder")
+        if let categoryId = self.categoryId {
+            // FIXME: does this work?
+            query = query.filter("category = %@", categoryId)
+        }
+        query.execute({ (context, objectIds) -> Void in
             var todoItems = [NSManagedObjectID]()
             var doneItems = [NSManagedObjectID]()
             for objId in objectIds {
@@ -50,7 +57,7 @@ class TodoItemViewModel {
             dispatch_async(dispatch_get_main_queue(), {
                 self.todoItems = todoItems
                 self.doneItems = doneItems
-//                print("loaded from db")
+                print("reloaded todo items from db")
                 completion?()
             })
         })
@@ -63,10 +70,9 @@ class TodoItemViewModel {
         
         self.shouldAutoReloadOnDataChange = false
 
+        var todoItems = self.todoItems
         self.session.write (
             { context in
-                var todoItems = self.todoItems
-                
                 let exchangeWithBelow = { (row: Int) in
                     let item: TodoItem = context.dq_objectWithID(todoItems[row])
                     let nextItem: TodoItem = context.dq_objectWithID(todoItems[row+1])
@@ -94,5 +100,22 @@ class TodoItemViewModel {
                 self.shouldAutoReloadOnDataChange = true
         })
         
+    }
+    
+    func deleteTodoItemAtRow(row: Int, completion: (()->())?) {
+        let objId = self.todoItems[row]
+        
+        self.shouldAutoReloadOnDataChange = false
+        self.session.write(
+            {context in
+                let item: TodoItem = context.dq_objectWithID(objId)
+                item.dq_delete()
+            },
+            sync: false,
+            completion: {
+                self.todoItems.removeAtIndex(row)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
+        })
     }
 }

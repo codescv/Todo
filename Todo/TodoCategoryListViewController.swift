@@ -48,10 +48,13 @@ class TodoCategoryListViewController: UIViewController {
         }
     }
     
-    func cellRectForCategoryId(categoryId: NSManagedObjectID) -> CGRect {
-        let category = self.session.defaultContext.dq_objectWithID(categoryId)
-        let indexPath = fetchedResultsController.indexPathForObject(category)
-        let cell = collectionView(collectionView, cellForItemAtIndexPath: indexPath!)
+    func cellRectForCategoryId(categoryId: NSManagedObjectID?) -> CGRect {
+        var indexPath = NSIndexPath(forRow: 0, inSection: 0)
+        if categoryId != nil {
+            let category = self.session.defaultContext.dq_objectWithID(categoryId!)
+            indexPath = fetchedResultsController.indexPathForObject(category)!
+        }
+        let cell = collectionView(collectionView, cellForItemAtIndexPath: indexPath)
         return collectionView.convertRect(cell.frame, toView: view)
     }
 }

@@ -16,22 +16,72 @@ class TodoItemCell: UITableViewCell {
     @IBOutlet weak var actionsView: UIStackView!
     
     @IBOutlet weak var doneButton: UIButton!
+    @IBOutlet weak var reminderButton: UIButton!
+    @IBOutlet weak var detailButton: UIButton!
+    @IBOutlet weak var categoryButton: UIButton!
+    @IBOutlet weak var deleteButton: UIButton!
+    
+    
     @IBOutlet weak var doneLabel: UILabel!
     @IBOutlet weak var doneLabelWidthConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var cardBackgroundView: UIView!
     let animationDuration = 0.3
     
-    override func awakeFromNib() {
-        self.doneButton.imageView?.contentMode = .ScaleAspectFit
-        self.doneLabelWidthConstraint.constant = 0
-        let gestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
-        self.contentView.addGestureRecognizer(gestureRecognizer)
+    // MARK: action buttons
+    enum Action {
+        case Delete
+        case MarkAsDone
+        case ShowDetail
+        case MoveToCategory
+        case AddReminder
+        case Noop
+    }
+    
+    // action button callback
+    var actionTriggered: ((Action) -> ())?
+    
+    @IBAction func actionButtonTouched(button: UIButton) {
+        var action: Action = .Noop
+        switch button {
+        case self.deleteButton:
+            action = .Delete
+        case self.doneButton:
+            action = .MarkAsDone
+        case self.detailButton:
+            action = .ShowDetail
+        case self.categoryButton:
+            action = .MoveToCategory
+        case self.reminderButton:
+            action = .AddReminder
+        default:
+            action = .Noop
+        }
         
+        self.actionTriggered?(action)
+    }
+    
+    override func awakeFromNib() {
+        // set contentmode of icons so the animation will work correctly
+        self.doneButton.imageView?.contentMode = .ScaleAspectFit
+        self.deleteButton.imageView?.contentMode = .ScaleAspectFit
+        self.detailButton.imageView?.contentMode = .ScaleAspectFit
+        self.categoryButton.imageView?.contentMode = .ScaleAspectFit
+        self.reminderButton.imageView?.contentMode = .ScaleAspectFit
+        
+        // set background colors so the cell background can show
         self.backgroundColor = UIColor.clearColor()
         self.contentView.backgroundColor = UIColor.clearColor()
         self.cardBackgroundView.layer.cornerRadius = 5.0
+        // to let sliding label to have rounded corner
         self.cardBackgroundView.clipsToBounds = true
+        
+        // hide sliding done label initially
+        self.doneLabelWidthConstraint.constant = 0
+        
+        // slide gesture
+        let gestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
+        self.contentView.addGestureRecognizer(gestureRecognizer)
     }
     
     var panStartPos: CGPoint?
