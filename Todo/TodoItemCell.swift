@@ -39,7 +39,7 @@ class TodoItemCell: UITableViewCell {
     }
     
     // action button callback
-    var actionTriggered: ((Action) -> ())?
+    var actionTriggered: ((TodoItemCell, Action) -> ())?
     
     @IBAction func actionButtonTouched(button: UIButton) {
         var action: Action = .Noop
@@ -58,7 +58,7 @@ class TodoItemCell: UITableViewCell {
             action = .Noop
         }
         
-        self.actionTriggered?(action)
+        self.actionTriggered?(self, action)
     }
     
     override func awakeFromNib() {

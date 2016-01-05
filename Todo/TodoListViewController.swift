@@ -32,6 +32,11 @@ class TodoListViewController: UIViewController {
     @IBAction func cancelNewTodoItem(segue: UIStoryboardSegue) {
         
     }
+
+    @IBAction func newTodoItemButtonTouched(sender: UIButton) {
+        self.innerTableViewController?.startComposingNewTodoItem()
+    }
+    
     
     // unwind from saving new todo item
     @IBAction func saveNewTodoItem(segue: UIStoryboardSegue) {
@@ -60,6 +65,7 @@ class TodoListTableViewController: UITableViewController {
     enum CellType: String{
         case ItemCell = "TodoItemCellIdentifier"
         case DoneItemCell = "DoneItemCellIdentifier"
+        case NewItemCell = "NewTodoItemIdentifier"
         
         func identifier() -> String {
             return self.rawValue
@@ -86,6 +92,8 @@ class TodoListTableViewController: UITableViewController {
     
     // view model
     var todoItemsModel = TodoItemViewModel()
+    
+    var isComposingNewTodoItem = false
     
     func reloadDataFromDB() {
         todoItemsModel.reloadDataFromDB {
@@ -241,11 +249,55 @@ class TodoListTableViewController: UITableViewController {
 
     // MARK: datasource
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        if self.isComposingNewTodoItem {
+            return 2
+        }
         return 1
+    }
+    
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let itemCount = self.todoItemsModel.todoItems.count
+
+        if self.isComposingNewTodoItem {
+            if section == 0 {
+                return 1
+            }
+        }
+        return itemCount
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 //        print("get cell")
+        if self.isComposingNewTodoItem && indexPath.section == 0 {
+            let newItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.NewItemCell.identifier()) as! NewTodoItemCell
+            newItemCell.textView.text = ""
+            newItemCell.textView.becomeFirstResponder()
+            newItemCell.actionTriggered = { (cell, action) in
+                    switch action {
+                    case .OK:
+                        let title = cell.textView.text
+                        print("new item: \(title)")
+                        self.isComposingNewTodoItem = false
+                        self.tableView.reloadData()
+                        self.session.write({ (context) in
+                            let item: TodoItem = TodoItem.dq_insertInContext(context)
+                            item.title = title
+                            item.dueDate = NSDate.today()
+                            item.displayOrder = TodoItem.topDisplayOrder(context)
+                            if let categoryId = self.categoryId {
+                                item.category = context.dq_objectWithID(categoryId) as TodoItemCategory
+                            }
+                            }, sync:false, completion: {
+                                
+                        })
+                    default:
+                        break
+                    }
+                
+            }
+            return newItemCell
+        }
+        
         let itemId = self.todoItemsModel.todoItems[indexPath.row]
         let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
@@ -255,20 +307,15 @@ class TodoListTableViewController: UITableViewController {
         } else {
             itemCell.hideActionsAnimated(false)
         }
-        itemCell.actionTriggered = { action in
+        itemCell.actionTriggered = { (cell, action) in
             switch action {
             case .Delete:
-                self.deleteItemForCell(itemCell)
+                self.deleteItemForCell(cell)
             default:
                 break
             }
         }
         return itemCell
-    }
-    
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let itemCount = self.todoItemsModel.todoItems.count
-        return itemCount
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
@@ -317,6 +364,15 @@ class TodoListTableViewController: UITableViewController {
                 self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             }
         }
+    }
+    
+    func startComposingNewTodoItem() {
+        if self.isComposingNewTodoItem {
+            return
+        }
+        
+        self.isComposingNewTodoItem = true
+        self.tableView.insertSections(NSIndexSet(index: 0), withRowAnimation: .Automatic)
     }
 }
 
