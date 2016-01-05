@@ -29,6 +29,7 @@
 		C2AC0B8F1C1F04BB0014A959 /* DQuery.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2AC0B7A1C1F04BA0014A959 /* DQuery.framework */; };
 		C2AC0B901C1F04BB0014A959 /* DQuery.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C2AC0B7A1C1F04BA0014A959 /* DQuery.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C2AC0B991C1F04EE0014A959 /* DQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AC0B981C1F04EE0014A959 /* DQuery.swift */; };
+		C2D7A4921C3C14B500DFA44A /* DoneItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D7A4911C3C14B500DFA44A /* DoneItemCell.swift */; };
 		C2DD30E91C39521700E8BF77 /* TodoItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DD30E81C39521700E8BF77 /* TodoItemViewModel.swift */; };
 		C2E24ED21C2E492F00890992 /* NSDate+ESAdditions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E24ED11C2E492F00890992 /* NSDate+ESAdditions.swift */; };
 		C2E291741C224151006F25CB /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E291731C224151006F25CB /* DataManager.swift */; };
@@ -118,6 +119,7 @@
 		C2AC0B8A1C1F04BB0014A959 /* DQueryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DQueryTests.swift; sourceTree = "<group>"; };
 		C2AC0B8C1C1F04BB0014A959 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C2AC0B981C1F04EE0014A959 /* DQuery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DQuery.swift; sourceTree = "<group>"; };
+		C2D7A4911C3C14B500DFA44A /* DoneItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DoneItemCell.swift; sourceTree = "<group>"; };
 		C2DD30E81C39521700E8BF77 /* TodoItemViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TodoItemViewModel.swift; sourceTree = "<group>"; };
 		C2E24ED11C2E492F00890992 /* NSDate+ESAdditions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+ESAdditions.swift"; sourceTree = "<group>"; };
 		C2E291731C224151006F25CB /* DataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				C237652F1C250F6E0009219D /* CategoryCell.swift */,
 				C269CE011C2452840067BFA9 /* TodoItemCell.swift */,
 				C24933A91C3ABE4500E5812F /* NewTodoItemCell.swift */,
+				C2D7A4911C3C14B500DFA44A /* DoneItemCell.swift */,
 				C2AC0B411C1F02620014A959 /* Main.storyboard */,
 				C2AC0B491C1F02620014A959 /* LaunchScreen.storyboard */,
 			);
@@ -521,6 +524,7 @@
 				C23765321C2510210009219D /* TodoCategoryListViewController.swift in Sources */,
 				C23765411C2511900009219D /* TodoItemCategory.swift in Sources */,
 				C23765401C2511900009219D /* TodoItemCategory+CoreDataProperties.swift in Sources */,
+				C2D7A4921C3C14B500DFA44A /* DoneItemCell.swift in Sources */,
 				C2AC0B3E1C1F02620014A959 /* AppDelegate.swift in Sources */,
 				C24933AA1C3ABE4500E5812F /* NewTodoItemCell.swift in Sources */,
 			);

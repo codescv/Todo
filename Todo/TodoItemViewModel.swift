@@ -54,6 +54,7 @@ class TodoItemViewModel {
                     todoItems.append(objId)
                 }
             }
+            // TODO: sort done items by done time
             dispatch_async(dispatch_get_main_queue(), {
                 self.todoItems = todoItems
                 self.doneItems = doneItems
@@ -118,6 +119,26 @@ class TodoItemViewModel {
                 self.shouldAutoReloadOnDataChange = true
         })
     }
+    
+    func markTodoItemAsDoneAtRow(row: Int, completion: (()->())?) {
+        let objId = self.todoItems[row]
+        
+        self.shouldAutoReloadOnDataChange = false
+        self.session.write(
+            {context in
+                // TODO: done time
+                let item: TodoItem = context.dq_objectWithID(objId)
+                item.isDone = true
+            },
+            sync: false,
+            completion: {
+                self.todoItems.removeAtIndex(row)
+                self.doneItems.insert(objId, atIndex: 0)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
+        })
+    }
+
     
     func insertTodoItem(title title: String, completion: (()->())?) {
         self.shouldAutoReloadOnDataChange = false

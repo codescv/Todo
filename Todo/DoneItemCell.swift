@@ -1,0 +1,26 @@
+//
+//  DoneItemCell.swift
+//  Todo
+//
+//  Created by Chi Zhang on 1/5/16.
+//  Copyright © 2016 chi zhang. All rights reserved.
+//
+
+import UIKit
+
+class DoneItemCell: UITableViewCell {
+
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var deleteButton: UIButton!
+    
+    @IBOutlet weak var cardBackgroundView: UIView!
+    
+    override func awakeFromNib() {
+        // set background colors so the cell background can show
+        self.backgroundColor = UIColor.clearColor()
+        self.contentView.backgroundColor = UIColor.clearColor()
+        self.cardBackgroundView.layer.cornerRadius = 5.0
+        // to let sliding label to have rounded corner
+        self.cardBackgroundView.clipsToBounds = true
+    }
+}

@@ -12,7 +12,6 @@ import UIKit
 
 class TodoItemCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var button: UIButton!
     @IBOutlet weak var actionsView: UIStackView!
     
     @IBOutlet weak var doneButton: UIButton!
@@ -41,24 +40,24 @@ class TodoItemCell: UITableViewCell {
     // action button callback
     var actionTriggered: ((TodoItemCell, Action) -> ())?
     
-    @IBAction func actionButtonTouched(button: UIButton) {
-        var action: Action = .Noop
-        switch button {
-        case self.deleteButton:
-            action = .Delete
-        case self.doneButton:
-            action = .MarkAsDone
-        case self.detailButton:
-            action = .ShowDetail
-        case self.categoryButton:
-            action = .MoveToCategory
-        case self.reminderButton:
-            action = .AddReminder
-        default:
-            action = .Noop
-        }
-        
-        self.actionTriggered?(self, action)
+    @IBAction func markAsDoneAction(sender: AnyObject) {
+        self.actionTriggered?(self, .MarkAsDone)
+    }
+    
+    @IBAction func addReminderAction(sender: AnyObject) {
+        self.actionTriggered?(self, .AddReminder)
+    }
+    
+    @IBAction func showDetailAction(sender: AnyObject) {
+        self.actionTriggered?(self, .ShowDetail)
+    }
+    
+    @IBAction func moveToCategoryAction(sender: AnyObject) {
+        self.actionTriggered?(self, .MoveToCategory)
+    }
+    
+    @IBAction func deleteAction(sender: AnyObject) {
+        self.actionTriggered?(self, .Delete)
     }
     
     override func awakeFromNib() {
