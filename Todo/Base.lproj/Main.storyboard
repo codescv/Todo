@@ -440,6 +440,9 @@
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U5D-nP-8sg">
                                                             <rect key="frame" x="538" y="0.0" width="30" height="36"/>
                                                             <state key="normal" title="X"/>
+                                                            <connections>
+                                                                <action selector="deleteAction:" destination="u5R-LQ-f1y" eventType="touchUpInside" id="nQl-Pn-IJZ"/>
+                                                            </connections>
                                                         </button>
                                                     </subviews>
                                                 </stackView>

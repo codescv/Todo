@@ -323,6 +323,9 @@ class TodoListTableViewController: UITableViewController {
             let itemId = self.todoItemsModel.doneItems[indexPath.row]
             let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
             doneCell.titleLabel.text = item.title
+            doneCell.actionTriggered = { cell, action in
+                self.deleteDoneItemForCell(cell)
+            }
             return doneCell
         }
         
@@ -447,7 +450,15 @@ class TodoListTableViewController: UITableViewController {
         self.tableView.endUpdates()
     }
     
-    
+    func deleteDoneItemForCell(cell: DoneItemCell) {
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            self.todoItemsModel.deleteDoneItemAtRow(indexPath.row) {
+                self.selectedIndexPath = nil
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            }
+        }
+    }
+
 }
 
 

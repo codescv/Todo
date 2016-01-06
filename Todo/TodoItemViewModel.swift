@@ -120,6 +120,24 @@ class TodoItemViewModel {
         })
     }
     
+    func deleteDoneItemAtRow(row: Int, completion: (()->())?) {
+        let objId = self.doneItems[row]
+        
+        self.shouldAutoReloadOnDataChange = false
+        self.session.write(
+            {context in
+                let item: TodoItem = context.dq_objectWithID(objId)
+                item.dq_delete()
+            },
+            sync: false,
+            completion: {
+                self.doneItems.removeAtIndex(row)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
+        })
+    }
+
+    
     func markTodoItemAsDoneAtRow(row: Int, completion: (()->())?) {
         let objId = self.todoItems[row]
         

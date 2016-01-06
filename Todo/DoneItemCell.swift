@@ -12,8 +12,17 @@ class DoneItemCell: UITableViewCell {
 
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var deleteButton: UIButton!
-    
     @IBOutlet weak var cardBackgroundView: UIView!
+    
+    @IBAction func deleteAction(sender: AnyObject) {
+        self.actionTriggered?(self, .Delete)
+    }
+    
+    enum Action {
+        case Delete
+    }
+    
+    var actionTriggered: ((DoneItemCell, Action)->())?
     
     override func awakeFromNib() {
         // set background colors so the cell background can show
