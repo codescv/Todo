@@ -16,9 +16,9 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     }
     
     let direction: AnimationDirection
-    let rect: CGRect
+    let rect: ()->CGRect
     
-    init(direction: AnimationDirection, rect: CGRect) {
+    init(direction: AnimationDirection, rect: ()->CGRect) {
         self.direction = direction
         self.rect = rect
     }
@@ -46,7 +46,7 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
             
             UIView.animateWithDuration(transitionDuration(transitionContext),
                 animations: {
-                    animateViewSnapShot.frame = self.rect
+                    animateViewSnapShot.frame = self.rect()
                 },
                 completion: { (success) in
                     animateViewSnapShot.removeFromSuperview()
@@ -54,7 +54,7 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
             })
             
         } else {
-            animateViewSnapShot.frame = rect
+            animateViewSnapShot.frame = self.rect()
             containerView.addSubview(animateViewSnapShot)
             UIView.animateWithDuration(transitionDuration(transitionContext),
                 animations: {

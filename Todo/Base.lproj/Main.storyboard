@@ -43,11 +43,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Todo" id="Mq3-f8-xgR">
-                        <barButtonItem key="leftBarButtonItem" title="Category" id="AKa-qg-rGx">
-                            <connections>
-                                <segue destination="bGL-yS-4jx" kind="presentation" id="gqZ-Jd-yrK"/>
-                            </connections>
-                        </barButtonItem>
+                        <barButtonItem key="leftBarButtonItem" title="Category" id="AKa-qg-rGx"/>
                     </navigationItem>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -67,7 +63,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="fOE-jC-qSS">
-                                <rect key="frame" x="0.0" y="60" width="600" height="540"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="IZa-QK-qy1">
                                     <size key="itemSize" width="80" height="80"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -76,7 +72,7 @@
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryCellIdentifier" id="hGV-0u-pJx" customClass="CategoryCell" customModule="Todo" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
+                                        <rect key="frame" x="0.0" y="64" width="80" height="80"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
@@ -102,7 +98,7 @@
                                         </connections>
                                     </collectionViewCell>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryAddCellIdentifier" id="yJc-xe-0HS" customClass="CategoryCell" customModule="Todo" customModuleProvider="target">
-                                        <rect key="frame" x="104" y="0.0" width="80" height="80"/>
+                                        <rect key="frame" x="104" y="64" width="80" height="80"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
@@ -127,7 +123,7 @@
                                         </connections>
                                     </collectionViewCell>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryRemoveCellIdentifier" id="Lvq-W0-6vE" customClass="CategoryCell" customModule="Todo" customModuleProvider="target">
-                                        <rect key="frame" x="208" y="0.0" width="80" height="80"/>
+                                        <rect key="frame" x="208" y="64" width="80" height="80"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
@@ -160,10 +156,10 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="fOE-jC-qSS" secondAttribute="trailing" id="8Fn-PE-GMy"/>
-                            <constraint firstItem="fOE-jC-qSS" firstAttribute="top" secondItem="tgp-Kb-HTu" secondAttribute="top" constant="60" id="ATZ-AL-TGm"/>
-                            <constraint firstItem="CDF-aL-Drh" firstAttribute="top" secondItem="fOE-jC-qSS" secondAttribute="bottom" id="CxA-qJ-aB5"/>
-                            <constraint firstItem="fOE-jC-qSS" firstAttribute="leading" secondItem="tgp-Kb-HTu" secondAttribute="leading" id="H0e-cE-Yfs"/>
+                            <constraint firstItem="fOE-jC-qSS" firstAttribute="top" secondItem="tgp-Kb-HTu" secondAttribute="top" id="ATl-yD-q1S"/>
+                            <constraint firstAttribute="trailing" secondItem="fOE-jC-qSS" secondAttribute="trailing" id="CKD-fy-oEG"/>
+                            <constraint firstItem="fOE-jC-qSS" firstAttribute="bottom" secondItem="CDF-aL-Drh" secondAttribute="top" id="edM-ls-js9"/>
+                            <constraint firstItem="fOE-jC-qSS" firstAttribute="leading" secondItem="tgp-Kb-HTu" secondAttribute="leading" id="xHf-W6-LDq"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Categories" id="6wG-ap-xB9"/>
@@ -174,7 +170,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="84y-B9-MV3" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="0MY-uo-ZYG" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2814" y="-2067"/>
+            <point key="canvasLocation" x="1189" y="-2069"/>
         </scene>
         <!--New Todo Item-->
         <scene sceneID="LZP-Hf-4je">
@@ -501,6 +497,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xm7-2m-GUA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1261" y="-1254"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="kKW-jW-sn1">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="c4b-O1-Ttd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="FTg-Qb-okQ" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="pUi-fS-bRo">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="bGL-yS-4jx" kind="relationship" relationship="rootViewController" id="S4O-fb-2lK"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="377" y="-2069"/>
         </scene>
     </scenes>
     <resources>

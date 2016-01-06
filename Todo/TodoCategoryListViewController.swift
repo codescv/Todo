@@ -33,29 +33,28 @@ class TodoCategoryListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         try! fetchedResultsController.performFetch()
-        transitioningDelegate = self
+        self.collectionView.reloadData()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == selectCategorySegueIdentifier {
-            let todoListVC = segue.destinationViewController as! TodoListViewController
-            if let cell = sender as? CategoryCell {
-                selectedCellRect = collectionView.convertRect(cell.frame, toView: view)
-                let indexPath = collectionView.indexPathForCell(cell)!
-                let category = fetchedResultsController.objectAtIndexPath(indexPath) as! TodoItemCategory
-                todoListVC.categoryId = category.objectID
-            }
-        }
+    override func viewDidAppear(animated: Bool) {
+        let offset = collectionView.contentOffset
+        print("offset: \(offset)")
     }
-    
-    func cellRectForCategoryId(categoryId: NSManagedObjectID?) -> CGRect {
+
+    func cellRectForCategoryId(categoryId: NSManagedObjectID?) -> CGRect {        
         var indexPath = NSIndexPath(forRow: 0, inSection: 0)
         if categoryId != nil {
             let category = self.session.defaultContext.dq_objectWithID(categoryId!)
             indexPath = fetchedResultsController.indexPathForObject(category)!
         }
-        let cell = collectionView(collectionView, cellForItemAtIndexPath: indexPath)
-        return collectionView.convertRect(cell.frame, toView: view)
+        
+        let cell = collectionView(collectionView, cellForItemAtIndexPath:indexPath)
+        let offset = collectionView.contentOffset
+        print("offset: \(offset)")
+        let cellFrame = CGRectOffset(cell.frame, offset.x, offset.y)
+        print("cell frame: \(cellFrame)")
+        let result = collectionView.convertRect(cellFrame, toView: view)
+        return result
     }
 }
 
@@ -105,14 +104,13 @@ extension TodoCategoryListViewController: UICollectionViewDelegate, UICollection
 
 extension TodoCategoryListViewController: UIViewControllerTransitioningDelegate {
     func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return RectZoomAnimator(direction: .ZoomOut, rect: selectedCellRect)
+        return RectZoomAnimator(direction: .ZoomOut, rect: {self.selectedCellRect})
     }
     
     func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         if let todoListVC = source as? TodoListViewController {
             let categoryId = todoListVC.categoryId
-            let rect = cellRectForCategoryId(categoryId)
-            return RectZoomAnimator(direction: .ZoomIn, rect: rect)
+            return RectZoomAnimator(direction: .ZoomIn, rect: {self.cellRectForCategoryId(categoryId)})
         }
         
         return nil

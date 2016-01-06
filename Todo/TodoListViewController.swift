@@ -11,6 +11,9 @@ import CoreData
 
 class TodoListViewController: UIViewController {
     let session = DataManager.instance.session
+    
+    let selectCategorySegueIdentifier: String = "selectCategorySegue"
+    
     var categoryId: NSManagedObjectID? {
         get {
             return innerTableViewController?.categoryId
@@ -35,6 +38,18 @@ class TodoListViewController: UIViewController {
 
     @IBAction func newTodoItemButtonTouched(sender: UIButton) {
         self.innerTableViewController?.startComposingNewTodoItem()
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == selectCategorySegueIdentifier {
+            if let navController = segue.destinationViewController as? UINavigationController {
+                if let catListVC = navController.childViewControllers.first as? TodoCategoryListViewController {
+                    // catlist vc must load its view so that it can return the rect for zooming
+                    _ = catListVC.view
+                    navController.transitioningDelegate = catListVC
+                }
+            }
+        }
     }
     
     
@@ -145,6 +160,10 @@ class TodoListTableViewController: UITableViewController {
     
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
+        if self.isComposingNewTodoItem {
+            return
+        }
+        
         //print("long press! \(longPress)")
         let state = longPress.state
         let location = longPress.locationInView(tableView)
@@ -284,11 +303,15 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        if let newItemCell = cell as? NewTodoItemCell {
-            newItemCell.textView.becomeFirstResponder()
-        }
-    }
+//    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+//        if let newItemCell = cell as? NewTodoItemCell {
+//            if self.isComposingNewTodoItem && indexPath.row == 0 && indexPath.section == Section.TodoSection.rawValue {
+//                dispatch_async(dispatch_get_main_queue(), {
+//                    newItemCell.textView.becomeFirstResponder()
+//                })
+//            }
+//        }
+//    }
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return Section(rawValue: section)?.sectionName()
@@ -296,10 +319,13 @@ class TodoListTableViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 //        print("get cell")
-        if self.isComposingNewTodoItem && indexPath.row == 0 {
+        if self.isComposingNewTodoItem && indexPath.row == 0 && indexPath.section == 0 {
             let newItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.NewItemCell.identifier()) as! NewTodoItemCell
             newItemCell.textView.text = ""
-            newItemCell.textView.becomeFirstResponder()
+            //newItemCell.textView.becomeFirstResponder()
+            dispatch_async(dispatch_get_main_queue(), {
+                newItemCell.textView.becomeFirstResponder()
+            })
             newItemCell.actionTriggered = { (cell, action) in
                     switch action {
                     case .OK:
@@ -367,6 +393,10 @@ class TodoListTableViewController: UITableViewController {
     
     // delegate
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if self.isComposingNewTodoItem {
+            return
+        }
+        
         tableView.deselectRowAtIndexPath(indexPath, animated: false)
         
         if let selected = selectedIndexPath {
