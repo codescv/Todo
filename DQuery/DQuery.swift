@@ -119,9 +119,31 @@ public class DQ {
         return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: context) as! T
     }
     
-    public func insertObject<T:NSManagedObject>(entity: T.Type) -> T {
+    public func insertObject<T:NSManagedObject>(entity: T.Type, block:(NSManagedObjectContext, T)->Void, sync: Bool = false, completion: ((NSManagedObjectID)->())?) {
+        let privateContext = NSManagedObjectContext(concurrencyType: .PrivateQueueConcurrencyType)
+        privateContext.parentContext = defaultContext
         let entityName = NSStringFromClass(entity).componentsSeparatedByString(".").last!
-        return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: self.rootContext) as! T
+        
+        let writeBlock = {
+            let obj = NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: privateContext) as! T
+            block(privateContext, obj)
+            do {
+                try privateContext.save()
+            } catch {
+                print("unable to save private context!")
+            }
+            self.saveContext()
+            let objId = obj.objectID
+            dispatch_async(dispatch_get_main_queue(), {
+                completion?(objId)
+            })
+        }
+        
+        if sync {
+            privateContext.performBlockAndWait(writeBlock)
+        } else {
+            privateContext.performBlock(writeBlock)
+        }
     }
     
     public func write(block: (NSManagedObjectContext)->Void, sync: Bool = false, completion: (()->Void)? = nil) {
@@ -323,10 +345,10 @@ public class DQQuery<T:NSManagedObject> {
 // TODO REFACTOR: move to separate file
 public extension NSManagedObject {
     public class func dq_insertInContext(context: NSManagedObjectContext) -> Self {
-        return insertInContextHelper(context)
+        return dq_insertInContextHelper(context)
     }
     
-    private class func insertInContextHelper<T>(context: NSManagedObjectContext) -> T {
+    private class func dq_insertInContextHelper<T>(context: NSManagedObjectContext) -> T {
         let entityName = NSStringFromClass(self).componentsSeparatedByString(".").last!
         return NSEntityDescription.insertNewObjectForEntityForName(entityName, inManagedObjectContext: context) as! T
     }

@@ -160,22 +160,20 @@ class TodoItemViewModel {
     
     func insertTodoItem(title title: String, completion: (()->())?) {
         self.shouldAutoReloadOnDataChange = false
-        self.session.write({ (context) in
-            let item: TodoItem = TodoItem.dq_insertInContext(context)
-            item.title = title
-            item.dueDate = NSDate.today()
-            item.displayOrder = TodoItem.topDisplayOrder(context)
-            if let categoryId = self.categoryId {
-                item.category = context.dq_objectWithID(categoryId) as TodoItemCategory
-            }
-            
-            }, sync:false, completion: {
-                //self.todoItems.insert(, atIndex: 0)
-                self.reloadDataFromDB {
-                    completion?()
-                    self.shouldAutoReloadOnDataChange = true
+        self.session.insertObject(TodoItem.self,
+            block: {context, item in
+                item.title = title
+                item.dueDate = NSDate.today()
+                item.displayOrder = TodoItem.topDisplayOrder(context)
+                if let categoryId = self.categoryId {
+                    item.category = context.dq_objectWithID(categoryId) as TodoItemCategory
                 }
+            },
+            sync: false,
+            completion: { objId in
+                self.todoItems.insert(objId, atIndex: 0)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
         })
-
     }
 }
