@@ -105,6 +105,10 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    deinit {
+        print("deinit todolist table vc")
+    }
+    
     // the category id
     var categoryId: NSManagedObjectID? {
         didSet {
@@ -326,11 +330,11 @@ class TodoListTableViewController: UITableViewController {
             dispatch_async(dispatch_get_main_queue(), {
                 newItemCell.textView.becomeFirstResponder()
             })
-            newItemCell.actionTriggered = { (cell, action) in
+            newItemCell.actionTriggered = { [unowned self] (cell, action) in
                     switch action {
                     case .OK:
                         let title = cell.textView.text
-                        print("new item: \(title)")
+//                        print("new item: \(title)")
                         self.todoItemsModel.insertTodoItem(title: title) {
                             self.endComposingNewTodoItem(insertedNewItem: true)
                         }
@@ -349,7 +353,7 @@ class TodoListTableViewController: UITableViewController {
             let itemId = self.todoItemsModel.doneItems[indexPath.row]
             let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
             doneCell.titleLabel.text = item.title
-            doneCell.actionTriggered = { cell, action in
+            doneCell.actionTriggered = { [unowned self] cell, action in
                 self.deleteDoneItemForCell(cell)
             }
             return doneCell
@@ -365,12 +369,12 @@ class TodoListTableViewController: UITableViewController {
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
-            print("expand!")
+//            print("expand!")
             itemCell.expandActionsAnimated(false)
         } else {
             itemCell.hideActionsAnimated(false)
         }
-        itemCell.actionTriggered = { (cell, action) in
+        itemCell.actionTriggered = { [unowned self] (cell, action) in
             switch action {
             case .Delete:
                 self.deleteItemForCell(cell)

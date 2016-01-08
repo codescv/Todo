@@ -41,11 +41,11 @@ class TodoCategoryListViewController: UIViewController {
         let indexPath = NSIndexPath(forRow: 0, inSection: 0)
         
         let cell = collectionView(collectionView, cellForItemAtIndexPath:indexPath)
-        let offset = collectionView.contentOffset
-        print("offset: \(offset)")
+//        let offset = collectionView.contentOffset
+//        print("offset: \(offset)")
 //        let cellFrame = CGRectOffset(cell.frame, -offset.x, -offset.y)
         let cellFrame = cell.frame
-        print("cell frame: \(cellFrame)")
+//        print("cell frame: \(cellFrame)")
         let result = collectionView.convertRect(cellFrame, toView: view)
         return result
     }

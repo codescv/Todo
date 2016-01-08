@@ -9,7 +9,6 @@
 import UIKit
 
 class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
-    // true for presenting animation, false for dismissing animation
     enum AnimationDirection {
         case ZoomIn
         case ZoomOut
@@ -24,7 +23,7 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     }
     
     func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
-        return 1.0
+        return 0.4
     }
     
     func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
@@ -36,45 +35,89 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
             let containerView = transitionContext.containerView()
             else { return }
         
-        print("fromview: \(fromView) toview: \(toView)")
-        print("containerView: \(containerView)")
+//        print("fromview: \(fromView) toview: \(toView)")
+//        print("containerView: \(containerView)")
         containerView.backgroundColor = UIColor.whiteColor()
         
         let finalFrame = transitionContext.finalFrameForViewController(toViewController)
-        let animateView = direction == .ZoomOut ? fromView : toView
-        let animateViewSnapShot = animateView.resizableSnapshotViewFromRect(animateView.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
+        let (masterView, detailView) = direction == .ZoomIn ? (fromView, toView) : (toView, fromView)
+        let detailViewSnapShot = detailView.resizableSnapshotViewFromRect(detailView.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
+        let masterViewSnapShot = masterView.resizableSnapshotViewFromRect(masterView.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
         
         if direction == .ZoomOut {
-            containerView.addSubview(toView)
-            containerView.addSubview(animateViewSnapShot)
+            // dismiss
+            //containerView.addSubview(toView)
+            containerView.addSubview(masterViewSnapShot)
+            containerView.addSubview(detailViewSnapShot)
+            let detailViewEndFrame = self.rect()
+//            print("end frame: \(detailViewEndFrame)")
+            let scaleX =  containerView.frame.size.width / detailViewEndFrame.size.width
+            let scaleY = scaleX
             
-            UIView.animateWithDuration(transitionDuration(transitionContext),
-                animations: {
-                    animateViewSnapShot.frame = self.rect()
-                    print("animateView: \(animateViewSnapShot)")
-                },
-                completion: { (success) in
-                    animateViewSnapShot.removeFromSuperview()
-                    transitionContext.completeTransition(success)
-            })
+            masterViewSnapShot.transform = CGAffineTransformMakeScale(scaleX, scaleY)
+//            print("scale: \(scaleX)")
+            masterViewSnapShot.frame.origin = CGPointMake(-scaleX*detailViewEndFrame.origin.x, -detailViewEndFrame.origin.y*scaleY)
+//            print("origin: \(masterViewSnapShot.frame.origin)")
+            
+            dispatch_async(dispatch_get_main_queue()) {
+                fromView.hidden = true
+//                masterViewSnapShot.alpha = 0
+                UIView.animateWithDuration(self.transitionDuration(transitionContext),
+                    delay: 0,
+                    options: UIViewAnimationOptions.CurveEaseOut,
+                    animations: {
+                        detailViewSnapShot.frame = self.rect()
+                        masterViewSnapShot.transform = CGAffineTransformIdentity
+                        masterViewSnapShot.frame.origin = CGPointZero
+                        detailViewSnapShot.alpha = 0
+//                        masterViewSnapShot.alpha = 1
+                        
+//                        print("master: \(masterViewSnapShot)")
+//                        print("animateView: \(detailViewSnapShot)")
+                    },
+                    
+                    completion: { (success) in
+                        detailViewSnapShot.removeFromSuperview()
+                        masterViewSnapShot.removeFromSuperview()
+                        containerView.addSubview(toView)
+                        fromView.hidden = false
+                        transitionContext.completeTransition(success)
+                })
+            }
             
         } else {
-            animateViewSnapShot.frame = self.rect()
-            print("animateView: \(animateViewSnapShot)")
-            containerView.addSubview(animateViewSnapShot)
-            UIView.animateWithDuration(transitionDuration(transitionContext),
-                animations: {
-                    animateViewSnapShot.frame = finalFrame
-                },
-                completion: { (success) in
-                    animateViewSnapShot.removeFromSuperview()
-                    containerView.addSubview(toView)
-                    transitionContext.completeTransition(success)
+            // show
+            detailViewSnapShot.frame = self.rect()
+            let detailViewBeginFrame = detailViewSnapShot.frame
+            let scaleX = containerView.frame.size.width / detailViewSnapShot.frame.size.width
+            let scaleY = scaleX //containerView.frame.size.height / detailViewSnapShot.frame.size.height
+            containerView.addSubview(masterViewSnapShot)
+            containerView.addSubview(detailViewSnapShot)
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                fromView.hidden = true
+//                detailViewSnapShot.alpha = 0
+                UIView.animateWithDuration(self.transitionDuration(transitionContext),
+                    delay: 0,
+                    options: UIViewAnimationOptions.CurveEaseOut,
+                    animations: {
+                        detailViewSnapShot.frame = finalFrame
+                        masterViewSnapShot.transform = CGAffineTransformMakeScale(scaleX, scaleY)
+                        masterViewSnapShot.frame.origin = CGPointMake(-scaleX*detailViewBeginFrame.origin.x, -detailViewBeginFrame.origin.y*scaleY)
+//                        print("origin1: \(masterViewSnapShot.frame.origin)")
+//                        print("\(masterViewSnapShot.frame)")
+                        masterViewSnapShot.alpha = 0
+//                        detailViewSnapShot.alpha = 1
+                    },
+                    completion: { (success) in
+                        detailViewSnapShot.removeFromSuperview()
+                        masterViewSnapShot.removeFromSuperview()
+                        containerView.addSubview(toView)
+                        transitionContext.completeTransition(success)
+                        fromView.hidden = false
+                })
             })
             
-            
-            
         }
-        
     }
 }

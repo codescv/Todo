@@ -25,6 +25,7 @@ class TodoItemViewModel {
     }
     
     deinit {
+        print("deinit view model")
         NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
     }
     
@@ -32,6 +33,7 @@ class TodoItemViewModel {
         //        print("changed: \(notification)")
         if shouldAutoReloadOnDataChange {
             self.reloadDataFromDB({
+//                print("on change!!! \(self)")
                 self.onChange?()
             })
         }
