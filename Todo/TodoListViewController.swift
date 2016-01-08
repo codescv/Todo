@@ -46,7 +46,7 @@ class TodoListViewController: UIViewController {
                 if let catListVC = navController.childViewControllers.first as? TodoCategoryListViewController {
                     // catlist vc must load its view so that it can return the rect for zooming
                     _ = catListVC.view
-                    navController.transitioningDelegate = catListVC
+//                    navController.transitioningDelegate = catListVC
                 }
             }
         }

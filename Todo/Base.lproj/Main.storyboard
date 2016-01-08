@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Eol-oY-A9U">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9531" systemVersion="15C50" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="FTg-Qb-okQ">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
@@ -9,7 +9,7 @@
         <!--Todo List Container-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController title="Todo" automaticallyAdjustsScrollViewInsets="NO" definesPresentationContext="YES" providesPresentationContextTransitionStyle="YES" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Todo" definesPresentationContext="YES" providesPresentationContextTransitionStyle="YES" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nL8-Nd-Mhz">
-                                <rect key="frame" x="0.0" y="64" width="600" height="536"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <connections>
                                     <segue destination="9TU-RN-1vG" kind="embed" id="Afs-iI-IjX"/>
                                 </connections>
@@ -34,17 +34,15 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="L3A-LP-BB5"/>
-                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="TmW-gS-r9a"/>
-                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="fvc-5K-QuD"/>
-                            <constraint firstAttribute="trailing" secondItem="nL8-Nd-Mhz" secondAttribute="trailing" id="lrF-UY-gv2"/>
+                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="CSP-mN-0Sh"/>
+                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Dkf-UA-fgr"/>
+                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="OOs-AB-V5N"/>
+                            <constraint firstAttribute="trailing" secondItem="nL8-Nd-Mhz" secondAttribute="trailing" id="h5X-r8-Cuf"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Z4O-2j-7ra" secondAttribute="bottom" constant="20" id="mtz-ru-Mgb"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Z4O-2j-7ra" secondAttribute="trailing" id="yi2-V8-LO2"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Todo" id="Mq3-f8-xgR">
-                        <barButtonItem key="leftBarButtonItem" title="Category" id="AKa-qg-rGx"/>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Todo" id="Mq3-f8-xgR"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -94,7 +92,7 @@
                                         </constraints>
                                         <connections>
                                             <outlet property="categoryNameLabel" destination="1R4-xE-8DU" id="djK-8r-UUe"/>
-                                            <segue destination="0MY-uo-ZYG" kind="unwind" identifier="SelectCategoryIdentifier" unwindAction="unwindFromSelectCategory:" id="MLq-4P-PS2"/>
+                                            <segue destination="BYZ-38-t0r" kind="show" id="V7p-z6-KEZ"/>
                                         </connections>
                                     </collectionViewCell>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryAddCellIdentifier" id="yJc-xe-0HS" customClass="CategoryCell" customModule="Todo" customModuleProvider="target">
@@ -165,12 +163,12 @@
                     <navigationItem key="navigationItem" title="Categories" id="6wG-ap-xB9"/>
                     <connections>
                         <outlet property="collectionView" destination="fOE-jC-qSS" id="TZh-fu-f9W"/>
+                        <segue destination="BYZ-38-t0r" kind="show" identifier="showTodoListWithNoAnimation" animates="NO" id="8ss-ko-H2Y"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="84y-B9-MV3" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <exit id="0MY-uo-ZYG" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1189" y="-2069"/>
+            <point key="canvasLocation" x="1233" y="-1254"/>
         </scene>
         <!--New Todo Item-->
         <scene sceneID="LZP-Hf-4je">
@@ -230,7 +228,7 @@
             <objects>
                 <tableViewController id="9TU-RN-1vG" customClass="TodoListTableViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" showsSelectionImmediatelyOnTouchBegin="NO" rowHeight="83" sectionHeaderHeight="18" sectionFooterHeight="18" id="WJa-vW-DHF">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <color key="sectionIndexBackgroundColor" red="1" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -248,7 +246,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XRx-2F-bpL" userLabel="Background">
-                                            <rect key="frame" x="8" y="12" width="584" height="70"/>
+                                            <rect key="frame" x="8" y="6" width="584" height="70"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="249" text="✔︎" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zIb-yv-dXu">
                                                     <rect key="frame" x="0.0" y="0.0" width="30" height="70"/>
@@ -332,8 +330,8 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
-                                        <constraint firstAttribute="bottom" secondItem="XRx-2F-bpL" secondAttribute="bottom" id="7ny-aI-egk"/>
-                                        <constraint firstItem="XRx-2F-bpL" firstAttribute="top" secondItem="H2J-PW-19H" secondAttribute="top" constant="12" id="PzJ-Ae-Ec0"/>
+                                        <constraint firstAttribute="bottom" secondItem="XRx-2F-bpL" secondAttribute="bottom" constant="6" id="7ny-aI-egk"/>
+                                        <constraint firstItem="XRx-2F-bpL" firstAttribute="top" secondItem="H2J-PW-19H" secondAttribute="top" constant="6" id="PzJ-Ae-Ec0"/>
                                         <constraint firstAttribute="trailing" secondItem="XRx-2F-bpL" secondAttribute="trailing" constant="8" id="Sc9-dz-0ES"/>
                                         <constraint firstItem="XRx-2F-bpL" firstAttribute="leading" secondItem="H2J-PW-19H" secondAttribute="leading" constant="8" id="dAY-iK-RtQ"/>
                                     </constraints>
@@ -481,27 +479,8 @@
             <point key="canvasLocation" x="2087" y="-494"/>
         </scene>
         <!--Navigation Controller-->
-        <scene sceneID="lka-Ha-4No">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Eol-oY-A9U" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="bVE-Cu-CVS">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="1XL-7L-TTg"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="xm7-2m-GUA" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1261" y="-1254"/>
-        </scene>
-        <!--Navigation Controller-->
         <scene sceneID="kKW-jW-sn1">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="c4b-O1-Ttd" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="FTg-Qb-okQ" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="pUi-fS-bRo">
@@ -513,8 +492,9 @@
                         <segue destination="bGL-yS-4jx" kind="relationship" relationship="rootViewController" id="S4O-fb-2lK"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="c4b-O1-Ttd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="377" y="-2069"/>
+            <point key="canvasLocation" x="421" y="-1254"/>
         </scene>
     </scenes>
     <resources>
@@ -524,4 +504,7 @@
         <image name="done" width="21" height="19"/>
         <image name="reminder" width="19" height="21"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="V7p-z6-KEZ"/>
+    </inferredMetricsTieBreakers>
 </document>

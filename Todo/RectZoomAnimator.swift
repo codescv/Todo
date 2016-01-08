@@ -24,7 +24,7 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
     }
     
     func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
-        return 0.3
+        return 1.0
     }
     
     func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
@@ -36,17 +36,22 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
             let containerView = transitionContext.containerView()
             else { return }
         
+        print("fromview: \(fromView) toview: \(toView)")
+        print("containerView: \(containerView)")
+        containerView.backgroundColor = UIColor.whiteColor()
+        
         let finalFrame = transitionContext.finalFrameForViewController(toViewController)
-        let animateView = direction == .ZoomIn ? fromView : toView
+        let animateView = direction == .ZoomOut ? fromView : toView
         let animateViewSnapShot = animateView.resizableSnapshotViewFromRect(animateView.bounds, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
         
-        if direction == .ZoomIn {
+        if direction == .ZoomOut {
             containerView.addSubview(toView)
             containerView.addSubview(animateViewSnapShot)
             
             UIView.animateWithDuration(transitionDuration(transitionContext),
                 animations: {
                     animateViewSnapShot.frame = self.rect()
+                    print("animateView: \(animateViewSnapShot)")
                 },
                 completion: { (success) in
                     animateViewSnapShot.removeFromSuperview()
@@ -55,6 +60,7 @@ class RectZoomAnimator: NSObject, UIViewControllerAnimatedTransitioning {
             
         } else {
             animateViewSnapShot.frame = self.rect()
+            print("animateView: \(animateViewSnapShot)")
             containerView.addSubview(animateViewSnapShot)
             UIView.animateWithDuration(transitionDuration(transitionContext),
                 animations: {
