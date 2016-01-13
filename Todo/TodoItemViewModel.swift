@@ -8,9 +8,9 @@
 
 import Foundation
 import CoreData
+import DQuery
 
 class TodoItemViewModel {
-    let session = DataManager.instance.session
     var todoItems = [NSManagedObjectID]()
     var doneItems = [NSManagedObjectID]()
     var categoryId: NSManagedObjectID?
@@ -21,12 +21,12 @@ class TodoItemViewModel {
     
     init(categoryId: NSManagedObjectID? = nil) {
         self.categoryId = categoryId
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
+        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: DQ.dqContext.defaultContext)
     }
     
     deinit {
         print("deinit view model")
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
+        //NSNotificationCenter.defaultCenter().removeObserver(self, name: NSManagedObjectContextObjectsDidChangeNotification, object: session.defaultContext)
     }
     
     @objc func dataChanged(notification: NSNotification) {
@@ -40,12 +40,12 @@ class TodoItemViewModel {
     }
     
     func reloadDataFromDB(completion: (() -> ())? = nil) {
-        var query = self.session.query(TodoItem).orderBy("displayOrder")
+        var query = DQ.query(TodoItem).orderBy("displayOrder")
         if let categoryId = self.categoryId {
             // FIXME: does this work?
             query = query.filter("category = %@", categoryId)
         }
-        query.execute({ (context, objectIds) -> Void in
+        query.execute { (context, objectIds) -> Void in
             var todoItems = [NSManagedObjectID]()
             var doneItems = [NSManagedObjectID]()
             for objId in objectIds {
@@ -63,7 +63,7 @@ class TodoItemViewModel {
                 print("reloaded todo items from db")
                 completion?()
             })
-        })
+        }
     }
     
     func moveTodoItem(fromRow srcRow: Int, toRow destRow: Int, completion: (()->())? = nil) {
@@ -74,7 +74,7 @@ class TodoItemViewModel {
         self.shouldAutoReloadOnDataChange = false
 
         var todoItems = self.todoItems
-        self.session.write (
+        DQ.write (
             { context in
                 let exchangeWithBelow = { (row: Int) in
                     let item: TodoItem = context.dq_objectWithID(todoItems[row])
@@ -109,7 +109,7 @@ class TodoItemViewModel {
         let objId = self.todoItems[row]
         
         self.shouldAutoReloadOnDataChange = false
-        self.session.write(
+        DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
                 item.dq_delete()
@@ -126,7 +126,7 @@ class TodoItemViewModel {
         let objId = self.doneItems[row]
         
         self.shouldAutoReloadOnDataChange = false
-        self.session.write(
+        DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
                 item.dq_delete()
@@ -144,7 +144,7 @@ class TodoItemViewModel {
         let objId = self.todoItems[row]
         
         self.shouldAutoReloadOnDataChange = false
-        self.session.write(
+        DQ.write(
             {context in
                 // TODO: done time
                 let item: TodoItem = context.dq_objectWithID(objId)
@@ -162,7 +162,7 @@ class TodoItemViewModel {
     
     func insertTodoItem(title title: String, completion: (()->())?) {
         self.shouldAutoReloadOnDataChange = false
-        self.session.insertObject(TodoItem.self,
+        DQ.insertObject(TodoItem.self,
             block: {context, item in
                 item.title = title
                 item.dueDate = NSDate.today()

@@ -10,7 +10,6 @@ import Foundation
 import CoreData
 
 class TodoCategoryViewModel {
-    let session = DataManager.instance.session
     var categories = [NSManagedObject]()
     
     func reloadDataFromDB(completion: (() -> ())? = nil) {

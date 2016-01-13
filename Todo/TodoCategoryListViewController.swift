@@ -10,7 +10,6 @@ import UIKit
 import CoreData
 
 class TodoCategoryListViewController: UIViewController {
-    let session = DataManager.instance.session
     let selectCategorySegueIdentifier = "SelectCategoryIdentifier"
     let showTodoListSegueIdentifier = "showTodoListWithNoAnimation"
     

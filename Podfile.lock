@@ -1,0 +1,19 @@
+PODS:
+  - DQuery (0.1.0)
+
+DEPENDENCIES:
+  - DQuery (from `https://github.com/codescv/DQuery.git`)
+
+EXTERNAL SOURCES:
+  DQuery:
+    :git: https://github.com/codescv/DQuery.git
+
+CHECKOUT OPTIONS:
+  DQuery:
+    :commit: 320c4479ae542f219fd232e3c636a074b31a4629
+    :git: https://github.com/codescv/DQuery.git
+
+SPEC CHECKSUMS:
+  DQuery: aeac8c5831e6bb9e2729dfcb267dc94f04b1ae33
+
+COCOAPODS: 0.39.0

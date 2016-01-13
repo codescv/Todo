@@ -8,14 +8,14 @@
 
 import Foundation
 import CoreData
+import DQuery
 
 
 class TodoItem: NSManagedObject {
 
 // Insert code here to add functionality to your managed object subclass
     class func topDisplayOrder(context: NSManagedObjectContext) -> Int {
-        let session = DataManager.instance.session
-        if let item = session.query(self, context: context).min("displayOrder").first() {
+        if let item = DQ.query(self, context: context).min("displayOrder").first() {
             if let order = item.displayOrder?.integerValue {
                 return order - 1
             }

@@ -8,10 +8,9 @@
 
 import UIKit
 import CoreData
+import DQuery
 
 class TodoListViewController: UIViewController {
-    let session = DataManager.instance.session
-    
     let selectCategorySegueIdentifier: String = "selectCategorySegue"
     
     var categoryId: NSManagedObjectID? {
@@ -58,7 +57,7 @@ class TodoListViewController: UIViewController {
         if let newTodoItemVC = segue.sourceViewController as? NewTodoItemController {
             let content = newTodoItemVC.textView.text
             if content != "" {
-                session.write({ (context) in
+                DQ.write({ (context) in
                     let item: TodoItem = TodoItem.dq_insertInContext(context)
                     item.title = content
                     item.dueDate = NSDate.today()
@@ -75,8 +74,6 @@ class TodoListViewController: UIViewController {
 
 class TodoListTableViewController: UITableViewController {
     // MARK: properties
-    let session = DataManager.instance.session
-    
     enum CellType: String{
         case ItemCell = "TodoItemCellIdentifier"
         case DoneItemCell = "DoneItemCellIdentifier"
@@ -353,7 +350,7 @@ class TodoListTableViewController: UITableViewController {
         if indexPath.section == Section.DoneSection.rawValue {
             let doneCell = tableView.dequeueReusableCellWithIdentifier(CellType.DoneItemCell.identifier()) as! DoneItemCell
             let itemId = self.todoItemsModel.doneItems[indexPath.row]
-            let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
+            let item: TodoItem = DQ.objectWithID(itemId)
             doneCell.titleLabel.text = item.title
             doneCell.actionTriggered = { [unowned self] cell, action in
                 self.deleteDoneItemForCell(cell)
@@ -367,7 +364,7 @@ class TodoListTableViewController: UITableViewController {
         }
         
         let itemId = self.todoItemsModel.todoItems[row]
-        let item: TodoItem = session.defaultContext.dq_objectWithID(itemId)
+        let item: TodoItem = DQ.objectWithID(itemId)
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
         itemCell.titleLabel.text = item.title
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
