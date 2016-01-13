@@ -259,7 +259,7 @@
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="eo0-Ms-Ibh">
                                                     <rect key="frame" x="38" y="10" width="538" height="50"/>
                                                     <subviews>
-                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OsV-qI-Pg5">
+                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OsV-qI-Pg5">
                                                             <rect key="frame" x="0.0" y="0.0" width="42" height="21"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -418,7 +418,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8dB-91-SZb" userLabel="Background">
-                                            <rect key="frame" x="8" y="12" width="584" height="52"/>
+                                            <rect key="frame" x="8" y="6" width="584" height="52"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="CSK-iP-3bW">
                                                     <rect key="frame" x="8" y="8" width="568" height="36"/>
@@ -450,9 +450,9 @@
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
-                                        <constraint firstItem="8dB-91-SZb" firstAttribute="top" secondItem="VWW-ys-rYA" secondAttribute="top" constant="12" id="GsA-yG-tPt"/>
+                                        <constraint firstItem="8dB-91-SZb" firstAttribute="top" secondItem="VWW-ys-rYA" secondAttribute="top" constant="6" id="GsA-yG-tPt"/>
                                         <constraint firstItem="8dB-91-SZb" firstAttribute="leading" secondItem="VWW-ys-rYA" secondAttribute="leading" constant="8" id="HZd-xK-o4Y"/>
-                                        <constraint firstAttribute="bottom" secondItem="8dB-91-SZb" secondAttribute="bottom" id="neB-E5-dy9"/>
+                                        <constraint firstAttribute="bottom" secondItem="8dB-91-SZb" secondAttribute="bottom" constant="6" id="neB-E5-dy9"/>
                                         <constraint firstAttribute="trailing" secondItem="8dB-91-SZb" secondAttribute="trailing" constant="8" id="whZ-nL-Q7u"/>
                                     </constraints>
                                 </tableViewCellContentView>

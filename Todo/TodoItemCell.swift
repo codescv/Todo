@@ -116,6 +116,7 @@ class TodoItemCell: UITableViewCell {
         } else {
             self.actionsView.hidden = false
         }
+        self.titleLabel.numberOfLines = 10
     }
     
     func hideActionsAnimated(animated: Bool = true) {
@@ -127,5 +128,6 @@ class TodoItemCell: UITableViewCell {
         } else {
             self.actionsView.hidden = true
         }
+        self.titleLabel.numberOfLines = 1
     }
 }

@@ -155,8 +155,8 @@ class TodoListTableViewController: UITableViewController {
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
-        tableView.separatorStyle = .None
-        tableView.backgroundColor = UIColor.purpleColor()
+        //tableView.separatorStyle = .None
+        //tableView.backgroundColor = UIColor.purpleColor()
         
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
@@ -181,8 +181,7 @@ class TodoListTableViewController: UITableViewController {
                     self.firstMovingIndexPath = pressedIndexPath
                     self.currentMovingIndexPath = pressedIndexPath
                     let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
-                    
-                    let rect = cell.convertRect(cell.bounds, toView: self.view)
+                    let rect = cell.cardBackgroundView.convertRect(cell.cardBackgroundView.bounds, toView: self.view)
                     // using cell to create snapshot can sometimes lead to error
                     self.sourceCellSnapshot = self.view.resizableSnapshotViewFromRect(rect, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
                     
@@ -236,6 +235,9 @@ class TodoListTableViewController: UITableViewController {
             snapshot.center = CGPointMake(center.x, location.y);
             
             if let targetIndexPath = indexPath {
+                if targetIndexPath.section != Section.TodoSection.rawValue {
+                    return
+                }
                 if targetIndexPath.compare(currentMovingIndexPath!) != .OrderedSame {
                     tableView.moveRowAtIndexPath(currentMovingIndexPath!, toIndexPath: targetIndexPath)
                     currentMovingIndexPath = indexPath
