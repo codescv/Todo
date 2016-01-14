@@ -14,12 +14,14 @@ class TodoListViewController: UIViewController {
     let selectCategorySegueIdentifier: String = "selectCategorySegue"
     
     var categoryId: NSManagedObjectID? {
-        get {
-            return innerTableViewController?.categoryId
-        }
-        
-        set {
-            innerTableViewController?.categoryId = newValue
+        didSet {
+            innerTableViewController?.categoryId = categoryId
+            if categoryId == nil {
+                self.title = "All"
+            } else {
+                let category: TodoItemCategory = DQ.objectWithID(categoryId!)
+                self.title = category.name
+            }
         }
     }
     
@@ -110,9 +112,9 @@ class TodoListTableViewController: UITableViewController {
     var categoryId: NSManagedObjectID? {
         didSet {
             self.todoItemsModel = TodoItemViewModel(categoryId: self.categoryId)
-            self.todoItemsModel.reloadDataFromDB({
+            self.todoItemsModel.reloadDataFromDB {
                 self.tableView.reloadData()
-            })
+            }
         }
     }
     
@@ -129,15 +131,10 @@ class TodoListTableViewController: UITableViewController {
     
     var isComposingNewTodoItem = false
     
-    func reloadDataFromDB() {
-        todoItemsModel.reloadDataFromDB {
-            self.tableView.reloadData()
-        }
-    }
-    
     override func didMoveToParentViewController(parent: UIViewController?) {
         if let parentVC = parent as? TodoListViewController {
             parentVC.innerTableViewController = self
+            self.categoryId = parentVC.categoryId
         }
     }
     
@@ -145,7 +142,7 @@ class TodoListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        reloadDataFromDB()
+//        reloadDataFromDB()
 //        self.todoItemsModel.onChange = {
 //            self.tableView.reloadData()
 //        }

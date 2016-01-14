@@ -10,5 +10,10 @@ import UIKit
 
 class CategoryCell: UICollectionViewCell {
 
-    @IBOutlet weak var categoryNameLabel: UILabel!
+    @IBOutlet weak var categoryNameTextField: UITextField!
+    
+    override func awakeFromNib() {
+        self.layer.borderColor = UIColor.grayColor().CGColor
+        self.layer.borderWidth = 1
+    }
 }

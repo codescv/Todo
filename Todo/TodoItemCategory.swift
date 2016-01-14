@@ -13,22 +13,13 @@ import DQuery
 
 class TodoItemCategory: NSManagedObject {
     
-//    class func categoryNamed(name: String, context: NSManagedObjectContext = session.defaultContext) -> TodoItemCategory {
-//        let query = DQ.query(TodoItemCategory.self).filter("name = %@", name)
-//        var categoryId: NSManagedObjectID!
-//        if query.count() > 0 {
-//            categoryId = query.first()!.objectID
-//        } else {
-//            DQ.write({ (context) in
-//                let category = TodoItemCategory.dq_insertInContext(context)
-//                category.name = name
-//                categoryId = category.objectID
-//            }, sync: true)
-//        }
-//        return context.dq_objectWithID(categoryId)
-//    }
-    
-//    class func defaultCategory(context: NSManagedObjectContext = session.defaultContext) -> TodoItemCategory {
-//        return categoryNamed("default")
-//    }
+    class func lastDisplayOrder(context: NSManagedObjectContext) -> Int {
+        if let item = DQ.query(self, context: context).max("displayOrder").first() {
+            if let order = item.displayOrder?.integerValue {
+                return order + 1
+            }
+        }
+        return 0
+    }
+
 }

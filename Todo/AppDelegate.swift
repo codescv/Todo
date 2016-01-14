@@ -14,9 +14,13 @@ import DQuery
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    override init() {
+        // make sure Core Data context is initialized before any view controller
+        DQ.config([.ModelName: "Todo", .StoreType: StoreType.SQLite])
+    }
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        DQ.config([.ModelName: "Todo", .StoreType: StoreType.SQLite])
         return true
     }
 

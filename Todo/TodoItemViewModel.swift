@@ -21,6 +21,10 @@ class TodoItemViewModel {
     
     init(categoryId: NSManagedObjectID? = nil) {
         self.categoryId = categoryId
+        print("init todo")
+        DQ.monitor(self) {
+            print("changed: \($0)");
+        }
         //NSNotificationCenter.defaultCenter().addObserver(self, selector: "dataChanged:", name: NSManagedObjectContextObjectsDidChangeNotification, object: DQ.dqContext.defaultContext)
     }
     
@@ -33,7 +37,6 @@ class TodoItemViewModel {
         //        print("changed: \(notification)")
         if shouldAutoReloadOnDataChange {
             self.reloadDataFromDB({
-//                print("on change!!! \(self)")
                 self.onChange?()
             })
         }
@@ -42,7 +45,7 @@ class TodoItemViewModel {
     func reloadDataFromDB(completion: (() -> ())? = nil) {
         var query = DQ.query(TodoItem).orderBy("displayOrder")
         if let categoryId = self.categoryId {
-            // FIXME: does this work?
+//            print("category id: \(self.categoryId)")
             query = query.filter("category = %@", categoryId)
         }
         query.execute { (context, objectIds) -> Void in
