@@ -27,16 +27,6 @@ class TodoListViewController: UIViewController {
     
     var innerTableViewController: TodoListTableViewController?
     
-    // from select category controller
-    @IBAction func unwindFromSelectCategory(segue: UIStoryboardSegue) {
-        // TODO: set category id
-    }
-    
-    // MARK: unwind actions from new item controller
-    @IBAction func cancelNewTodoItem(segue: UIStoryboardSegue) {
-        
-    }
-
     @IBAction func newTodoItemButtonTouched(sender: UIButton) {
         self.innerTableViewController?.startComposingNewTodoItem()
     }
@@ -52,26 +42,6 @@ class TodoListViewController: UIViewController {
             }
         }
     }
-    
-    
-    // unwind from saving new todo item
-    @IBAction func saveNewTodoItem(segue: UIStoryboardSegue) {
-        if let newTodoItemVC = segue.sourceViewController as? NewTodoItemController {
-            let content = newTodoItemVC.textView.text
-            if content != "" {
-                DQ.write({ (context) in
-                    let item: TodoItem = TodoItem.dq_insertInContext(context)
-                    item.title = content
-                    item.dueDate = NSDate.today()
-                    item.displayOrder = TodoItem.topDisplayOrder(context)
-                    if let categoryId = self.categoryId {
-                        item.category = context.dq_objectWithID(categoryId) as TodoItemCategory
-                    }
-                })
-            }
-        }
-    }
-
 }
 
 class TodoListTableViewController: UITableViewController {
@@ -111,8 +81,8 @@ class TodoListTableViewController: UITableViewController {
     // the category id
     var categoryId: NSManagedObjectID? {
         didSet {
-            self.todoItemsModel = TodoItemViewModel(categoryId: self.categoryId)
-            self.todoItemsModel.reloadDataFromDB {
+            self.todoItemsDataController = TodoItemDataController(categoryId: self.categoryId)
+            self.todoItemsDataController.reloadDataFromDB {
                 self.tableView.reloadData()
             }
         }
@@ -127,7 +97,7 @@ class TodoListTableViewController: UITableViewController {
     var sourceCellSnapshot: UIView?
     
     // view model
-    var todoItemsModel = TodoItemViewModel()
+    var todoItemsDataController = TodoItemDataController()
     
     var isComposingNewTodoItem = false
     
@@ -141,16 +111,10 @@ class TodoListTableViewController: UITableViewController {
     // MARK: viewcontroller lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-//        reloadDataFromDB()
-//        self.todoItemsModel.onChange = {
-//            self.tableView.reloadData()
-//        }
         
         tableView.estimatedRowHeight = 44
         tableView.rowHeight = UITableViewAutomaticDimension
-        //tableView.separatorStyle = .None
-        //tableView.backgroundColor = UIColor.purpleColor()
+        tableView.separatorStyle = .None
         
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
@@ -162,7 +126,6 @@ class TodoListTableViewController: UITableViewController {
             return
         }
         
-        //print("long press! \(longPress)")
         let state = longPress.state
         let location = longPress.locationInView(tableView)
         let indexPath = tableView.indexPathForRowAtPoint(location)
@@ -268,7 +231,7 @@ class TodoListTableViewController: UITableViewController {
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
                     if state == .Ended {
-                        self.todoItemsModel.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row,
+                        self.todoItemsDataController.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row,
                             completion: {
                                 self.firstMovingIndexPath = nil
                                 self.currentMovingIndexPath = nil
@@ -291,7 +254,7 @@ class TodoListTableViewController: UITableViewController {
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch Section(rawValue: section)! {
         case .TodoSection:
-            let itemCount = self.todoItemsModel.todoItems.count
+            let itemCount = self.todoItemsDataController.todoItemsCount
             
             if self.isComposingNewTodoItem {
                 return itemCount + 1
@@ -299,30 +262,19 @@ class TodoListTableViewController: UITableViewController {
             
             return itemCount
         case .DoneSection:
-            return self.todoItemsModel.doneItems.count
+            return self.todoItemsDataController.doneItemsCount
         }
     }
-    
-//    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-//        if let newItemCell = cell as? NewTodoItemCell {
-//            if self.isComposingNewTodoItem && indexPath.row == 0 && indexPath.section == Section.TodoSection.rawValue {
-//                dispatch_async(dispatch_get_main_queue(), {
-//                    newItemCell.textView.becomeFirstResponder()
-//                })
-//            }
-//        }
-//    }
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return Section(rawValue: section)?.sectionName()
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-//        print("get cell")
+        // new item cell
         if self.isComposingNewTodoItem && indexPath.row == 0 && indexPath.section == 0 {
             let newItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.NewItemCell.identifier()) as! NewTodoItemCell
             newItemCell.textView.text = ""
-            //newItemCell.textView.becomeFirstResponder()
             dispatch_async(dispatch_get_main_queue(), {
                 newItemCell.textView.becomeFirstResponder()
             })
@@ -330,8 +282,7 @@ class TodoListTableViewController: UITableViewController {
                     switch action {
                     case .OK:
                         let title = cell.textView.text
-//                        print("new item: \(title)")
-                        self.todoItemsModel.insertTodoItem(title: title) {
+                        self.todoItemsDataController.insertTodoItem(title: title) {
                             self.endComposingNewTodoItem(insertedNewItem: true)
                         }
                     case .Cancel:
@@ -344,32 +295,35 @@ class TodoListTableViewController: UITableViewController {
             return newItemCell
         }
         
+        // done item cell
         if indexPath.section == Section.DoneSection.rawValue {
             let doneCell = tableView.dequeueReusableCellWithIdentifier(CellType.DoneItemCell.identifier()) as! DoneItemCell
-            let itemId = self.todoItemsModel.doneItems[indexPath.row]
-            let item: TodoItem = DQ.objectWithID(itemId)
-            doneCell.titleLabel.text = item.title
+            let item = self.todoItemsDataController.doneItemAtRow(indexPath.row)
+            doneCell.model = item
             doneCell.actionTriggered = { [unowned self] cell, action in
                 self.deleteDoneItemForCell(cell)
             }
             return doneCell
         }
         
+        // todo item cell
         var row = indexPath.row
         if self.isComposingNewTodoItem {
             row -= 1
         }
         
-        let itemId = self.todoItemsModel.todoItems[row]
-        let item: TodoItem = DQ.objectWithID(itemId)
+        let item = self.todoItemsDataController.todoItemAtRow(row)
         let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
-        itemCell.titleLabel.text = item.title
         if selectedIndexPath?.compare(indexPath) == .OrderedSame {
-//            print("expand!")
-            itemCell.expandActionsAnimated(false)
+            item.isExpanded = true
         } else {
-            itemCell.hideActionsAnimated(false)
+            item.isExpanded = false
         }
+        // only show category name inside the "all" list
+        if self.categoryId != nil {
+            item.categoryName = nil
+        }
+        itemCell.model = item
         itemCell.actionTriggered = { [unowned self] (cell, action) in
             switch action {
             case .Delete:
@@ -388,7 +342,7 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-        self.todoItemsModel.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
+        self.todoItemsDataController.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
     }
     
     // delegate
@@ -428,7 +382,16 @@ class TodoListTableViewController: UITableViewController {
     // table cell actions
     func deleteItemForCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.todoItemsModel.deleteTodoItemAtRow(indexPath.row) {
+            self.todoItemsDataController.deleteTodoItemAtRow(indexPath.row) {
+                self.selectedIndexPath = nil
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            }
+        }
+    }
+    
+    func deleteDoneItemForCell(cell: DoneItemCell) {
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row) {
                 self.selectedIndexPath = nil
                 self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             }
@@ -438,7 +401,7 @@ class TodoListTableViewController: UITableViewController {
     func markItemAsDoneForCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
             self.selectedIndexPath = nil
-            self.todoItemsModel.markTodoItemAsDoneAtRow(indexPath.row) {
+            self.todoItemsDataController.markTodoItemAsDoneAtRow(indexPath.row) {
                 self.tableView.beginUpdates()
                 self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
                 self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: Section.DoneSection.rawValue)], withRowAnimation: .Automatic)
@@ -478,15 +441,6 @@ class TodoListTableViewController: UITableViewController {
             self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Automatic)
         }
         self.tableView.endUpdates()
-    }
-    
-    func deleteDoneItemForCell(cell: DoneItemCell) {
-        if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.todoItemsModel.deleteDoneItemAtRow(indexPath.row) {
-                self.selectedIndexPath = nil
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-            }
-        }
     }
 
 }

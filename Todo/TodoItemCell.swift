@@ -12,6 +12,7 @@ import UIKit
 
 class TodoItemCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var categoryLabel: UILabel!
     @IBOutlet weak var actionsView: UIStackView!
     
     @IBOutlet weak var doneButton: UIButton!
@@ -58,6 +59,25 @@ class TodoItemCell: UITableViewCell {
     
     @IBAction func deleteAction(sender: AnyObject) {
         self.actionTriggered?(self, .Delete)
+    }
+    
+    var model: TodoItemViewModel? {
+        didSet {
+            if let vm = model {
+                self.titleLabel.text = vm.title
+                if vm.isExpanded {
+                    self.expandActionsAnimated(false)
+                } else {
+                    self.hideActionsAnimated(false)
+                }
+                if let categoryName = vm.categoryName {
+                    self.categoryLabel.hidden = false
+                    self.categoryLabel.text = categoryName
+                } else {
+                    self.categoryLabel.hidden = true
+                }
+            }
+        }
     }
     
     override func awakeFromNib() {

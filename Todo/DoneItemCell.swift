@@ -24,6 +24,12 @@ class DoneItemCell: UITableViewCell {
     
     var actionTriggered: ((DoneItemCell, Action)->())?
     
+    var model: DoneItemViewModel? {
+        didSet {
+            self.titleLabel.text = model!.title
+        }
+    }
+    
     override func awakeFromNib() {
         // set background colors so the cell background can show
         self.backgroundColor = UIColor.clearColor()

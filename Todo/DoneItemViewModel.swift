@@ -1,5 +1,5 @@
 //
-//  TodoItemViewModel.swift
+//  DoneItemViewModel.swift
 //  Todo
 //
 //  Created by 陳小晶 on 16/1/14.
@@ -8,8 +8,6 @@
 
 import Foundation
 
-class TodoItemViewModel {
+class DoneItemViewModel {
     var title: String = ""
-    var categoryName: String?
-    var isExpanded: Bool = false
 }
