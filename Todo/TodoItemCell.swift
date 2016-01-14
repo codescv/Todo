@@ -17,7 +17,7 @@ class TodoItemCell: UITableViewCell {
     
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var reminderButton: UIButton!
-    @IBOutlet weak var detailButton: UIButton!
+    @IBOutlet weak var editButton: UIButton!
     @IBOutlet weak var categoryButton: UIButton!
     @IBOutlet weak var deleteButton: UIButton!
     
@@ -32,6 +32,7 @@ class TodoItemCell: UITableViewCell {
     enum Action {
         case Delete
         case MarkAsDone
+        case Edit
         case ShowDetail
         case MoveToCategory
         case AddReminder
@@ -51,6 +52,10 @@ class TodoItemCell: UITableViewCell {
     
     @IBAction func showDetailAction(sender: AnyObject) {
         self.actionTriggered?(self, .ShowDetail)
+    }
+    
+    @IBAction func editAction(sender: AnyObject) {
+        self.actionTriggered?(self, .Edit)
     }
     
     @IBAction func moveToCategoryAction(sender: AnyObject) {
@@ -84,7 +89,7 @@ class TodoItemCell: UITableViewCell {
         // set contentmode of icons so the animation will work correctly
         self.doneButton.imageView?.contentMode = .ScaleAspectFit
         self.deleteButton.imageView?.contentMode = .ScaleAspectFit
-        self.detailButton.imageView?.contentMode = .ScaleAspectFit
+        self.editButton.imageView?.contentMode = .ScaleAspectFit
         self.categoryButton.imageView?.contentMode = .ScaleAspectFit
         self.reminderButton.imageView?.contentMode = .ScaleAspectFit
         

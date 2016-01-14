@@ -284,11 +284,11 @@
                                                                         <action selector="addReminderAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="IMO-wQ-lCx"/>
                                                                     </connections>
                                                                 </button>
-                                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="00d-B0-vwd">
+                                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="00d-B0-vwd" userLabel="Edit Button">
                                                                     <rect key="frame" x="264" y="0.0" width="16" height="22"/>
                                                                     <state key="normal" image="detail"/>
                                                                     <connections>
-                                                                        <action selector="showDetailAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="d6H-gf-lXn"/>
+                                                                        <action selector="editAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="Xwu-Ch-Xef"/>
                                                                     </connections>
                                                                 </button>
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vnd-5c-SEn">
@@ -342,10 +342,10 @@
                                     <outlet property="categoryButton" destination="vnd-5c-SEn" id="B0H-IM-Vqu"/>
                                     <outlet property="categoryLabel" destination="QeW-Xy-JzF" id="gYX-6U-wvv"/>
                                     <outlet property="deleteButton" destination="J1x-yY-SoL" id="Siv-PF-tKZ"/>
-                                    <outlet property="detailButton" destination="00d-B0-vwd" id="Olc-Mh-sYg"/>
                                     <outlet property="doneButton" destination="wvw-15-3Vr" id="dcw-G6-Eqv"/>
                                     <outlet property="doneLabel" destination="zIb-yv-dXu" id="9WN-uT-0H5"/>
                                     <outlet property="doneLabelWidthConstraint" destination="q8J-w0-wlV" id="Gm4-Tj-8Fe"/>
+                                    <outlet property="editButton" destination="00d-B0-vwd" id="k8l-1l-how"/>
                                     <outlet property="reminderButton" destination="gU6-IO-Gld" id="XPo-D0-DWu"/>
                                     <outlet property="titleLabel" destination="OsV-qI-Pg5" id="JRR-bO-m25"/>
                                 </connections>

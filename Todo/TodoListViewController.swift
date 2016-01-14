@@ -384,7 +384,7 @@ class TodoListTableViewController: UITableViewController {
         if let indexPath = self.tableView.indexPathForCell(cell) {
             self.todoItemsDataController.deleteTodoItemAtRow(indexPath.row) {
                 self.selectedIndexPath = nil
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
             }
         }
     }
@@ -393,7 +393,7 @@ class TodoListTableViewController: UITableViewController {
         if let indexPath = self.tableView.indexPathForCell(cell) {
             self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row) {
                 self.selectedIndexPath = nil
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
             }
         }
     }
@@ -403,8 +403,8 @@ class TodoListTableViewController: UITableViewController {
             self.selectedIndexPath = nil
             self.todoItemsDataController.markTodoItemAsDoneAtRow(indexPath.row) {
                 self.tableView.beginUpdates()
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: Section.DoneSection.rawValue)], withRowAnimation: .Automatic)
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: Section.DoneSection.rawValue)], withRowAnimation: .Left)
                 self.tableView.endUpdates()
             }
         }
@@ -417,7 +417,7 @@ class TodoListTableViewController: UITableViewController {
         
         self.isComposingNewTodoItem = true
         self.tableView.beginUpdates()
-        self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Middle)
+        self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
         if self.selectedIndexPath != nil {
             self.tableView.reloadRowsAtIndexPaths([self.selectedIndexPath!], withRowAnimation: .Automatic)
             self.selectedIndexPath = nil
@@ -436,9 +436,9 @@ class TodoListTableViewController: UITableViewController {
         
         self.isComposingNewTodoItem = false
         self.tableView.beginUpdates()
-        self.tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Middle)
+        self.tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Right)
         if insertedNewItem {
-            self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Automatic)
+            self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
         }
         self.tableView.endUpdates()
     }
