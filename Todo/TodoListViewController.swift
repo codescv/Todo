@@ -86,6 +86,9 @@ class TodoListTableViewController: UITableViewController {
     // current editing item
     var editingIndexPath: NSIndexPath?
     
+    // is tableview dragging
+    var isDragging = false
+    
     var isComposingNewTodoItem = false {
         didSet {
             if isComposingNewTodoItem {
@@ -334,6 +337,9 @@ class TodoListTableViewController: UITableViewController {
                 break
             }
         }
+        itemCell.isTableViewDragging = { [unowned self] in
+            return self.isDragging
+        }
         return itemCell
     }
     
@@ -377,6 +383,14 @@ class TodoListTableViewController: UITableViewController {
         
         tableView.beginUpdates()
         tableView.endUpdates()
+    }
+    
+    override func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        self.isDragging = true
+    }
+    
+    override func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.isDragging = false
     }
     
     // table cell actions

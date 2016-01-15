@@ -23,6 +23,10 @@ class TodoCategoryDataController {
         }
     }
     
+    deinit {
+        print("deinit category data controller")
+    }
+    
     func reloadDataFromDB(completion: (() -> ())? = nil) {
         print("reload category data")
         

@@ -41,6 +41,7 @@ class TodoItemCell: UITableViewCell {
     
     // action button callback
     var actionTriggered: ((TodoItemCell, Action) -> ())?
+    var isTableViewDragging: (()->Bool)?
     
     @IBAction func markAsDoneAction(sender: AnyObject) {
         self.actionTriggered?(self, .MarkAsDone)
@@ -110,25 +111,57 @@ class TodoItemCell: UITableViewCell {
     }
     
     override func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.state == .Changed {
+            return false
+        }
         return true
     }
     
     var panStartPos: CGPoint?
+    var panDistance: CGFloat = 0
     
     func pan(gesture: UIPanGestureRecognizer) {
-        let maxDistance: CGFloat = 100
+        let maxDistance: CGFloat = 200
+        let minEffectiveDistance: CGFloat = 50
         switch (gesture.state) {
         case .Began:
+            if self.isTableViewDragging?() == true {
+                gesture.enabled = false
+                return
+            }
             panStartPos = gesture.locationInView(self.contentView)
         case .Changed:
+            if self.isTableViewDragging?() == true {
+                gesture.enabled = false
+                return
+            }
             let pos = gesture.locationInView(self.contentView)
-            let distance = pos.x - panStartPos!.x
-            if distance > 0 && distance < maxDistance {
-                self.doneLabelWidthConstraint.constant = distance
+            self.panDistance = min(pos.x - panStartPos!.x, maxDistance)
+            if self.panDistance > 0 {
+                self.doneLabelWidthConstraint.constant = self.panDistance
+                if self.panDistance > minEffectiveDistance {
+                    self.doneLabel.backgroundColor = UIColor.greenColor()
+                } else {
+                    self.doneLabel.backgroundColor = UIColor.grayColor()
+                }
             }
         default:
+            print("gesture finish")
+            if self.panDistance > minEffectiveDistance {
+                self.doneLabelWidthConstraint.constant = 0
+                self.actionTriggered?(self, .MarkAsDone)
+            } else {
+                UIView.animateWithDuration(0.2, delay: 0,
+                    options: [],
+                    animations: {
+                        self.doneLabelWidthConstraint.constant = 0
+                        self.contentView.layoutIfNeeded()
+                    },
+                    completion: { _ in })
+            }
+            self.panDistance = 0
             panStartPos = nil
-            self.doneLabelWidthConstraint.constant = 0
+            gesture.enabled = true
         }
     }
     
