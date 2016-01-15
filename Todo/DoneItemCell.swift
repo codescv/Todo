@@ -32,7 +32,15 @@ class DoneItemCell: UITableViewCell {
     
     var model: DoneItemViewModel? {
         didSet {
-            self.titleLabel.text = model!.title
+            if model != nil {
+                let attributes = [
+                    NSStrikethroughStyleAttributeName: NSUnderlineStyle.StyleSingle.rawValue,
+                    NSForegroundColorAttributeName: UIColor.grayColor(),
+                ]
+                self.titleLabel.attributedText = NSAttributedString(string: model!.title, attributes: attributes)
+            } else {
+                self.titleLabel.text = ""
+            }
         }
     }
     
