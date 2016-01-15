@@ -10,29 +10,61 @@ import UIKit
 import CoreData
 import DQuery
 
-class TodoCategoryListViewController: UICollectionViewController {
+
+class TodoCategoryListViewController: UIViewController {
+    var innerCollectionViewController: TodoCategoryCollectionViewController?
+    
+    override func viewDidLoad() {
+        self.navigationController?.delegate = self
+    }
+    
+    @IBAction func newCategory(sender: AnyObject) {
+        self.innerCollectionViewController?.startEditingNewCategory()
+    }
+    
+}
+
+extension TodoCategoryListViewController: UINavigationControllerDelegate {
+    
+    func navigationController(navigationController: UINavigationController, animationControllerForOperation operation: UINavigationControllerOperation, fromViewController fromVC: UIViewController, toViewController toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        if operation == .Push {
+            if let todoListVC = toVC as? TodoListViewController {
+                let categoryId = todoListVC.category?.objId
+                return RectZoomAnimator(direction: .ZoomIn, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
+            }
+        } else {
+            if let todoListVC = fromVC as? TodoListViewController {
+                let categoryId = todoListVC.category?.objId
+                return RectZoomAnimator(direction: .ZoomOut, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
+            }
+        }
+        return nil
+    }
+}
+
+class TodoCategoryCollectionViewController: UICollectionViewController {
     let selectCategorySegueIdentifier = "SelectCategoryIdentifier"
     let showTodoListSegueIdentifier = "showTodoListWithNoAnimation"
     
-    let categoryViewModel = TodoCategoryViewModel()
+    let categoryDataController = TodoCategoryDataController()
     
     var selectedCellRect = CGRectZero
-    var isComposingNewCategory: Bool {
-        return self.editingIndexPath != nil
-    }
-    var editingIndexPath: NSIndexPath? {
+    var isEditingNewCategory: Bool = false {
         didSet {
-            if editingIndexPath != oldValue {
-                self.collectionView!.reloadData()
+            if isEditingNewCategory {
+                let row = self.categoryDataController.numberOfCategories
+                self.editingIndexPath = NSIndexPath(forRow: row, inSection: 0)
             }
         }
     }
+    
+    var editingIndexPath: NSIndexPath?
     
     enum CellType: String {
         case Category = "CategoryCellIdentifier"
         case Add = "CategoryAddCellIdentifier"
         case Remove = "CategoryRemoveCellIdentifier"
-        case New = "CategoryNewCellIdentifier"
+        case Edit = "CategoryEditCellIdentifier"
         
         func identifier() -> String {
             return self.rawValue
@@ -41,7 +73,7 @@ class TodoCategoryListViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.categoryViewModel.reloadDataFromDB {
+        self.categoryDataController.reloadDataFromDB {
             self.collectionView!.reloadData()
         }
         self.collectionView!.backgroundColor = UIColor.whiteColor()
@@ -50,15 +82,56 @@ class TodoCategoryListViewController: UICollectionViewController {
         layout.itemSize = CGSizeMake(self.view.frame.width/2, self.view.frame.width/2)
         layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 0
-        
-        navigationController?.delegate = self
     }
     
+    override func didMoveToParentViewController(parent: UIViewController?) {
+        if let parentVC = parent as? TodoCategoryListViewController {
+            parentVC.innerCollectionViewController = self
+        }
+    }
+    
+    func startEditingNewCategory() {
+        self.isEditingNewCategory = true
+        let indexPath = self.editingIndexPath!
+        self.collectionView?.insertItemsAtIndexPaths([indexPath])
+        self.collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+    }
+    
+    func endEditingForCell(cell: EditCategoryCell, saved: Bool) {
+        let name = cell.categoryNameTextField.text!
+        if let indexPath = self.editingIndexPath {
+            if self.isEditingNewCategory {
+                if saved {
+                    self.categoryDataController.insertNewCategory(name) {
+                        self.isEditingNewCategory = false
+                        self.editingIndexPath = nil
+                        self.collectionView?.reloadItemsAtIndexPaths([indexPath])
+                    }
+                } else {
+                    self.isEditingNewCategory = false
+                    self.editingIndexPath = nil
+                    self.collectionView?.deleteItemsAtIndexPaths([indexPath])
+                }
+            } else {
+                if saved {
+                    self.categoryDataController.editCategory(cell.model!, newName:name) {
+                        self.isEditingNewCategory = false
+                        self.editingIndexPath = nil
+                        self.collectionView?.reloadItemsAtIndexPaths([indexPath])
+                    }
+                } else {
+                    self.isEditingNewCategory = false
+                    self.editingIndexPath = nil
+                    self.collectionView?.reloadItemsAtIndexPaths([indexPath])
+                }
+            }
+        }
+    }
     
     func cellRectForCategoryId(categoryId: NSManagedObjectID?) -> CGRect {
         // compute for category rect
         var indexPath = NSIndexPath(forRow: 0, inSection: 0)
-        let order = self.categoryViewModel.orderForCategoryId(categoryId)
+        let order = self.categoryDataController.orderForCategoryId(categoryId)
         if order >= 0 {
             indexPath = NSIndexPath(forRow: order+1, inSection: 0)
         }
@@ -73,34 +146,22 @@ class TodoCategoryListViewController: UICollectionViewController {
             if let todoListVC = segue.destinationViewController as? TodoListViewController,
                let cell = sender as? CategoryCell {
                 if let indexPath = self.collectionView?.indexPathForCell(cell) {
-                    if indexPath.row == 0 {
-                        // all items
-                        todoListVC.title = "All"
-                    } else {
-                        todoListVC.categoryId = self.categoryViewModel.categories[indexPath.row-1]
-                    }
+                    todoListVC.category = self.categoryDataController.categoryAtRow(indexPath.row)
                 }
             }
         }
     }
 }
 
-extension TodoCategoryListViewController {
+extension TodoCategoryCollectionViewController {
 
     func cellTypeForItemAtIndexPath(indexPath: NSIndexPath) -> CellType {
-        let row = indexPath.row
-        let count = self.categoryViewModel.categories.count + 1
-        
-        if row < count {
-            return CellType.Category
-        } else {
-            var functionCells = [CellType.Add, CellType.Remove]
-            if self.isComposingNewCategory {
-                functionCells = [CellType.New, CellType.Add, CellType.Remove]
-            }
-            
-            return functionCells[row - count]
+        if indexPath.isEqual(self.editingIndexPath) {
+            return CellType.Edit
         }
+        
+        return CellType.Category
+        
     }
     
     func reusableCellForType(cellType: CellType, indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -114,35 +175,18 @@ extension TodoCategoryListViewController {
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         let cellType = self.cellTypeForItemAtIndexPath(indexPath)
         if cellType == CellType.Category {
-            let cell: CategoryCell = self.reusableCellForType(cellType, indexPath: indexPath) as! CategoryCell
-            let row = indexPath.row - 1
-            if row == -1 {
-                cell.categoryNameTextField.text = "All"
-            } else {
-                let category: TodoItemCategory = DQ.objectWithID(self.categoryViewModel.categories[row])
-                cell.categoryNameTextField.text = category.name
-            }
-        
-            if indexPath.isEqual(self.editingIndexPath) {
-                cell.categoryNameTextField.enabled = true
-                dispatch_async(dispatch_get_main_queue(), {
-                    cell.categoryNameTextField.becomeFirstResponder()
-                })
-                cell.categoryNameTextField.delegate = self
-            } else {
-                cell.categoryNameTextField.enabled = false
-                cell.categoryNameTextField.delegate = nil
-            }
+            let cell = self.reusableCellForType(cellType, indexPath: indexPath) as! CategoryCell
+            let category = self.categoryDataController.categoryAtRow(indexPath.row)
+            cell.model = category
             return cell
-        } else if cellType == CellType.New {
-            let cell: CategoryCell = self.reusableCellForType(cellType, indexPath: indexPath) as! CategoryCell
-            cell.categoryNameTextField.placeholder = "List Name"
-            cell.categoryNameTextField.text = ""
-            cell.categoryNameTextField.enabled = true
-            dispatch_async(dispatch_get_main_queue(), {
-                cell.categoryNameTextField.becomeFirstResponder()
-            })
-            cell.categoryNameTextField.delegate = self
+        } else if cellType == CellType.Edit {
+            let cell = self.reusableCellForType(cellType, indexPath: indexPath) as! EditCategoryCell
+            cell.textIsValid = { !($0?.isEmpty ?? true) }
+            cell.editFinished = { (cell, saved) in
+                self.endEditingForCell(cell, saved: saved)
+            }
+            cell.startEditing()
+            
             return cell
         }
     
@@ -151,74 +195,52 @@ extension TodoCategoryListViewController {
     }
     
     override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let count = self.categoryViewModel.categories.count
-        if self.isComposingNewCategory {
-            return count + 4
+        let count = self.categoryDataController.numberOfCategories
+        if self.isEditingNewCategory {
+            return count + 1
         } else {
-            return count + 3
+            return count
         }
     }
     
     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        let cellType = self.cellTypeForItemAtIndexPath(indexPath)
         
-        if cellType == CellType.Add {
-            self.editingIndexPath = indexPath
-        }
     }
-    
     
 }
 
-extension TodoCategoryListViewController: UITextFieldDelegate {
-    func isCategoryNameValid(categoryName: String?) -> Bool {
-        return !(categoryName?.isEmpty ?? true)
-    }
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.endEditing(true)
-        return isCategoryNameValid(textField.text)
-    }
-    
-    func textFieldShouldEndEditing(textField: UITextField) -> Bool {
-        return true
-    }
-    
-    func textFieldDidEndEditing(textField: UITextField) {
-        let categoryName = textField.text
-        if isCategoryNameValid(categoryName) {
-            DQ.insertObject(TodoItemCategory.self,
-                block: { (context, category) in
-                    category.name = categoryName
-                    category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
-                },
-                completion: { categoryId in
-                    self.categoryViewModel.reloadDataFromDB() {
-                        self.collectionView!.reloadData()
-                    }
-            })
-        }
-        self.editingIndexPath = nil
-    }
-}
+//extension TodoCategoryListViewController: UITextFieldDelegate {
+//    func isCategoryNameValid(categoryName: String?) -> Bool {
+//        return !(categoryName?.isEmpty ?? true)
+//    }
+//    
+//    func textFieldShouldReturn(textField: UITextField) -> Bool {
+//        textField.endEditing(true)
+//        return isCategoryNameValid(textField.text)
+//    }
+//    
+//    func textFieldShouldEndEditing(textField: UITextField) -> Bool {
+//        return true
+//    }
+//    
+//    func textFieldDidEndEditing(textField: UITextField) {
+//        let categoryName = textField.text
+//        if isCategoryNameValid(categoryName) {
+//            DQ.insertObject(TodoItemCategory.self,
+//                block: { (context, category) in
+//                    category.name = categoryName
+//                    category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
+//                },
+//                completion: { categoryId in
+//                    self.categoryDataController.reloadDataFromDB() {
+//                        self.collectionView!.reloadData()
+//                    }
+//            })
+//        }
+//        self.editingIndexPath = nil
+//    }
+//}
 
-extension TodoCategoryListViewController: UINavigationControllerDelegate {
-    
-    func navigationController(navigationController: UINavigationController, animationControllerForOperation operation: UINavigationControllerOperation, fromViewController fromVC: UIViewController, toViewController toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if operation == .Push {
-            if let todoListVC = toVC as? TodoListViewController {
-                let categoryId = todoListVC.categoryId
-                return RectZoomAnimator(direction: .ZoomIn, rect: {self.cellRectForCategoryId(categoryId)})
-            }
-        } else {
-            if let todoListVC = fromVC as? TodoListViewController {
-                let categoryId = todoListVC.categoryId
-                return RectZoomAnimator(direction: .ZoomOut, rect: {self.cellRectForCategoryId(categoryId)})
-            }
-        }
-        return nil
-    }
-}
 
 //extension TodoCategoryListViewController: UIViewControllerTransitioningDelegate {
 //    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {

@@ -13,15 +13,10 @@ import DQuery
 class TodoListViewController: UIViewController {
     let selectCategorySegueIdentifier: String = "selectCategorySegue"
     
-    var categoryId: NSManagedObjectID? {
+    var category: TodoCategoryViewModel? {
         didSet {
-            innerTableViewController?.categoryId = categoryId
-            if categoryId == nil {
-                self.title = "All"
-            } else {
-                let category: TodoItemCategory = DQ.objectWithID(categoryId!)
-                self.title = category.name
-            }
+            innerTableViewController?.categoryId = category?.objId
+            self.title = category?.name
         }
     }
     
@@ -113,7 +108,7 @@ class TodoListTableViewController: UITableViewController {
     override func didMoveToParentViewController(parent: UIViewController?) {
         if let parentVC = parent as? TodoListViewController {
             parentVC.innerTableViewController = self
-            self.categoryId = parentVC.categoryId
+            self.categoryId = parentVC.category?.objId
         }
     }
     
