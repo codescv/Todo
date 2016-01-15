@@ -3,6 +3,7 @@
     <entity name="TodoItem" representedClassName=".TodoItem" syncable="YES">
         <attribute name="comment" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="displayOrder" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="doneDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="dueDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="hasNotification" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="isDone" optional="YES" attributeType="Boolean" syncable="YES"/>
@@ -18,7 +19,7 @@
         <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TodoItem" inverseName="category" inverseEntity="TodoItem" syncable="YES"/>
     </entity>
     <elements>
-        <element name="TodoItem" positionX="-63" positionY="-18" width="128" height="180"/>
+        <element name="TodoItem" positionX="-63" positionY="-18" width="128" height="195"/>
         <element name="TodoItemCategory" positionX="-63" positionY="36" width="128" height="105"/>
     </elements>
 </model>

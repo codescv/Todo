@@ -73,12 +73,15 @@ class TodoItemDataController {
                 } else {
                     todoItemIds.append(objId)
                 }
+                doneItemIds.sortInPlace {(id1, id2) in
+                    let item1: TodoItem = context.dq_objectWithID(id1)
+                    let item2: TodoItem = context.dq_objectWithID(id2)
+                    return item1.doneDate!.compare(item2.doneDate!) == .OrderedDescending
+                }
             }
-            // TODO: sort done items by done time
             dispatch_async(dispatch_get_main_queue(), {
                 self.todoItemIds = todoItemIds
                 self.doneItemIds = doneItemIds
-                print("reloaded todo items from db")
                 completion?()
             })
         }
@@ -153,6 +156,24 @@ class TodoItemDataController {
                 self.shouldAutoReloadOnDataChange = true
         })
     }
+    
+    func undoItemAtRow(row: Int, completion: (()->())?) {
+        let objId = self.doneItemIds[row]
+        
+        self.shouldAutoReloadOnDataChange = false
+        DQ.write(
+            {context in
+                let item: TodoItem = context.dq_objectWithID(objId)
+                item.isDone = false
+            },
+            sync: false,
+            completion: {
+                self.doneItemIds.removeAtIndex(row)
+                self.todoItemIds.insert(objId, atIndex: 0)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
+        })
+    }
 
     
     func markTodoItemAsDoneAtRow(row: Int, completion: (()->())?) {
@@ -161,9 +182,9 @@ class TodoItemDataController {
         self.shouldAutoReloadOnDataChange = false
         DQ.write(
             {context in
-                // TODO: done time
                 let item: TodoItem = context.dq_objectWithID(objId)
                 item.isDone = true
+                item.doneDate = NSDate()
             },
             sync: false,
             completion: {

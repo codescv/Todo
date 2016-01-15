@@ -513,7 +513,7 @@
                                             <rect key="frame" x="8" y="6" width="584" height="52"/>
                                             <subviews>
                                                 <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="CSK-iP-3bW">
-                                                    <rect key="frame" x="8" y="8" width="568" height="36"/>
+                                                    <rect key="frame" x="8" y="8" width="530" height="36"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UuT-tp-lJl">
                                                             <rect key="frame" x="0.0" y="0.0" width="42" height="36"/>
@@ -522,7 +522,7 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U5D-nP-8sg">
-                                                            <rect key="frame" x="538" y="0.0" width="30" height="36"/>
+                                                            <rect key="frame" x="500" y="0.0" width="30" height="36"/>
                                                             <state key="normal" title="X"/>
                                                             <connections>
                                                                 <action selector="deleteAction:" destination="u5R-LQ-f1y" eventType="touchUpInside" id="nQl-Pn-IJZ"/>
@@ -530,13 +530,26 @@
                                                         </button>
                                                     </subviews>
                                                 </stackView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt;-" textAlignment="center" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qU2-xQ-HGy">
+                                                    <rect key="frame" x="546" y="0.0" width="38" height="52"/>
+                                                    <color key="backgroundColor" red="0.21364438150000001" green="0.7518815445" blue="0.17427857399999999" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="38" id="inO-de-S2p"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="40"/>
+                                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <constraints>
-                                                <constraint firstAttribute="trailing" secondItem="CSK-iP-3bW" secondAttribute="trailing" constant="8" id="1xF-1N-phC"/>
+                                                <constraint firstAttribute="bottom" secondItem="qU2-xQ-HGy" secondAttribute="bottom" id="3Ny-XQ-2tv"/>
                                                 <constraint firstItem="CSK-iP-3bW" firstAttribute="top" secondItem="8dB-91-SZb" secondAttribute="top" constant="8" id="3cG-kl-0lD"/>
+                                                <constraint firstAttribute="trailing" secondItem="qU2-xQ-HGy" secondAttribute="trailing" id="FWQ-eT-6mH"/>
                                                 <constraint firstAttribute="bottom" secondItem="CSK-iP-3bW" secondAttribute="bottom" constant="8" id="Lp3-pg-w4G"/>
                                                 <constraint firstItem="CSK-iP-3bW" firstAttribute="leading" secondItem="8dB-91-SZb" secondAttribute="leading" constant="8" id="gXT-ff-ar4"/>
+                                                <constraint firstItem="qU2-xQ-HGy" firstAttribute="leading" secondItem="CSK-iP-3bW" secondAttribute="trailing" constant="8" id="uCd-Wo-R95"/>
+                                                <constraint firstItem="qU2-xQ-HGy" firstAttribute="top" secondItem="8dB-91-SZb" secondAttribute="top" id="uec-mz-cuc"/>
                                             </constraints>
                                         </view>
                                     </subviews>
@@ -553,6 +566,8 @@
                                     <outlet property="cardBackgroundView" destination="8dB-91-SZb" id="BQA-FM-dnm"/>
                                     <outlet property="deleteButton" destination="U5D-nP-8sg" id="msE-ux-6fA"/>
                                     <outlet property="titleLabel" destination="UuT-tp-lJl" id="s44-2k-yiZ"/>
+                                    <outlet property="undoLabel" destination="qU2-xQ-HGy" id="D69-cb-WdR"/>
+                                    <outlet property="undoLabelWidthConstraint" destination="inO-de-S2p" id="TD7-8P-rec"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>

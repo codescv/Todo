@@ -23,5 +23,6 @@ extension TodoItem {
     @NSManaged var title: String?
     @NSManaged var displayOrder: NSNumber?
     @NSManaged var category: TodoItemCategory?
+    @NSManaged var doneDate: NSDate?
 
 }

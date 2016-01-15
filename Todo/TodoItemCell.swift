@@ -146,7 +146,6 @@ class TodoItemCell: UITableViewCell {
                 }
             }
         default:
-            print("gesture finish")
             if self.panDistance > minEffectiveDistance {
                 self.doneLabelWidthConstraint.constant = 0
                 self.actionTriggered?(self, .MarkAsDone)

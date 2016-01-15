@@ -300,7 +300,15 @@ class TodoListTableViewController: UITableViewController {
             let item = self.todoItemsDataController.doneItemAtRow(indexPath.row)
             doneCell.model = item
             doneCell.actionTriggered = { [unowned self] cell, action in
-                self.deleteDoneItemForCell(cell)
+                switch action {
+                case .Delete:
+                    self.deleteDoneItemForCell(cell)
+                case .Undo:
+                    self.undoDoneItemForCell(cell)
+                }
+            }
+            doneCell.isTableViewDragging = { [unowned self] in
+                return self.isDragging
             }
             return doneCell
         }
@@ -408,6 +416,18 @@ class TodoListTableViewController: UITableViewController {
             self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row) {
                 self.selectedIndexPath = nil
                 self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+            }
+        }
+    }
+    
+    func undoDoneItemForCell(cell: DoneItemCell) {
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            self.todoItemsDataController.undoItemAtRow(indexPath.row) {
+                self.selectedIndexPath = nil
+                self.tableView.beginUpdates()
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
+                self.tableView.endUpdates()
             }
         }
     }
