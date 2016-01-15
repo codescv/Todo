@@ -7,9 +7,11 @@
 //
 
 import Foundation
+import CoreData
 
 class TodoItemViewModel {
     var title: String = ""
     var categoryName: String?
     var isExpanded: Bool = false
+    var objId: NSManagedObjectID?
 }

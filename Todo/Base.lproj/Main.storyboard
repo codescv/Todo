@@ -350,7 +350,7 @@
                                     <outlet property="titleLabel" destination="OsV-qI-Pg5" id="JRR-bO-m25"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="NewTodoItemIdentifier" rowHeight="134" id="Nn1-bU-bhu" customClass="NewTodoItemCell" customModule="Todo" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EditTodoItemIdentifier" rowHeight="134" id="Nn1-bU-bhu" customClass="EditTodoItemCell" customModule="Todo" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="158" width="600" height="134"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Nn1-bU-bhu" id="VjI-SW-7KQ">
@@ -374,14 +374,14 @@
                                                     <rect key="frame" x="546" y="83" width="30" height="30"/>
                                                     <state key="normal" title="OK"/>
                                                     <connections>
-                                                        <action selector="okTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="hP4-R4-dlm"/>
+                                                        <action selector="okTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="fPR-Fr-wFF"/>
                                                     </connections>
                                                 </button>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zB4-du-nCz">
                                                     <rect key="frame" x="490" y="83" width="48" height="30"/>
                                                     <state key="normal" title="Cancel"/>
                                                     <connections>
-                                                        <action selector="cancelTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="2bX-Ma-EJZ"/>
+                                                        <action selector="cancelTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="25G-uA-62P"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -409,7 +409,7 @@
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <connections>
-                                    <outlet property="textView" destination="706-zW-Iv3" id="hY1-Dl-2Kg"/>
+                                    <outlet property="textView" destination="706-zW-Iv3" id="B34-pO-IPN"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="DoneItemCellIdentifier" rowHeight="65" id="u5R-LQ-f1y" customClass="DoneItemCell" customModule="Todo" customModuleProvider="target">

@@ -49,7 +49,7 @@ class TodoListTableViewController: UITableViewController {
     enum CellType: String{
         case ItemCell = "TodoItemCellIdentifier"
         case DoneItemCell = "DoneItemCellIdentifier"
-        case NewItemCell = "NewTodoItemIdentifier"
+        case EditItemCell = "EditTodoItemIdentifier"
         
         func identifier() -> String {
             return self.rawValue
@@ -99,7 +99,16 @@ class TodoListTableViewController: UITableViewController {
     // view model
     var todoItemsDataController = TodoItemDataController()
     
-    var isComposingNewTodoItem = false
+    // current editing item
+    var editingIndexPath: NSIndexPath?
+    
+    var isComposingNewTodoItem = false {
+        didSet {
+            if isComposingNewTodoItem {
+                self.editingIndexPath = NSIndexPath(forRow: 0, inSection: 0)
+            }
+        }
+    }
     
     override func didMoveToParentViewController(parent: UIViewController?) {
         if let parentVC = parent as? TodoListViewController {
@@ -112,7 +121,7 @@ class TodoListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        tableView.estimatedRowHeight = 44
+        tableView.estimatedRowHeight = 80
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.separatorStyle = .None
         
@@ -122,7 +131,7 @@ class TodoListTableViewController: UITableViewController {
     
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
-        if self.isComposingNewTodoItem {
+        if self.editingIndexPath != nil {
             return
         }
         
@@ -271,28 +280,36 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        // new item cell
-        if self.isComposingNewTodoItem && indexPath.row == 0 && indexPath.section == 0 {
-            let newItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.NewItemCell.identifier()) as! NewTodoItemCell
-            newItemCell.textView.text = ""
+        // new/edit item cell
+        if indexPath.isEqual(self.editingIndexPath) {
+            let editItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.EditItemCell.identifier()) as! EditTodoItemCell
+            print("edit item cell")
+            if self.isComposingNewTodoItem {
+                editItemCell.model = nil
+            } else {
+                let item = self.todoItemsDataController.todoItemAtRow(indexPath.row)
+                editItemCell.model = item
+            }
             dispatch_async(dispatch_get_main_queue(), {
-                newItemCell.textView.becomeFirstResponder()
+                editItemCell.textView.becomeFirstResponder()
             })
-            newItemCell.actionTriggered = { [unowned self] (cell, action) in
+            editItemCell.actionTriggered = { [unowned self] (cell, action) in
                     switch action {
                     case .OK:
-                        let title = cell.textView.text
-                        self.todoItemsDataController.insertTodoItem(title: title) {
-                            self.endComposingNewTodoItem(insertedNewItem: true)
-                        }
+//                        let title = cell.textView.text
+                        self.endEditingCell(cell, save: true)
+//                        self.todoItemsDataController.insertTodoItem(title: title) {
+//                            self.endComposingNewTodoItem(insertedNewItem: true)
+//                        }
                     case .Cancel:
-                        self.endComposingNewTodoItem(insertedNewItem: false)
+//                        self.endComposingNewTodoItem(insertedNewItem: false)
+                        self.endEditingCell(cell, save: false)
                     default:
                         break
                     }
                 
             }
-            return newItemCell
+            return editItemCell
         }
         
         // done item cell
@@ -330,6 +347,8 @@ class TodoListTableViewController: UITableViewController {
                 self.deleteItemForCell(cell)
             case .MarkAsDone:
                 self.markItemAsDoneForCell(cell)
+            case .Edit:
+                self.beginEditingCell(cell)
             default:
                 break
             }
@@ -410,14 +429,26 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    func beginEditingCell(cell: TodoItemCell) {
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            self.selectedIndexPath = nil
+            self.editingIndexPath = indexPath
+            self.tableView.beginUpdates()
+            self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            self.tableView.endUpdates()
+        }
+    }
+    
     func startComposingNewTodoItem() {
         if self.isComposingNewTodoItem {
             return
         }
         
+        let indexPath = NSIndexPath(forRow: 0, inSection: 0)
         self.isComposingNewTodoItem = true
+        self.editingIndexPath = indexPath
         self.tableView.beginUpdates()
-        self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
+        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
         if self.selectedIndexPath != nil {
             self.tableView.reloadRowsAtIndexPaths([self.selectedIndexPath!], withRowAnimation: .Automatic)
             self.selectedIndexPath = nil
@@ -425,22 +456,36 @@ class TodoListTableViewController: UITableViewController {
         self.tableView.endUpdates()
     }
     
-    func endComposingNewTodoItem(insertedNewItem insertedNewItem: Bool) {
-        if !self.isComposingNewTodoItem {
-            return
+    func endEditingCell(cell: EditTodoItemCell, save: Bool) {
+        let title = cell.textView.text
+        let indexPath = self.editingIndexPath!
+        if let item = cell.model {
+            // edit
+            if save {
+                self.todoItemsDataController.editTodoItem(item, title: title) {
+                    self.isComposingNewTodoItem = false
+                    self.editingIndexPath = nil
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+                }
+            } else {
+                self.isComposingNewTodoItem = false
+                self.editingIndexPath = nil
+                self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+            }
+        } else {
+            // new
+            self.todoItemsDataController.insertTodoItem(title: title) {
+                self.editingIndexPath = nil
+                self.isComposingNewTodoItem = false
+                self.tableView.beginUpdates()
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+                if save {
+                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
+                }
+                self.tableView.endUpdates()
+                
+            }
         }
-        
-        if let newTodoItemCell = self.tableView.cellForRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0)) as? NewTodoItemCell {
-            newTodoItemCell.textView.resignFirstResponder()
-        }
-        
-        self.isComposingNewTodoItem = false
-        self.tableView.beginUpdates()
-        self.tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Right)
-        if insertedNewItem {
-            self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
-        }
-        self.tableView.endUpdates()
     }
 
 }

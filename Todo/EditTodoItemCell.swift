@@ -8,7 +8,7 @@
 
 import UIKit
 
-class NewTodoItemCell: UITableViewCell {
+class EditTodoItemCell: UITableViewCell {
     
     @IBOutlet weak var textView: UITextView!
     
@@ -26,5 +26,11 @@ class NewTodoItemCell: UITableViewCell {
         case Unknown
     }
     
-    var actionTriggered: ((NewTodoItemCell, Action)->())?
+    var model: TodoItemViewModel? {
+        didSet {
+            self.textView.text = model?.title
+        }
+    }
+    
+    var actionTriggered: ((EditTodoItemCell, Action)->())?
 }

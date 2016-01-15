@@ -133,6 +133,7 @@ class TodoItemCell: UITableViewCell {
     }
     
     func expandActionsAnimated(animated: Bool = true) {
+        self.titleLabel.numberOfLines = 6
         if animated {
             UIView.animateWithDuration(animationDuration, animations: {
                 self.actionsView.hidden = false
@@ -141,10 +142,11 @@ class TodoItemCell: UITableViewCell {
         } else {
             self.actionsView.hidden = false
         }
-        self.titleLabel.numberOfLines = 10
+        
     }
     
     func hideActionsAnimated(animated: Bool = true) {
+        self.titleLabel.numberOfLines = 1
         if animated {
             UIView.animateWithDuration(animationDuration, animations: {
                 self.actionsView.hidden = true
@@ -153,6 +155,5 @@ class TodoItemCell: UITableViewCell {
         } else {
             self.actionsView.hidden = true
         }
-        self.titleLabel.numberOfLines = 1
     }
 }

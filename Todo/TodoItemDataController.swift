@@ -44,6 +44,7 @@ class TodoItemDataController {
         let item: TodoItem = DQ.objectWithID(itemId)
         let vm = TodoItemViewModel()
         vm.title = item.title ?? ""
+        vm.objId = item.objectID
         vm.categoryName = item.category?.name ?? ""
         return vm
     }
@@ -187,6 +188,20 @@ class TodoItemDataController {
             sync: false,
             completion: { objId in
                 self.todoItemIds.insert(objId, atIndex: 0)
+                completion?()
+                self.shouldAutoReloadOnDataChange = true
+        })
+    }
+    
+    func editTodoItem(model:TodoItemViewModel, title: String, completion: (()->())?) {
+        self.shouldAutoReloadOnDataChange = false
+        DQ.write(
+            { context in
+                let item: TodoItem = context.dq_objectWithID(model.objId!)
+                item.title = title
+            },
+            sync: false,
+            completion:  {
                 completion?()
                 self.shouldAutoReloadOnDataChange = true
         })
