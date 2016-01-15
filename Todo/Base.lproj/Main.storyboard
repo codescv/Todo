@@ -128,17 +128,40 @@
                                                 </label>
                                             </subviews>
                                         </stackView>
+                                        <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" translatesAutoresizingMaskIntoConstraints="NO" id="0XL-aV-TdE">
+                                            <rect key="frame" x="4" y="126" width="152" height="30"/>
+                                            <subviews>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bSi-sn-7bC">
+                                                    <rect key="frame" x="0.0" y="0.0" width="30" height="30"/>
+                                                    <state key="normal" title="Edit"/>
+                                                    <connections>
+                                                        <action selector="editAction:" destination="DpY-mV-DIC" eventType="touchUpInside" id="WjF-op-jGA"/>
+                                                    </connections>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iPM-eA-oKp">
+                                                    <rect key="frame" x="107" y="0.0" width="45" height="30"/>
+                                                    <state key="normal" title="Delete"/>
+                                                    <connections>
+                                                        <action selector="deleteAction:" destination="DpY-mV-DIC" eventType="touchUpInside" id="4En-BA-bi6"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                        </stackView>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="0XL-aV-TdE" secondAttribute="bottom" constant="4" id="KNL-TM-cps"/>
+                                    <constraint firstAttribute="trailing" secondItem="0XL-aV-TdE" secondAttribute="trailing" constant="4" id="Vbs-0b-z3l"/>
                                     <constraint firstItem="0mT-zJ-T4t" firstAttribute="leading" secondItem="DpY-mV-DIC" secondAttribute="leading" constant="4" id="qyY-tQ-Fsw"/>
+                                    <constraint firstItem="0XL-aV-TdE" firstAttribute="leading" secondItem="DpY-mV-DIC" secondAttribute="leading" constant="4" id="rdC-6l-zvc"/>
                                     <constraint firstAttribute="trailing" secondItem="0mT-zJ-T4t" secondAttribute="trailing" constant="4" id="rlt-69-CpV"/>
                                     <constraint firstItem="0mT-zJ-T4t" firstAttribute="centerY" secondItem="DpY-mV-DIC" secondAttribute="centerY" id="wVk-FK-SMK"/>
                                 </constraints>
                                 <connections>
                                     <outlet property="categoryInfoLabel" destination="emr-ox-OoF" id="N9V-va-c0W"/>
                                     <outlet property="categoryNameLabel" destination="lqN-uG-UMN" id="TkP-Zq-6NB"/>
+                                    <outlet property="editingControls" destination="0XL-aV-TdE" id="FHQ-Iw-9kf"/>
                                     <segue destination="BYZ-38-t0r" kind="show" identifier="SelectCategoryIdentifier" id="d2B-um-vJ6"/>
                                 </connections>
                             </collectionViewCell>
@@ -195,7 +218,7 @@
                                             <textInputTraits key="textInputTraits"/>
                                         </textField>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mk6-1k-gT0">
-                                            <rect key="frame" x="122" y="122" width="30" height="30"/>
+                                            <rect key="frame" x="122" y="8" width="30" height="30"/>
                                             <state key="normal" title="X"/>
                                             <connections>
                                                 <action selector="cancelEditing:" destination="31L-LS-Qri" eventType="touchUpInside" id="gvt-Xv-jh7"/>
@@ -205,8 +228,8 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="mk6-1k-gT0" secondAttribute="bottom" constant="8" id="B7m-Kc-i10"/>
                                     <constraint firstAttribute="trailingMargin" secondItem="KvS-0k-idH" secondAttribute="trailing" constant="8" id="GXs-2d-FBK"/>
+                                    <constraint firstItem="mk6-1k-gT0" firstAttribute="top" secondItem="31L-LS-Qri" secondAttribute="top" constant="8" id="YJj-Ir-vHL"/>
                                     <constraint firstItem="KvS-0k-idH" firstAttribute="leading" secondItem="31L-LS-Qri" secondAttribute="leadingMargin" constant="8" id="sMr-xc-I66"/>
                                     <constraint firstAttribute="trailing" secondItem="mk6-1k-gT0" secondAttribute="trailing" constant="8" id="tfF-55-gz6"/>
                                     <constraint firstItem="KvS-0k-idH" firstAttribute="centerY" secondItem="31L-LS-Qri" secondAttribute="centerY" id="wnc-4A-9mO"/>

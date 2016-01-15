@@ -16,10 +16,24 @@ class TodoCategoryListViewController: UIViewController {
     
     override func viewDidLoad() {
         self.navigationController?.delegate = self
+        self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
     
     @IBAction func newCategory(sender: AnyObject) {
         self.innerCollectionViewController?.startEditingNewCategory()
+    }
+    
+    override func setEditing(editing: Bool, animated: Bool) {
+        if self.innerCollectionViewController?.editingIndexPath != nil {
+            return
+        }
+        super.setEditing(editing, animated: animated)
+        self.innerCollectionViewController?.setEditing(editing, animated: animated)
+    }
+    
+    func endEditingMode() {
+        super.setEditing(false, animated: true)
+        self.innerCollectionViewController?.setEditing(editing, animated: true)
     }
     
 }
@@ -51,6 +65,7 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
     var selectedCellRect = CGRectZero
     var isEditingNewCategory: Bool = false {
         didSet {
+            print("did set to \(isEditingNewCategory)")
             if isEditingNewCategory {
                 let row = self.categoryDataController.numberOfCategories
                 self.editingIndexPath = NSIndexPath(forRow: row, inSection: 0)
@@ -90,40 +105,50 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         }
     }
     
+    override func setEditing(editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: false)
+        self.collectionView?.reloadData()
+    }
+    
+    func endEditingMode() {
+        if self.editing {
+            if let parent = self.parentViewController as? TodoCategoryListViewController {
+                parent.endEditingMode()
+            }
+        }
+    }
+    
+    func endEditing() {
+        endEditingMode()
+        self.isEditingNewCategory = false
+        self.editingIndexPath = nil
+        self.collectionView?.reloadData()
+    }
+    
     func startEditingNewCategory() {
+        self.endEditingMode()
         self.isEditingNewCategory = true
-        let indexPath = self.editingIndexPath!
-        self.collectionView?.insertItemsAtIndexPaths([indexPath])
-        self.collectionView?.scrollToItemAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+        self.collectionView?.reloadData()
     }
     
     func endEditingForCell(cell: EditCategoryCell, saved: Bool) {
         let name = cell.categoryNameTextField.text!
-        if let indexPath = self.editingIndexPath {
-            if self.isEditingNewCategory {
-                if saved {
-                    self.categoryDataController.insertNewCategory(name) {
-                        self.isEditingNewCategory = false
-                        self.editingIndexPath = nil
-                        self.collectionView?.reloadItemsAtIndexPaths([indexPath])
-                    }
-                } else {
-                    self.isEditingNewCategory = false
-                    self.editingIndexPath = nil
-                    self.collectionView?.deleteItemsAtIndexPaths([indexPath])
+        
+        if self.isEditingNewCategory {
+            if saved {
+                self.categoryDataController.insertNewCategory(name) {
+                    self.endEditing()
                 }
             } else {
-                if saved {
-                    self.categoryDataController.editCategory(cell.model!, newName:name) {
-                        self.isEditingNewCategory = false
-                        self.editingIndexPath = nil
-                        self.collectionView?.reloadItemsAtIndexPaths([indexPath])
-                    }
-                } else {
-                    self.isEditingNewCategory = false
-                    self.editingIndexPath = nil
-                    self.collectionView?.reloadItemsAtIndexPaths([indexPath])
+                self.endEditing()
+            }
+        } else {
+            if saved {
+                self.categoryDataController.editCategory(cell.model!, newName:name) {
+                    self.endEditing()
                 }
+            } else {
+                self.endEditing()
             }
         }
     }
@@ -177,16 +202,30 @@ extension TodoCategoryCollectionViewController {
         if cellType == CellType.Category {
             let cell = self.reusableCellForType(cellType, indexPath: indexPath) as! CategoryCell
             let category = self.categoryDataController.categoryAtRow(indexPath.row)
+            category.showsEditingControls = self.editing
             cell.model = category
+            cell.actionTriggered = { [unowned self] (cell, action) in
+                switch action {
+                case .Delete:
+                    self.deleteCategoryForCell(cell)
+                case .Edit:
+                    self.editCategoryForCell(cell)
+                }
+            }
             return cell
         } else if cellType == CellType.Edit {
             let cell = self.reusableCellForType(cellType, indexPath: indexPath) as! EditCategoryCell
+            if isEditingNewCategory {
+                cell.model = nil
+            } else {
+                let model = self.categoryDataController.categoryAtRow(indexPath.row)
+                cell.model = model
+            }
             cell.textIsValid = { !($0?.isEmpty ?? true) }
             cell.editFinished = { (cell, saved) in
                 self.endEditingForCell(cell, saved: saved)
             }
             cell.startEditing()
-            
             return cell
         }
     
@@ -205,6 +244,34 @@ extension TodoCategoryCollectionViewController {
     
     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
+    }
+    
+    func deleteCategoryForCell(cell: CategoryCell) {
+        if let indexPath = self.collectionView?.indexPathForCell(cell) {
+            self.categoryDataController.deleteCategoryAtRow(indexPath.row) {
+                self.collectionView?.deleteItemsAtIndexPaths([indexPath])
+            }
+        }
+    }
+    
+    func editCategoryForCell(cell: CategoryCell) {
+        if let indexPath = self.collectionView?.indexPathForCell(cell) {
+            self.isEditingNewCategory = false
+            self.editingIndexPath = indexPath
+            self.collectionView?.reloadData()
+        }
+    }
+    
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        if self.editing || self.isEditingNewCategory {
+            if let editingIndexPath = self.editingIndexPath {
+                if let cell = self.collectionView?.cellForItemAtIndexPath(editingIndexPath) as? EditCategoryCell {
+                    self.endEditingForCell(cell, saved: false)
+                }
+            }
+            return false
+        }
+        return true
     }
     
 }

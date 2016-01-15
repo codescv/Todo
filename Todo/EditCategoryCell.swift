@@ -12,6 +12,7 @@ class EditCategoryCell: UICollectionViewCell {
 
     @IBOutlet weak var categoryNameTextField: UITextField!
     @IBAction func cancelEditing(sender: AnyObject) {
+        self.categoryNameTextField.delegate = nil
         self.editFinished?(self, false)
     }
     
@@ -24,14 +25,15 @@ class EditCategoryCell: UICollectionViewCell {
         }
     }
     
-    override func awakeFromNib() {
-        self.categoryNameTextField.delegate = self
-    }
+//    override func awakeFromNib() {
+//        self.categoryNameTextField.delegate = self
+//    }
     
     func startEditing() {
         dispatch_async(dispatch_get_main_queue(), {
             self.categoryNameTextField.becomeFirstResponder()
         })
+        self.categoryNameTextField.delegate = self
     }
 
 }
@@ -50,6 +52,8 @@ extension EditCategoryCell: UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
-        self.editFinished?(self, true)
+        let shouldSave = self.textIsValid?(textField.text) ?? false
+        self.categoryNameTextField.delegate = nil
+        self.editFinished?(self, shouldSave)
     }
 }

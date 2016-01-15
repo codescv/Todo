@@ -94,4 +94,23 @@ class TodoCategoryDataController {
                 completion?()
         })
     }
+    
+    func deleteCategoryAtRow(row: Int, completion: (()->())?) {
+        let r = row - 1
+        let categoryId = self.categorieIds[r]
+        DQ.write(
+            { context in
+                let obj: TodoItemCategory = context.dq_objectWithID(categoryId)
+                obj.dq_delete()
+            },
+            sync: false,
+            completion: {
+                self.categorieIds.removeAtIndex(r)
+                self.categoryOrder.removeAll()
+                for (idx, id) in self.categorieIds.enumerate() {
+                    self.categoryOrder[id] = idx
+                }
+                completion?()
+        })
+    }
 }

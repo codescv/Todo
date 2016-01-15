@@ -13,4 +13,5 @@ class TodoCategoryViewModel {
     var numberOfItems: Int = 0
     var name = ""
     var objId: NSManagedObjectID?
+    var showsEditingControls = false
 }
