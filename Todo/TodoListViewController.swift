@@ -11,8 +11,6 @@ import CoreData
 import DQuery
 
 class TodoListViewController: UIViewController {
-    let selectCategorySegueIdentifier: String = "selectCategorySegue"
-    
     var category: TodoCategoryViewModel? {
         didSet {
             innerTableViewController?.categoryId = category?.objId
@@ -26,17 +24,6 @@ class TodoListViewController: UIViewController {
         self.innerTableViewController?.startComposingNewTodoItem()
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == selectCategorySegueIdentifier {
-            if let navController = segue.destinationViewController as? UINavigationController {
-                if let catListVC = navController.childViewControllers.first as? TodoCategoryListViewController {
-                    // catlist vc must load its view so that it can return the rect for zooming
-                    _ = catListVC.view
-//                    navController.transitioningDelegate = catListVC
-                }
-            }
-        }
-    }
 }
 
 class TodoListTableViewController: UITableViewController {
@@ -72,6 +59,8 @@ class TodoListTableViewController: UITableViewController {
     deinit {
         print("deinit todolist table vc")
     }
+    
+    let moveToCategorySegue = "SelectCategorySegue"
     
     // the category id
     var categoryId: NSManagedObjectID? {
@@ -291,13 +280,8 @@ class TodoListTableViewController: UITableViewController {
             editItemCell.actionTriggered = { [unowned self] (cell, action) in
                     switch action {
                     case .OK:
-//                        let title = cell.textView.text
                         self.endEditingCell(cell, save: true)
-//                        self.todoItemsDataController.insertTodoItem(title: title) {
-//                            self.endComposingNewTodoItem(insertedNewItem: true)
-//                        }
                     case .Cancel:
-//                        self.endComposingNewTodoItem(insertedNewItem: false)
                         self.endEditingCell(cell, save: false)
                     default:
                         break
@@ -344,6 +328,8 @@ class TodoListTableViewController: UITableViewController {
                 self.markItemAsDoneForCell(cell)
             case .Edit:
                 self.beginEditingCell(cell)
+            case .MoveToCategory:
+                self.moveToCategoryForCell(cell)
             default:
                 break
             }
@@ -424,6 +410,8 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    
+    
     func beginEditingCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
             self.selectedIndexPath = nil
@@ -469,16 +457,45 @@ class TodoListTableViewController: UITableViewController {
             }
         } else {
             // new
-            self.todoItemsDataController.insertTodoItem(title: title) {
+            if save {
+                if title.isEmpty {
+                    return
+                }
+                self.todoItemsDataController.insertTodoItem(title: title) {
+                    self.editingIndexPath = nil
+                    self.isComposingNewTodoItem = false
+                    self.tableView.beginUpdates()
+                    self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
+                    self.tableView.endUpdates()
+                }
+            } else {
                 self.editingIndexPath = nil
                 self.isComposingNewTodoItem = false
-                self.tableView.beginUpdates()
                 self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-                if save {
-                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
+            }
+        }
+    }
+    
+    func moveToCategoryForCell(cell: TodoItemCell) {
+        self.performSegueWithIdentifier(self.moveToCategorySegue, sender: cell)
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == self.moveToCategorySegue {
+            //let model = (sender as! TodoItemCell).model!
+            if let toVC = segue.destinationViewController as? UINavigationController {
+                if let categoryVC = toVC.topViewController as? TodoCategoryListViewController,
+                   let cell = sender as? TodoItemCell {
+                    categoryVC.readonly = true
+                    categoryVC.onSelectCategory = { [weak categoryVC] category in
+                        self.todoItemsDataController.changeCategory(cell.model!, category: category) {
+                            categoryVC?.dismissViewControllerAnimated(true, completion: {})
+                            self.tableView.reloadData()
+                        }
+                    }
+                    categoryVC.title = "Pick A List"
                 }
-                self.tableView.endUpdates()
-                
             }
         }
     }

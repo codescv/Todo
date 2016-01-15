@@ -15,10 +15,12 @@ class TodoCategoryDataController {
     private var categoryOrder = [NSManagedObjectID: Int]()
     private var totalItems = 0
     
+    private var shouldAutoReload = false
+    
     init () {
-//        DQ.monitor(self, block: {_ in
-//            self.reloadDataFromDB()
-//        })
+        DQ.monitor(self) { [weak self] _ in
+            self?.reloadDataFromDB()
+        }
     }
     
     func reloadDataFromDB(completion: (() -> ())? = nil) {
@@ -78,7 +80,6 @@ class TodoCategoryDataController {
                 category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
             },
             completion: { categoryId in
-                self.categorieIds.append(categoryId)
                 completion?()
         })
     }
@@ -105,11 +106,6 @@ class TodoCategoryDataController {
             },
             sync: false,
             completion: {
-                self.categorieIds.removeAtIndex(r)
-                self.categoryOrder.removeAll()
-                for (idx, id) in self.categorieIds.enumerate() {
-                    self.categoryOrder[id] = idx
-                }
                 completion?()
         })
     }

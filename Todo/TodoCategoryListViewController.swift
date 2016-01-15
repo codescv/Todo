@@ -13,10 +13,22 @@ import DQuery
 
 class TodoCategoryListViewController: UIViewController {
     var innerCollectionViewController: TodoCategoryCollectionViewController?
+    var readonly = false
+    var onSelectCategory: ((TodoCategoryViewModel)->())?
+    @IBOutlet weak var newCategoryButton: UIButton!
     
     override func viewDidLoad() {
         self.navigationController?.delegate = self
-        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        if self.readonly {
+            self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: "cancel:")
+            self.newCategoryButton.hidden = true
+        } else {
+            self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        }
+    }
+    
+    func cancel(sender: AnyObject) {
+        self.dismissViewControllerAnimated(true, completion:{})
     }
     
     @IBAction func newCategory(sender: AnyObject) {
@@ -65,7 +77,6 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
     var selectedCellRect = CGRectZero
     var isEditingNewCategory: Bool = false {
         didSet {
-            print("did set to \(isEditingNewCategory)")
             if isEditingNewCategory {
                 let row = self.categoryDataController.numberOfCategories
                 self.editingIndexPath = NSIndexPath(forRow: row, inSection: 0)
@@ -97,6 +108,11 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         layout.itemSize = CGSizeMake(self.view.frame.width/2, self.view.frame.width/2)
         layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 0
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        self.collectionView!.reloadData()
     }
     
     override func didMoveToParentViewController(parent: UIViewController?) {
@@ -243,7 +259,10 @@ extension TodoCategoryCollectionViewController {
     }
     
     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        
+        if let parent = self.parentViewController as? TodoCategoryListViewController {
+            let item = self.categoryDataController.categoryAtRow(indexPath.row)
+            parent.onSelectCategory?(item)
+        }
     }
     
     func deleteCategoryForCell(cell: CategoryCell) {
@@ -263,6 +282,12 @@ extension TodoCategoryCollectionViewController {
     }
     
     override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        if let parent = self.parentViewController as? TodoCategoryListViewController {
+            if parent.onSelectCategory != nil {
+                return false
+            }
+        }
+        
         if self.editing || self.isEditingNewCategory {
             if let editingIndexPath = self.editingIndexPath {
                 if let cell = self.collectionView?.cellForItemAtIndexPath(editingIndexPath) as? EditCategoryCell {

@@ -85,6 +85,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="List" id="4VT-mg-7zY"/>
+                    <connections>
+                        <outlet property="newCategoryButton" destination="M25-hX-1lQ" id="pPb-rf-3QV"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5lt-DF-by4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -560,6 +563,9 @@
                     </tableView>
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <segue destination="T3X-ac-ydd" kind="presentation" identifier="SelectCategorySegue" id="MjM-bp-NaR"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="w8m-Fy-VJT" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

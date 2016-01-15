@@ -21,14 +21,15 @@ class TodoItemDataController {
     
     init(categoryId: NSManagedObjectID? = nil) {
         self.categoryId = categoryId
-//        print("init todo")
-//        DQ.monitor(self) {
-//            print("changed: \($0)");
-//        }
+        DQ.monitor(self) {[weak self] _ in
+            if self?.shouldAutoReloadOnDataChange == true {
+                self?.reloadDataFromDB()
+            }
+        }
     }
     
     deinit {
-//        print("deinit view model")
+        print("deinit todo item data controller")
     }
     
     var todoItemsCount: Int {
@@ -204,6 +205,27 @@ class TodoItemDataController {
             completion:  {
                 completion?()
                 self.shouldAutoReloadOnDataChange = true
+        })
+    }
+    
+    func changeCategory(model: TodoItemViewModel, category: TodoCategoryViewModel, completion: (()->())?) {
+        self.shouldAutoReloadOnDataChange = false
+        DQ.write(
+            { context in
+                let item: TodoItem = context.dq_objectWithID(model.objId!)
+                if let objId = category.objId {
+                    let categoryObj: TodoItemCategory = context.dq_objectWithID(objId)
+                    item.category = categoryObj
+                }else {
+                    item.category = nil
+                }
+            },
+            sync: false,
+            completion: {
+                self.reloadDataFromDB() {
+                    completion?()
+                    self.shouldAutoReloadOnDataChange = true
+                }
         })
     }
 }
