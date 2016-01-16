@@ -194,7 +194,6 @@
 		C2AC0B3C1C1F02620014A959 /* Todo */ = {
 			isa = PBXGroup;
 			children = (
-				C2DD30E71C3951C100E8BF77 /* DataController */,
 				C2E24ED01C2E490D00890992 /* Utils */,
 				C23765331C25103C0009219D /* UI */,
 				C2AC0B6E1C1F03D10014A959 /* Model */,
@@ -232,13 +231,6 @@
 				C2AC0B711C1F045D0014A959 /* TodoItem.swift */,
 			);
 			name = Model;
-			sourceTree = "<group>";
-		};
-		C2DD30E71C3951C100E8BF77 /* DataController */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = DataController;
 			sourceTree = "<group>";
 		};
 		C2E24ED01C2E490D00890992 /* Utils */ = {

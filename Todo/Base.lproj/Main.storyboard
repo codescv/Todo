@@ -24,9 +24,13 @@
                                     <segue destination="9TU-RN-1vG" kind="embed" id="Afs-iI-IjX"/>
                                 </connections>
                             </containerView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z4O-2j-7ra">
-                                <rect key="frame" x="549" y="550" width="31" height="30"/>
-                                <state key="normal" title="New"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Z4O-2j-7ra">
+                                <rect key="frame" x="532" y="532" width="48" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="e1w-f5-UVX"/>
+                                    <constraint firstAttribute="width" constant="48" id="iRq-bm-rea"/>
+                                </constraints>
+                                <state key="normal" image="add"/>
                                 <connections>
                                     <action selector="newTodoItemButtonTouched:" destination="BYZ-38-t0r" eventType="touchUpInside" id="1fu-jr-yNo"/>
                                 </connections>
@@ -66,9 +70,13 @@
                                     <segue destination="Jg1-ZZ-T91" kind="embed" id="h5U-X9-zRg"/>
                                 </connections>
                             </containerView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="M25-hX-1lQ">
-                                <rect key="frame" x="549" y="550" width="31" height="30"/>
-                                <state key="normal" title="New"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="M25-hX-1lQ">
+                                <rect key="frame" x="532" y="532" width="48" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="F19-yj-WpS"/>
+                                    <constraint firstAttribute="width" constant="48" id="Twk-XJ-07x"/>
+                                </constraints>
+                                <state key="normal" image="add"/>
                                 <connections>
                                     <action selector="newCategory:" destination="2Eq-Mu-EwL" eventType="touchUpInside" id="U09-4o-qih"/>
                                 </connections>
@@ -366,23 +374,23 @@
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <color key="sectionIndexBackgroundColor" red="1" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <view key="tableFooterView" contentMode="scaleToFill" id="XVV-zu-xut" userLabel="footer">
-                            <rect key="frame" x="0.0" y="395" width="600" height="0.0"/>
+                            <rect key="frame" x="0.0" y="397" width="600" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </view>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="TodoItemCellIdentifier" rowHeight="108" id="Jwg-II-eKj" customClass="TodoItemCell" customModule="Todo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="50" width="600" height="108"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="TodoItemCellIdentifier" rowHeight="110" id="Jwg-II-eKj" customClass="TodoItemCell" customModule="Todo" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="50" width="600" height="110"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Jwg-II-eKj" id="H2J-PW-19H">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="107"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="109"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XRx-2F-bpL" userLabel="Background">
-                                            <rect key="frame" x="8" y="6" width="584" height="95"/>
+                                            <rect key="frame" x="8" y="6" width="584" height="97"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="249" text="✓" textAlignment="center" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zIb-yv-dXu">
-                                                    <rect key="frame" x="0.0" y="0.0" width="30" height="95"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="30" height="97"/>
                                                     <color key="backgroundColor" red="0.21364438151584186" green="0.7518815445026179" blue="0.17427857400808491" alpha="1" colorSpace="calibratedRGB"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="30" id="q8J-w0-wlV"/>
@@ -392,7 +400,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="equalSpacing" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="eo0-Ms-Ibh">
-                                                    <rect key="frame" x="38" y="10" width="538" height="75"/>
+                                                    <rect key="frame" x="38" y="10" width="538" height="77"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OsV-qI-Pg5">
                                                             <rect key="frame" x="0.0" y="0.0" width="42" height="21"/>
@@ -401,13 +409,13 @@
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QeW-Xy-JzF">
-                                                            <rect key="frame" x="0.0" y="29" width="36" height="17"/>
+                                                            <rect key="frame" x="0.0" y="30" width="36" height="17"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                             <color key="textColor" red="0.60000002384185791" green="0.40000000596046448" blue="0.20000000298023224" alpha="1" colorSpace="calibratedRGB"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <stackView opaque="NO" contentMode="scaleToFill" distribution="equalSpacing" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="tFY-CW-f1P">
-                                                            <rect key="frame" x="0.0" y="53" width="538" height="22"/>
+                                                            <rect key="frame" x="0.0" y="55" width="538" height="22"/>
                                                             <subviews>
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wvw-15-3Vr">
                                                                     <rect key="frame" x="0.0" y="0.0" width="21" height="22"/>
@@ -418,21 +426,21 @@
                                                                     </connections>
                                                                 </button>
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gU6-IO-Gld">
-                                                                    <rect key="frame" x="133" y="0.0" width="19" height="22"/>
+                                                                    <rect key="frame" x="131" y="0.0" width="19" height="22"/>
                                                                     <state key="normal" image="reminder"/>
                                                                     <connections>
                                                                         <action selector="addReminderAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="IMO-wQ-lCx"/>
                                                                     </connections>
                                                                 </button>
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="00d-B0-vwd" userLabel="Edit Button">
-                                                                    <rect key="frame" x="264" y="0.0" width="16" height="22"/>
-                                                                    <state key="normal" image="detail"/>
+                                                                    <rect key="frame" x="261" y="0.0" width="22" height="22"/>
+                                                                    <state key="normal" image="edit"/>
                                                                     <connections>
                                                                         <action selector="editAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="Xwu-Ch-Xef"/>
                                                                     </connections>
                                                                 </button>
                                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vnd-5c-SEn">
-                                                                    <rect key="frame" x="391" y="0.0" width="16" height="22"/>
+                                                                    <rect key="frame" x="393" y="0.0" width="16" height="22"/>
                                                                     <state key="normal" image="category"/>
                                                                     <connections>
                                                                         <action selector="moveToCategoryAction:" destination="Jwg-II-eKj" eventType="touchUpInside" id="3Dq-aS-wdA"/>
@@ -491,7 +499,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EditTodoItemIdentifier" rowHeight="134" id="Nn1-bU-bhu" customClass="EditTodoItemCell" customModule="Todo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="158" width="600" height="134"/>
+                                <rect key="frame" x="0.0" y="160" width="600" height="134"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Nn1-bU-bhu" id="VjI-SW-7KQ">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="133"/>
@@ -553,7 +561,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="DoneItemCellIdentifier" rowHeight="65" id="u5R-LQ-f1y" customClass="DoneItemCell" customModule="Todo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="292" width="600" height="65"/>
+                                <rect key="frame" x="0.0" y="294" width="600" height="65"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="u5R-LQ-f1y" id="VWW-ys-rYA">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="64"/>
@@ -571,16 +579,16 @@
                                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
-                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U5D-nP-8sg">
-                                                            <rect key="frame" x="500" y="0.0" width="30" height="36"/>
-                                                            <state key="normal" title="X"/>
+                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U5D-nP-8sg">
+                                                            <rect key="frame" x="511" y="0.0" width="19" height="36"/>
+                                                            <state key="normal" image="delete"/>
                                                             <connections>
                                                                 <action selector="deleteAction:" destination="u5R-LQ-f1y" eventType="touchUpInside" id="nQl-Pn-IJZ"/>
                                                             </connections>
                                                         </button>
                                                     </subviews>
                                                 </stackView>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt;-" textAlignment="center" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qU2-xQ-HGy">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="↺" textAlignment="center" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qU2-xQ-HGy">
                                                     <rect key="frame" x="546" y="0.0" width="38" height="52"/>
                                                     <color key="backgroundColor" red="0.21364438150000001" green="0.7518815445" blue="0.17427857399999999" alpha="1" colorSpace="calibratedRGB"/>
                                                     <constraints>
@@ -656,10 +664,11 @@
         </scene>
     </scenes>
     <resources>
+        <image name="add" width="64" height="64"/>
         <image name="category" width="16" height="19"/>
         <image name="delete" width="19" height="20"/>
-        <image name="detail" width="16" height="20"/>
         <image name="done" width="21" height="19"/>
+        <image name="edit" width="22" height="22"/>
         <image name="reminder" width="19" height="21"/>
     </resources>
 </document>
