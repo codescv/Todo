@@ -48,8 +48,8 @@ class CategoryCell: UICollectionViewCell {
     }
     
     override func awakeFromNib() {
-        self.layer.borderColor = UIColor.grayColor().CGColor
-        self.layer.borderWidth = 1
+//        self.layer.borderColor = UIColor.grayColor().CGColor
+//        self.layer.borderWidth = 1
         self.editingControls.hidden = true
     }
 

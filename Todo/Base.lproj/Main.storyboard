@@ -150,15 +150,35 @@
                                                 </button>
                                             </subviews>
                                         </stackView>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="fJv-hO-rUd" userLabel="Right Separator">
+                                            <rect key="frame" x="159" y="0.0" width="1" height="160"/>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="1" id="Ahe-mq-9JW"/>
+                                            </constraints>
+                                        </view>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IK8-Ie-CmB" userLabel="Bottom Separator">
+                                            <rect key="frame" x="0.0" y="159" width="160" height="1"/>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="1" id="7St-EI-xdM"/>
+                                            </constraints>
+                                        </view>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="fJv-hO-rUd" secondAttribute="trailing" id="BJU-Z6-q9c"/>
+                                    <constraint firstAttribute="bottom" secondItem="fJv-hO-rUd" secondAttribute="bottom" id="KGG-fv-EGy"/>
                                     <constraint firstAttribute="bottom" secondItem="0XL-aV-TdE" secondAttribute="bottom" constant="4" id="KNL-TM-cps"/>
+                                    <constraint firstAttribute="bottom" secondItem="IK8-Ie-CmB" secondAttribute="bottom" id="NGg-QU-whu"/>
                                     <constraint firstAttribute="trailing" secondItem="0XL-aV-TdE" secondAttribute="trailing" constant="4" id="Vbs-0b-z3l"/>
+                                    <constraint firstItem="fJv-hO-rUd" firstAttribute="top" secondItem="DpY-mV-DIC" secondAttribute="top" id="pNA-Cb-XBk"/>
                                     <constraint firstItem="0mT-zJ-T4t" firstAttribute="leading" secondItem="DpY-mV-DIC" secondAttribute="leading" constant="4" id="qyY-tQ-Fsw"/>
                                     <constraint firstItem="0XL-aV-TdE" firstAttribute="leading" secondItem="DpY-mV-DIC" secondAttribute="leading" constant="4" id="rdC-6l-zvc"/>
                                     <constraint firstAttribute="trailing" secondItem="0mT-zJ-T4t" secondAttribute="trailing" constant="4" id="rlt-69-CpV"/>
+                                    <constraint firstAttribute="trailing" secondItem="IK8-Ie-CmB" secondAttribute="trailing" id="v4B-Ei-y4y"/>
+                                    <constraint firstItem="IK8-Ie-CmB" firstAttribute="leading" secondItem="DpY-mV-DIC" secondAttribute="leading" id="vht-VP-5YY"/>
                                     <constraint firstItem="0mT-zJ-T4t" firstAttribute="centerY" secondItem="DpY-mV-DIC" secondAttribute="centerY" id="wVk-FK-SMK"/>
                                 </constraints>
                                 <connections>
@@ -227,16 +247,46 @@
                                                 <action selector="cancelEditing:" destination="31L-LS-Qri" eventType="touchUpInside" id="gvt-Xv-jh7"/>
                                             </connections>
                                         </button>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z9W-7z-6pf" userLabel="Right Separator">
+                                            <rect key="frame" x="159" y="0.0" width="1" height="160"/>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="1" id="uec-RZ-qpf"/>
+                                            </constraints>
+                                        </view>
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lb9-49-DAm" userLabel="Bottom Separator">
+                                            <rect key="frame" x="0.0" y="159" width="160" height="1"/>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="1" id="ab0-g8-9hr"/>
+                                            </constraints>
+                                        </view>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="lb9-49-DAm" secondAttribute="bottom" id="0WU-T8-RTU"/>
+                                    <constraint firstAttribute="trailing" secondItem="z9W-7z-6pf" secondAttribute="trailing" id="7eA-OZ-jaz"/>
+                                    <constraint firstAttribute="trailing" secondItem="lb9-49-DAm" secondAttribute="trailing" id="DJY-Z5-X49"/>
+                                    <constraint firstItem="z9W-7z-6pf" firstAttribute="top" secondItem="31L-LS-Qri" secondAttribute="top" id="Evv-UO-bEr"/>
                                     <constraint firstAttribute="trailingMargin" secondItem="KvS-0k-idH" secondAttribute="trailing" constant="8" id="GXs-2d-FBK"/>
+                                    <constraint firstAttribute="trailing" secondItem="lb9-49-DAm" secondAttribute="trailing" id="WkP-Cr-ybM"/>
+                                    <constraint firstAttribute="bottom" secondItem="z9W-7z-6pf" secondAttribute="bottom" id="XVh-4q-6II"/>
                                     <constraint firstItem="mk6-1k-gT0" firstAttribute="top" secondItem="31L-LS-Qri" secondAttribute="top" constant="8" id="YJj-Ir-vHL"/>
+                                    <constraint firstAttribute="bottom" secondItem="lb9-49-DAm" secondAttribute="bottom" id="a9I-Mj-lzd"/>
+                                    <constraint firstItem="lb9-49-DAm" firstAttribute="leading" secondItem="31L-LS-Qri" secondAttribute="leading" id="heN-67-A7l"/>
                                     <constraint firstItem="KvS-0k-idH" firstAttribute="leading" secondItem="31L-LS-Qri" secondAttribute="leadingMargin" constant="8" id="sMr-xc-I66"/>
                                     <constraint firstAttribute="trailing" secondItem="mk6-1k-gT0" secondAttribute="trailing" constant="8" id="tfF-55-gz6"/>
                                     <constraint firstItem="KvS-0k-idH" firstAttribute="centerY" secondItem="31L-LS-Qri" secondAttribute="centerY" id="wnc-4A-9mO"/>
+                                    <constraint firstItem="lb9-49-DAm" firstAttribute="top" secondItem="KvS-0k-idH" secondAttribute="bottom" id="xQo-MM-ay8"/>
                                 </constraints>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="WkP-Cr-ybM"/>
+                                        <exclude reference="a9I-Mj-lzd"/>
+                                        <exclude reference="xQo-MM-ay8"/>
+                                    </mask>
+                                </variation>
                                 <connections>
                                     <outlet property="categoryNameTextField" destination="KvS-0k-idH" id="54P-48-Hlq"/>
                                 </connections>
