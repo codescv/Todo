@@ -542,16 +542,6 @@ class TodoListTableViewController: UITableViewController {
             if let cell = sender as? TodoItemCell {
                 if let reminderVC = segue.destinationViewController as? ReminderViewController {
                     reminderVC.item = cell.model
-                    let item: TodoItem = DQ.objectWithID(cell.model!.objId!)
-                    reminderVC.hasReminder = item.hasReminder?.boolValue ?? false
-                    reminderVC.reminderDate = item.reminderDate ?? NSDate()
-                    reminderVC.isRepeated = item.isRepeated?.boolValue ?? false
-                    if let repeatType = item.repeatType {
-                        reminderVC.repeatType = ReminderViewController.RepeatType(rawValue: repeatType.integerValue) ?? .Daily
-                    }
-                    if let repeatValue = item.repeatValue {
-                        reminderVC.repeatValue = NSKeyedUnarchiver.unarchiveObjectWithData(repeatValue) as! Set<Int>
-                    }
                 }
             }
         }
@@ -560,21 +550,20 @@ class TodoListTableViewController: UITableViewController {
     // unwind from edit reminder
     @IBAction func editReminder(segue: UIStoryboardSegue) {
         if let reminderVC = segue.sourceViewController as? ReminderViewController {
-            let isRepeated = reminderVC.isRepeated
-            let repeatType = reminderVC.repeatType
-            let repeatValue = reminderVC.repeatValue
-            let hasReminder = reminderVC.hasReminder
-            let reminderDate = reminderVC.reminderDate
             if let model = reminderVC.item {
                 //let x = "abc"
+                let isRepeated = model.isRepeated
+                let repeatType = model.repeatType
+                let repeatValue = model.repeatValue
+                let hasReminder = model.hasReminder
+                let reminderDate = model.reminderDate
                 self.todoItemsDataController.editReminder(model, hasReminder: hasReminder,
                     reminderDate: reminderDate, isRepeated: isRepeated,
-                    repeatType: repeatType.rawValue, repeatValue: repeatValue as NSSet, completion: {
+                    repeatType: repeatType, repeatValue: repeatValue, completion: {
                         self.tableView.reloadData()
                 })
 
             }
-            print("isrepeat: \(isRepeated), type: \(repeatType), value: \(repeatValue)")
         }
     }
     

@@ -18,6 +18,6 @@ class TodoItemViewModel {
     var hasReminder = false
     var reminderDate = NSDate()
     var isRepeated = false
-    var repeatType = 0
-    var repeatValue: AnyObject?
+    var repeatType: RepeatType?
+    var repeatValue = Set<Int>()
 }

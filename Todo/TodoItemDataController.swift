@@ -47,9 +47,18 @@ class TodoItemDataController {
         vm.title = item.title ?? ""
         vm.objId = item.objectID
         vm.categoryName = item.category?.name ?? ""
-        vm.hasReminder = item.hasReminder == true ? true: false
+        vm.hasReminder = item.hasReminder == true
         vm.reminderDate = item.reminderDate ?? NSDate()
-        vm.repeatType = item.repeatType?.integerValue ?? 0
+        vm.isRepeated = item.isRepeated == true
+        if let repeatTypeInt = item.repeatType?.integerValue {
+            vm.repeatType = RepeatType(rawValue: repeatTypeInt)
+        }
+        
+        if let repeatValue = item.repeatValue {
+            if let repeatValueSet =  NSKeyedUnarchiver.unarchiveObjectWithData(repeatValue) as? Set<Int> {
+                vm.repeatValue = repeatValueSet
+            }
+        }
         return vm
     }
     
@@ -253,7 +262,7 @@ class TodoItemDataController {
         })
     }
     
-    func editReminder<T:NSCoding>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: Int, repeatValue: T, completion: (()->())?) {
+    func editReminder<T>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: RepeatType?, repeatValue: T, completion: (()->())?) {
         self.shouldAutoReloadOnDataChange = false
         DQ.write(
             { context in
@@ -261,8 +270,10 @@ class TodoItemDataController {
                 item.hasReminder = hasReminder
                 item.reminderDate = reminderDate
                 item.isRepeated = isRepeated
-                item.repeatType = repeatType
-                item.repeatValue = NSKeyedArchiver.archivedDataWithRootObject(repeatValue)
+                item.repeatType = repeatType?.rawValue
+                if let repeatValueSet = repeatValue as? NSSet {
+                    item.repeatValue = NSKeyedArchiver.archivedDataWithRootObject(repeatValueSet)
+                }
             },
             sync: false,
             completion: {

@@ -12,12 +12,53 @@ class ReminderViewController: UITableViewController {
     let editReminderSegue = "editReminderSegue"
     let cancelEditSegue = "cancelEditSegue"
     
-    var item: TodoItemViewModel?
-    var hasReminder = false
-    var isRepeated = false
-    var repeatType: RepeatType = .Daily
-    var repeatValue = Set<Int>()
-    var reminderDate = NSDate()
+    var item: TodoItemViewModel!
+    
+    var hasReminder: Bool {
+        get {
+            return self.item.hasReminder ?? false
+        }
+        set {
+            self.item.hasReminder = newValue
+        }
+    }
+    
+    var reminderDate: NSDate {
+        get {
+            return self.item.reminderDate ?? NSDate()
+        }
+        
+        set {
+            self.item.reminderDate = newValue
+        }
+    }
+    
+    var isRepeated: Bool {
+        get {
+            return self.item.isRepeated
+        }
+        set {
+            self.item.isRepeated = newValue
+        }
+    }
+    
+    var repeatType: RepeatType {
+        get {
+            return self.item.repeatType ?? .Daily
+        }
+        set {
+            self.item.repeatType = newValue
+        }
+    }
+    
+    var repeatValue: Set<Int> {
+        get {
+            return self.item.repeatValue
+        }
+        set {
+            self.item.repeatValue = newValue
+        }
+    }
     
     @IBAction func didPickDate(picker: UIDatePicker) {
         self.reminderDate = picker.date
@@ -59,35 +100,11 @@ class ReminderViewController: UITableViewController {
         }
     }
     
-    enum RepeatType: Int {
-        case Daily
-        case Weekly
-        case Monthly
-        case Yearly
         
-        func name() -> String {
-            switch self {
-            case .Daily:
-                return "Daily"
-            case .Weekly:
-                return "Weekly"
-            case .Monthly:
-                return "Monthly"
-            case .Yearly:
-                return "Yearly"
-            }
-        }
-    }
-    
     override func viewDidLoad() {
         self.tableView.estimatedRowHeight = 100
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: "cancel:")
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save:")
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-//        self.isRepeated = self.item?.
     }
     
     func save(sender: AnyObject?) {
