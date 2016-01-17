@@ -14,6 +14,7 @@ class TodoItemCell: UITableViewCell {
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var categoryLabel: UILabel!
     @IBOutlet weak var actionsView: UIStackView!
+    @IBOutlet weak var reminderInfoLabel: UILabel!
     
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var reminderButton: UIButton!
@@ -35,7 +36,7 @@ class TodoItemCell: UITableViewCell {
         case Edit
         case ShowDetail
         case MoveToCategory
-        case AddReminder
+        case EditReminder
         case Noop
     }
     
@@ -48,7 +49,7 @@ class TodoItemCell: UITableViewCell {
     }
     
     @IBAction func addReminderAction(sender: AnyObject) {
-        self.actionTriggered?(self, .AddReminder)
+        self.actionTriggered?(self, .EditReminder)
     }
     
     @IBAction func showDetailAction(sender: AnyObject) {
@@ -76,12 +77,22 @@ class TodoItemCell: UITableViewCell {
                 } else {
                     self.hideActionsAnimated(false)
                 }
+                
                 if let categoryName = vm.categoryName {
                     self.categoryLabel.hidden = false
                     self.categoryLabel.text = categoryName
                 } else {
                     self.categoryLabel.hidden = true
                 }
+                
+                if vm.hasReminder {
+                    self.reminderInfoLabel.hidden = false
+                    self.reminderInfoLabel.text = "\(vm.reminderDate.shortString())"
+                } else {
+                    self.reminderInfoLabel.hidden = true
+                }
+            } else {
+                self.reminderInfoLabel.hidden = true
             }
         }
     }

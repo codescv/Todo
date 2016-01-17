@@ -47,6 +47,9 @@ class TodoItemDataController {
         vm.title = item.title ?? ""
         vm.objId = item.objectID
         vm.categoryName = item.category?.name ?? ""
+        vm.hasReminder = item.hasReminder == true ? true: false
+        vm.reminderDate = item.reminderDate ?? NSDate()
+        vm.repeatType = item.repeatType?.integerValue ?? 0
         return vm
     }
     
@@ -240,6 +243,26 @@ class TodoItemDataController {
                 }else {
                     item.category = nil
                 }
+            },
+            sync: false,
+            completion: {
+                self.reloadDataFromDB() {
+                    completion?()
+                    self.shouldAutoReloadOnDataChange = true
+                }
+        })
+    }
+    
+    func editReminder<T:NSCoding>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: Int, repeatValue: T, completion: (()->())?) {
+        self.shouldAutoReloadOnDataChange = false
+        DQ.write(
+            { context in
+                let item: TodoItem = context.dq_objectWithID(model.objId!)
+                item.hasReminder = hasReminder
+                item.reminderDate = reminderDate
+                item.isRepeated = isRepeated
+                item.repeatType = repeatType
+                item.repeatValue = NSKeyedArchiver.archivedDataWithRootObject(repeatValue)
             },
             sync: false,
             completion: {

@@ -32,23 +32,25 @@ class TodoCategoryDataController {
         
         DQ.query(TodoItemCategory.self).orderBy("displayOrder").execute { (context, objectIds) in
             // TODO fix DQuery to make completion run on main thread
+            let count = DQ.query(TodoItem.self, context: context).count()
             dispatch_async(dispatch_get_main_queue(), {
                 self.categorieIds = objectIds
                 self.categoryOrder.removeAll()
                 for (idx, id) in objectIds.enumerate() {
                     self.categoryOrder[id] = idx
                 }
+                self.totalItems = count
                 completion?()
             })
         }
         
         // TODO let DQuery provide async count
-        DQ.query(TodoItem).execute {
-            let count = $1.count
-            dispatch_async(dispatch_get_main_queue(), {
-                self.totalItems = count
-            })
-        }
+//        DQ.query(TodoItem).execute {
+//            let count = $1.count
+//            dispatch_async(dispatch_get_main_queue(), {
+//                self.totalItems = count
+//            })
+//        }
     }
     
     func orderForCategoryId(categoryId: NSManagedObjectID?) -> Int {

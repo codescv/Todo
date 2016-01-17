@@ -43,4 +43,10 @@ extension NSDate {
         fm.dateFormat = ["YYYY", "MM", "dd"].joinWithSeparator(separator)
         return fm.stringFromDate(self)
     }
+    
+    func shortString() -> String {
+        let fm = NSDateFormatter()
+        fm.dateFormat = "HH:mm"
+        return fm.stringFromDate(self)
+    }
 }

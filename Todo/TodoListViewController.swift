@@ -56,11 +56,12 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    let moveToCategorySegue = "SelectCategorySegue"
+    let editReminderSegue = "editReminderSegue"
+    
     deinit {
         print("deinit todolist table vc")
     }
-    
-    let moveToCategorySegue = "SelectCategorySegue"
     
     // the category id
     var categoryId: NSManagedObjectID? {
@@ -341,6 +342,8 @@ class TodoListTableViewController: UITableViewController {
                 self.beginEditingCell(cell)
             case .MoveToCategory:
                 self.moveToCategoryForCell(cell)
+            case .EditReminder:
+                self.editReminderForCell(cell)
             default:
                 break
             }
@@ -515,6 +518,10 @@ class TodoListTableViewController: UITableViewController {
         self.performSegueWithIdentifier(self.moveToCategorySegue, sender: cell)
     }
     
+    func editReminderForCell(cell: TodoItemCell) {
+        self.performSegueWithIdentifier(self.editReminderSegue, sender: cell)
+    }
+    
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == self.moveToCategorySegue {
             //let model = (sender as! TodoItemCell).model!
@@ -531,7 +538,48 @@ class TodoListTableViewController: UITableViewController {
                     categoryVC.title = "Pick A List"
                 }
             }
+        } else if segue.identifier == self.editReminderSegue {
+            if let cell = sender as? TodoItemCell {
+                if let reminderVC = segue.destinationViewController as? ReminderViewController {
+                    reminderVC.item = cell.model
+                    let item: TodoItem = DQ.objectWithID(cell.model!.objId!)
+                    reminderVC.hasReminder = item.hasReminder?.boolValue ?? false
+                    reminderVC.reminderDate = item.reminderDate ?? NSDate()
+                    reminderVC.isRepeated = item.isRepeated?.boolValue ?? false
+                    if let repeatType = item.repeatType {
+                        reminderVC.repeatType = ReminderViewController.RepeatType(rawValue: repeatType.integerValue) ?? .Daily
+                    }
+                    if let repeatValue = item.repeatValue {
+                        reminderVC.repeatValue = NSKeyedUnarchiver.unarchiveObjectWithData(repeatValue) as! Set<Int>
+                    }
+                }
+            }
         }
+    }
+    
+    // unwind from edit reminder
+    @IBAction func editReminder(segue: UIStoryboardSegue) {
+        if let reminderVC = segue.sourceViewController as? ReminderViewController {
+            let isRepeated = reminderVC.isRepeated
+            let repeatType = reminderVC.repeatType
+            let repeatValue = reminderVC.repeatValue
+            let hasReminder = reminderVC.hasReminder
+            let reminderDate = reminderVC.reminderDate
+            if let model = reminderVC.item {
+                //let x = "abc"
+                self.todoItemsDataController.editReminder(model, hasReminder: hasReminder,
+                    reminderDate: reminderDate, isRepeated: isRepeated,
+                    repeatType: repeatType.rawValue, repeatValue: repeatValue as NSSet, completion: {
+                        self.tableView.reloadData()
+                })
+
+            }
+            print("isrepeat: \(isRepeated), type: \(repeatType), value: \(repeatValue)")
+        }
+    }
+    
+    @IBAction func cancelEditReminder(segue: UIStoryboardSegue) {
+        
     }
 
 }

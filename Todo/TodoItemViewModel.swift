@@ -14,4 +14,10 @@ class TodoItemViewModel {
     var categoryName: String?
     var isExpanded: Bool = false
     var objId: NSManagedObjectID?
+    
+    var hasReminder = false
+    var reminderDate = NSDate()
+    var isRepeated = false
+    var repeatType = 0
+    var repeatValue: AnyObject?
 }
