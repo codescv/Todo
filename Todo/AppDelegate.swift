@@ -21,6 +21,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        let types: UIUserNotificationType = [.Badge, .Sound, .Alert]
+        let settings = UIUserNotificationSettings(forTypes: types, categories: nil)
+        application.registerUserNotificationSettings(settings)
         return true
     }
 
@@ -32,6 +35,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        for item in DQ.query(TodoItem).filter("hasReminder = true").all() {
+            let notif = UILocalNotification()
+            notif.alertTitle = "alert"
+            notif.alertBody = item.title
+            notif.fireDate = item.reminderDate
+            if item.isRepeated?.boolValue == true {
+                if let repeatTypeInt = item.repeatType?.integerValue {
+                    if let repeatType = ReminderViewController.RepeatType(rawValue: repeatTypeInt) {
+                        switch repeatType {
+                        case .Daily:
+                            notif.repeatInterval = NSCalendarUnit.Day
+                        case .Weekly:
+                            notif.repeatInterval = NSCalendarUnit.Weekday
+                        case .Monthly:
+                            notif.repeatInterval = NSCalendarUnit.Month
+                        case .Yearly:
+                            notif.repeatInterval = NSCalendarUnit.Year
+                        }
+                    }
+                }
+            }
+            application.scheduleLocalNotification(notif)            
+        }
+    }
+    
+    func application(application: UIApplication, didReceiveLocalNotification notification: UILocalNotification) {
+        application.cancelAllLocalNotifications()
     }
 
     func applicationWillEnterForeground(application: UIApplication) {

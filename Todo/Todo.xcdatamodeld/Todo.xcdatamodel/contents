@@ -5,8 +5,8 @@
         <attribute name="displayOrder" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
         <attribute name="doneDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="dueDate" optional="YES" attributeType="Date" syncable="YES"/>
-        <attribute name="hasReminder" optional="YES" attributeType="Boolean" syncable="YES"/>
-        <attribute name="isDone" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="hasReminder" optional="YES" attributeType="Boolean" indexed="YES" syncable="YES"/>
+        <attribute name="isDone" optional="YES" attributeType="Boolean" indexed="YES" syncable="YES"/>
         <attribute name="isRepeated" optional="YES" attributeType="Boolean" syncable="YES"/>
         <attribute name="reminderDate" optional="YES" attributeType="Date" syncable="YES"/>
         <attribute name="repeatType" optional="YES" attributeType="Integer 16" syncable="YES"/>
@@ -17,7 +17,7 @@
     <entity name="TodoItemCategory" representedClassName=".TodoItemCategory" syncable="YES">
         <attribute name="color" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="displayOrder" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
-        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TodoItem" inverseName="category" inverseEntity="TodoItem" syncable="YES"/>
     </entity>
     <elements>
