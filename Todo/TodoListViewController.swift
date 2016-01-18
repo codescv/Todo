@@ -70,6 +70,28 @@ class TodoListTableViewController: UITableViewController {
             self.todoItemsDataController.reloadDataFromDB {
                 self.tableView.reloadData()
             }
+            self.todoItemsDataController.onChange = { [weak self] changes in
+                if let myself = self {
+                    if changes.count == 0 {
+                        myself.tableView.reloadData()
+                        return
+                    }
+                    myself.tableView.beginUpdates()
+                    for change in changes {
+                        switch change {
+                        case .Insert(indexPaths: let indexPaths):
+                            myself.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Left)
+                        case .Delete(indexPaths: let indexPaths):
+                            myself.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Right)
+                        case .Update(indexPaths: let indexPaths):
+                            myself.tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+                        default:
+                            ()
+                        }
+                    }
+                    myself.tableView.endUpdates()
+                }
+            }
         }
     }
     
@@ -228,12 +250,9 @@ class TodoListTableViewController: UITableViewController {
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
                     if state == .Ended {
-                        self.todoItemsDataController.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row,
-                            completion: {
-                                self.firstMovingIndexPath = nil
-                                self.currentMovingIndexPath = nil
-                                self.tableView.reloadData()
-                        })
+                        self.todoItemsDataController.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
+                        self.firstMovingIndexPath = nil
+                        self.currentMovingIndexPath = nil
                     } else {
                         print("state: \(state)")
                         self.tableView.reloadData()
@@ -271,7 +290,6 @@ class TodoListTableViewController: UITableViewController {
         // new/edit item cell
         if indexPath.isEqual(self.editingIndexPath) {
             let editItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.EditItemCell.identifier()) as! EditTodoItemCell
-            print("edit item cell")
             if self.isComposingNewTodoItem {
                 editItemCell.model = nil
             } else {
@@ -407,47 +425,35 @@ class TodoListTableViewController: UITableViewController {
     // table cell actions
     func deleteItemForCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.todoItemsDataController.deleteTodoItemAtRow(indexPath.row) {
-                self.selectedIndexPath = nil
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-            }
+            self.selectedIndexPath = nil
+            self.tableView.reloadData()
+            self.todoItemsDataController.deleteTodoItemAtRow(indexPath.row)
         }
     }
     
     func deleteDoneItemForCell(cell: DoneItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row) {
-                self.selectedIndexPath = nil
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-            }
+            self.selectedIndexPath = nil
+            self.tableView.reloadData()
+            self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row)
         }
     }
     
     func undoDoneItemForCell(cell: DoneItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.todoItemsDataController.undoItemAtRow(indexPath.row) {
-                self.selectedIndexPath = nil
-                self.tableView.beginUpdates()
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Left)
-                self.tableView.endUpdates()
-            }
+            self.selectedIndexPath = nil
+            self.tableView.reloadData()
+            self.todoItemsDataController.undoItemAtRow(indexPath.row)
         }
     }
     
     func markItemAsDoneForCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
             self.selectedIndexPath = nil
-            self.todoItemsDataController.markTodoItemAsDoneAtRow(indexPath.row) {
-                self.tableView.beginUpdates()
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-                self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: Section.DoneSection.rawValue)], withRowAnimation: .Left)
-                self.tableView.endUpdates()
-            }
+            self.tableView.reloadData()
+            self.todoItemsDataController.markTodoItemAsDoneAtRow(indexPath.row)
         }
     }
-    
-    
     
     func beginEditingCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
@@ -482,11 +488,9 @@ class TodoListTableViewController: UITableViewController {
         if let item = cell.model {
             // edit
             if save {
-                self.todoItemsDataController.editTodoItem(item, title: title) {
-                    self.isComposingNewTodoItem = false
-                    self.editingIndexPath = nil
-                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
-                }
+                self.isComposingNewTodoItem = false
+                self.editingIndexPath = nil
+                self.todoItemsDataController.editTodoItem(item, title: title)
             } else {
                 self.isComposingNewTodoItem = false
                 self.editingIndexPath = nil
@@ -498,14 +502,11 @@ class TodoListTableViewController: UITableViewController {
                 if title.isEmpty {
                     return
                 }
-                self.todoItemsDataController.insertTodoItem(title: title) {
-                    self.editingIndexPath = nil
-                    self.isComposingNewTodoItem = false
-                    self.tableView.beginUpdates()
-                    self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
-                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
-                    self.tableView.endUpdates()
-                }
+                self.editingIndexPath = nil
+                self.isComposingNewTodoItem = false
+                // remove the editing cell
+                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+                self.todoItemsDataController.insertTodoItem(title: title)
             } else {
                 self.editingIndexPath = nil
                 self.isComposingNewTodoItem = false
@@ -532,7 +533,6 @@ class TodoListTableViewController: UITableViewController {
                     categoryVC.onSelectCategory = { [weak categoryVC] category in
                         self.todoItemsDataController.changeCategory(cell.model!, category: category) {
                             categoryVC?.dismissViewControllerAnimated(true, completion: {})
-                            self.tableView.reloadData()
                         }
                     }
                     categoryVC.title = "Pick A List"
@@ -559,10 +559,7 @@ class TodoListTableViewController: UITableViewController {
                 let reminderDate = model.reminderDate
                 self.todoItemsDataController.editReminder(model, hasReminder: hasReminder,
                     reminderDate: reminderDate, isRepeated: isRepeated,
-                    repeatType: repeatType, repeatValue: repeatValue, completion: {
-                        self.tableView.reloadData()
-                })
-
+                    repeatType: repeatType, repeatValue: repeatValue)
             }
         }
     }

@@ -102,6 +102,26 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         self.categoryDataController.reloadDataFromDB {
             self.collectionView!.reloadData()
         }
+        self.categoryDataController.onChange = { [weak self] changes in
+            if let myself = self {
+                if changes.count == 0 {
+                    myself.collectionView!.reloadData()
+                    return
+                }
+                for change in changes {
+                    switch change {
+                    case .Insert(indexPaths: let indexPaths):
+                        myself.collectionView!.insertItemsAtIndexPaths(indexPaths)
+                    case .Delete(indexPaths: let indexPaths):
+                        myself.collectionView!.deleteItemsAtIndexPaths(indexPaths)
+                    case .Update(indexPaths: let indexPaths):
+                        myself.collectionView!.reloadItemsAtIndexPaths(indexPaths)
+                    }
+                }
+            }
+            
+        }
+        
         self.collectionView!.backgroundColor = UIColor.whiteColor()
         
         let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
@@ -149,22 +169,14 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
     
     func endEditingForCell(cell: EditCategoryCell, saved: Bool) {
         let name = cell.categoryNameTextField.text!
+        let isNew = self.isEditingNewCategory
+        self.endEditing()
         
-        if self.isEditingNewCategory {
-            if saved {
-                self.categoryDataController.insertNewCategory(name) {
-                    self.endEditing()
-                }
+        if saved {
+            if isNew {
+                self.categoryDataController.insertNewCategory(name)
             } else {
-                self.endEditing()
-            }
-        } else {
-            if saved {
-                self.categoryDataController.editCategory(cell.model!, newName:name) {
-                    self.endEditing()
-                }
-            } else {
-                self.endEditing()
+                self.categoryDataController.editCategory(cell.model!, newName:name)
             }
         }
     }
@@ -267,9 +279,7 @@ extension TodoCategoryCollectionViewController {
     
     func deleteCategoryForCell(cell: CategoryCell) {
         if let indexPath = self.collectionView?.indexPathForCell(cell) {
-            self.categoryDataController.deleteCategoryAtRow(indexPath.row) {
-                self.collectionView?.deleteItemsAtIndexPaths([indexPath])
-            }
+            self.categoryDataController.deleteCategoryAtRow(indexPath.row)
         }
     }
     

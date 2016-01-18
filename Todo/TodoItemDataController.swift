@@ -15,15 +15,30 @@ class TodoItemDataController {
     private var doneItemIds = [NSManagedObjectID]()
     var categoryId: NSManagedObjectID?
     
+    enum Change {
+        case Delete(indexPaths: [NSIndexPath])
+        case Insert(indexPaths: [NSIndexPath])
+        case Update(indexPaths: [NSIndexPath])
+        case Move(fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath)
+    }
+    
     // data change callback
-    var onChange: (()->())?
-    var shouldAutoReloadOnDataChange = true
+    var onChange: (([Change])->())?
+    
+    // is the controller changing the data
+    var isChanging = false
     
     init(categoryId: NSManagedObjectID? = nil) {
         self.categoryId = categoryId
-        DQ.monitor(self) {[weak self] _ in
-            if self?.shouldAutoReloadOnDataChange == true {
-                self?.reloadDataFromDB()
+        DQ.monitor(self) {[weak self] notification in
+            if let myself = self {
+                if !myself.isChanging {
+                    myself.reloadDataFromDB() {
+                        if !myself.isChanging {
+                            myself.onChange?([])
+                        }
+                    }
+                }
             }
         }
     }
@@ -91,6 +106,7 @@ class TodoItemDataController {
                     return item1.doneDate!.compare(item2.doneDate!) == .OrderedDescending
                 }
             }
+            print("reloaded items from DB")
             dispatch_async(dispatch_get_main_queue(), {
                 self.todoItemIds = todoItemIds
                 self.doneItemIds = doneItemIds
@@ -104,8 +120,6 @@ class TodoItemDataController {
             return
         }
         
-        self.shouldAutoReloadOnDataChange = false
-
         var todoItemIds = self.todoItemIds
         DQ.write (
             { context in
@@ -130,15 +144,13 @@ class TodoItemDataController {
             completion: {
                 self.todoItemIds = todoItemIds
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
         })
-        
     }
     
-    func deleteTodoItemAtRow(row: Int, completion: (()->())?) {
+    func deleteTodoItemAtRow(row: Int, completion: (()->())? = nil) {
         let objId = self.todoItemIds[row]
         
-        self.shouldAutoReloadOnDataChange = false
+        self.isChanging = true
         DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
@@ -147,15 +159,16 @@ class TodoItemDataController {
             sync: false,
             completion: {
                 self.todoItemIds.removeAtIndex(row)
+                self.onChange?([.Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 0)])])
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
     
-    func deleteDoneItemAtRow(row: Int, completion: (()->())?) {
+    func deleteDoneItemAtRow(row: Int, completion: (()->())? = nil) {
         let objId = self.doneItemIds[row]
         
-        self.shouldAutoReloadOnDataChange = false
+        self.isChanging = true
         DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
@@ -164,15 +177,16 @@ class TodoItemDataController {
             sync: false,
             completion: {
                 self.doneItemIds.removeAtIndex(row)
+                self.onChange?([.Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 1)])])
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
     
-    func undoItemAtRow(row: Int, completion: (()->())?) {
+    func undoItemAtRow(row: Int, completion: (()->())? = nil) {
         let objId = self.doneItemIds[row]
         
-        self.shouldAutoReloadOnDataChange = false
+        self.isChanging = true
         DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
@@ -182,16 +196,21 @@ class TodoItemDataController {
             completion: {
                 self.doneItemIds.removeAtIndex(row)
                 self.todoItemIds.insert(objId, atIndex: 0)
+                let changes: [Change] = [
+                    .Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 1)]),
+                    .Insert(indexPaths: [NSIndexPath(forRow: row, inSection: 0)])
+                ]
+                self.onChange?(changes)
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
 
     
-    func markTodoItemAsDoneAtRow(row: Int, completion: (()->())?) {
+    func markTodoItemAsDoneAtRow(row: Int, completion: (()->())? = nil) {
         let objId = self.todoItemIds[row]
         
-        self.shouldAutoReloadOnDataChange = false
+        self.isChanging = true
         DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
@@ -202,14 +221,19 @@ class TodoItemDataController {
             completion: {
                 self.todoItemIds.removeAtIndex(row)
                 self.doneItemIds.insert(objId, atIndex: 0)
+                let changes: [Change] = [
+                    .Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 0)]),
+                    .Insert(indexPaths: [NSIndexPath(forRow: 0, inSection: 1)])
+                ]
+                self.onChange?(changes)
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
 
     
-    func insertTodoItem(title title: String, completion: (()->())?) {
-        self.shouldAutoReloadOnDataChange = false
+    func insertTodoItem(title title: String, completion: (()->())? = nil) {
+        self.isChanging = true
         DQ.insertObject(TodoItem.self,
             block: {context, item in
                 item.title = title
@@ -222,27 +246,31 @@ class TodoItemDataController {
             sync: false,
             completion: { objId in
                 self.todoItemIds.insert(objId, atIndex: 0)
+                self.onChange?([.Insert(indexPaths:[NSIndexPath(forRow: 0, inSection: 0)])])
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
     
-    func editTodoItem(model:TodoItemViewModel, title: String, completion: (()->())?) {
-        self.shouldAutoReloadOnDataChange = false
+    func editTodoItem(model:TodoItemViewModel, title: String, completion: (()->())? = nil) {
+        var index: Int = 0
+        self.isChanging = true
         DQ.write(
             { context in
-                let item: TodoItem = context.dq_objectWithID(model.objId!)
+                let objId = model.objId!
+                index = self.todoItemIds.indexOf(objId)!
+                let item: TodoItem = context.dq_objectWithID(objId)
                 item.title = title
             },
             sync: false,
             completion:  {
+                self.onChange?([.Update(indexPaths:[NSIndexPath(forRow: index, inSection: 0)])])
                 completion?()
-                self.shouldAutoReloadOnDataChange = true
+                self.isChanging = false
         })
     }
     
-    func changeCategory(model: TodoItemViewModel, category: TodoCategoryViewModel, completion: (()->())?) {
-        self.shouldAutoReloadOnDataChange = false
+    func changeCategory(model: TodoItemViewModel, category: TodoCategoryViewModel, completion: (()->())? = nil) {
         DQ.write(
             { context in
                 let item: TodoItem = context.dq_objectWithID(model.objId!)
@@ -255,15 +283,11 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                self.reloadDataFromDB() {
-                    completion?()
-                    self.shouldAutoReloadOnDataChange = true
-                }
+                completion?()
         })
     }
     
-    func editReminder<T>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: RepeatType?, repeatValue: T, completion: (()->())?) {
-        self.shouldAutoReloadOnDataChange = false
+    func editReminder<T>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: RepeatType?, repeatValue: T, completion: (()->())? = nil) {
         DQ.write(
             { context in
                 let item: TodoItem = context.dq_objectWithID(model.objId!)
@@ -277,10 +301,7 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                self.reloadDataFromDB() {
-                    completion?()
-                    self.shouldAutoReloadOnDataChange = true
-                }
+                completion?()
         })
     }
 }
