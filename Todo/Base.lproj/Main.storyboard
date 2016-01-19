@@ -634,7 +634,6 @@
                                             </constraints>
                                         </view>
                                     </subviews>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstAttribute="bottom" secondItem="XRx-2F-bpL" secondAttribute="bottom" constant="6" id="7ny-aI-egk"/>
                                         <constraint firstItem="XRx-2F-bpL" firstAttribute="top" secondItem="H2J-PW-19H" secondAttribute="top" constant="6" id="PzJ-Ae-Ec0"/>
@@ -707,7 +706,6 @@
                                             </constraints>
                                         </view>
                                     </subviews>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstItem="LP0-iM-BQO" firstAttribute="top" secondItem="VjI-SW-7KQ" secondAttribute="top" constant="12" id="Gmu-Ds-4gg"/>
                                         <constraint firstAttribute="trailing" secondItem="LP0-iM-BQO" secondAttribute="trailing" constant="8" id="Ir5-p7-YMj"/>
@@ -771,7 +769,6 @@
                                             </constraints>
                                         </view>
                                     </subviews>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
                                         <constraint firstItem="8dB-91-SZb" firstAttribute="top" secondItem="VWW-ys-rYA" secondAttribute="top" constant="6" id="GsA-yG-tPt"/>
                                         <constraint firstItem="8dB-91-SZb" firstAttribute="leading" secondItem="VWW-ys-rYA" secondAttribute="leading" constant="8" id="HZd-xK-o4Y"/>

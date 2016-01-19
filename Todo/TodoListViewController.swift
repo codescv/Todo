@@ -80,13 +80,13 @@ class TodoListTableViewController: UITableViewController {
                     for change in changes {
                         switch change {
                         case .Insert(indexPaths: let indexPaths):
-                            myself.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Left)
+                            myself.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
                         case .Delete(indexPaths: let indexPaths):
-                            myself.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Right)
+                            myself.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
                         case .Update(indexPaths: let indexPaths):
                             myself.tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
-                        default:
-                            ()
+                        case .Move(fromIndexPath: let fromIndexPath, toIndexPath: let toIndexPath):
+                            myself.tableView.moveRowAtIndexPath(fromIndexPath, toIndexPath: toIndexPath)
                         }
                     }
                     myself.tableView.endUpdates()
@@ -474,7 +474,7 @@ class TodoListTableViewController: UITableViewController {
         self.isComposingNewTodoItem = true
         self.editingIndexPath = indexPath
         self.tableView.beginUpdates()
-        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
+        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
         if self.selectedIndexPath != nil {
             self.tableView.reloadRowsAtIndexPaths([self.selectedIndexPath!], withRowAnimation: .Automatic)
             self.selectedIndexPath = nil
@@ -500,7 +500,7 @@ class TodoListTableViewController: UITableViewController {
         } else {
             // new item
             // remove the editing cell
-            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
+            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
             if save {
                 self.todoItemsDataController.insertTodoItem(title: title)
             }

@@ -106,8 +106,8 @@ class TodoItemCell: UITableViewCell {
         self.reminderButton.imageView?.contentMode = .ScaleAspectFit
         
         // set background colors so the cell background can show
-        self.backgroundColor = UIColor.clearColor()
-        self.contentView.backgroundColor = UIColor.clearColor()
+        //self.backgroundColor = UIColor.clearColor()
+        //self.contentView.backgroundColor = UIColor.clearColor()
         self.cardBackgroundView.layer.cornerRadius = 5.0
         // to let sliding label to have rounded corner
         self.cardBackgroundView.clipsToBounds = true
