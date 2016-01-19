@@ -484,33 +484,25 @@ class TodoListTableViewController: UITableViewController {
     
     func endEditingCell(cell: EditTodoItemCell, save: Bool) {
         let title = cell.textView.text
+        if save && title.isEmpty {
+            return
+        }
         let indexPath = self.editingIndexPath!
+        self.isComposingNewTodoItem = false
+        self.editingIndexPath = nil
         if let item = cell.model {
-            // edit
+            // edit item
             if save {
-                self.isComposingNewTodoItem = false
-                self.editingIndexPath = nil
                 self.todoItemsDataController.editTodoItem(item, title: title)
             } else {
-                self.isComposingNewTodoItem = false
-                self.editingIndexPath = nil
                 self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             }
         } else {
-            // new
+            // new item
+            // remove the editing cell
+            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
             if save {
-                if title.isEmpty {
-                    return
-                }
-                self.editingIndexPath = nil
-                self.isComposingNewTodoItem = false
-                // remove the editing cell
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
                 self.todoItemsDataController.insertTodoItem(title: title)
-            } else {
-                self.editingIndexPath = nil
-                self.isComposingNewTodoItem = false
-                self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
             }
         }
     }

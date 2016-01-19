@@ -238,6 +238,7 @@ class TodoItemDataController {
             block: {context, item in
                 item.title = title
                 item.dueDate = NSDate.today()
+                item.isDone = false
                 item.displayOrder = TodoItem.topDisplayOrder(context)
                 if let categoryId = self.categoryId {
                     item.category = context.dq_objectWithID(categoryId) as TodoItemCategory

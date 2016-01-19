@@ -38,6 +38,24 @@ extension NSDate {
         return calendar.dateFromComponents(components)!
     }
     
+    func weekday() -> Int {
+        let calendar = NSCalendar.currentCalendar()
+        let components = calendar.components([NSCalendarUnit.Year, NSCalendarUnit.Month, NSCalendarUnit.Day], fromDate: NSDate())
+        return components.weekday
+    }
+    
+    func nearestWeekday(nextWeekday: Int) -> NSDate {
+        let thisWeekday = self.weekday()
+        let delta = NSDateComponents()
+        var deltaDays = (nextWeekday - thisWeekday) % 7
+        if deltaDays < 0 {
+            deltaDays += 7
+        }
+        delta.day = deltaDays
+        let calendar = NSCalendar.currentCalendar()
+        return calendar.dateByAddingComponents(delta, toDate: self, options: [])!
+    }
+    
     func yyyymmdd(separator separator: String = "-") -> String {
         let fm = NSDateFormatter()
         fm.dateFormat = ["YYYY", "MM", "dd"].joinWithSeparator(separator)
