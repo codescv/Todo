@@ -271,7 +271,7 @@ class TodoItemDataController {
         })
     }
     
-    func changeCategory(model: TodoItemViewModel, category: TodoCategoryViewModel, completion: (()->())? = nil) {
+    func changeCategory(model: TodoItemViewModel, category: CategoryCellModel, completion: (()->())? = nil) {
         DQ.write(
             { context in
                 let item: TodoItem = context.dq_objectWithID(model.objId!)

@@ -11,7 +11,7 @@ import CoreData
 import DQuery
 
 class TodoListViewController: UIViewController {
-    var category: TodoCategoryViewModel? {
+    var category: CategoryCellModel? {
         didSet {
             innerTableViewController?.categoryId = category?.objId
             self.title = category?.name
@@ -24,6 +24,9 @@ class TodoListViewController: UIViewController {
         self.innerTableViewController?.startComposingNewTodoItem()
     }
     
+    @IBAction func cancelMoveToCategory(segue: UIStoryboardSegue) {
+    
+    }
 }
 
 class TodoListTableViewController: UITableViewController {

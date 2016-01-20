@@ -9,9 +9,10 @@
 import Foundation
 import CoreData
 
-class TodoCategoryViewModel {
+class CategoryCellModel {
     var numberOfItems: Int = 0
     var name = ""
     var objId: NSManagedObjectID?
-    var showsEditingControls = false
+    var indexPath: NSIndexPath?
+    var editable = false
 }

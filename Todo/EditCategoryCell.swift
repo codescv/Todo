@@ -19,7 +19,7 @@ class EditCategoryCell: UICollectionViewCell {
     var textIsValid: ((String?)->Bool)?
     var editFinished: ((EditCategoryCell, Bool)->())?
     
-    var model: TodoCategoryViewModel? {
+    var model: CategoryCellModel? {
         didSet {
             self.categoryNameTextField.text = model?.name
         }

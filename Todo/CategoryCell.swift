@@ -11,8 +11,12 @@ import UIKit
 class CategoryCell: UICollectionViewCell {
 
     @IBOutlet weak var categoryNameLabel: UILabel!
-    @IBOutlet weak var categoryInfoLabel: UILabel!
-    @IBOutlet weak var editingControls: UIStackView!
+    //@IBOutlet weak var categoryInfoLabel: UILabel!
+    //@IBOutlet weak var editingControls: UIStackView!
+    @IBOutlet weak var editButton: UIButton!
+    
+    @IBOutlet weak var topBar: UIView!
+    @IBOutlet weak var bgCardView: UIView!
     
     @IBAction func editAction(sender: AnyObject) {
         self.actionTriggered?(self, .Edit)
@@ -29,28 +33,19 @@ class CategoryCell: UICollectionViewCell {
     
     var actionTriggered: ((CategoryCell, Action)->())?
     
-    var model: TodoCategoryViewModel? {
+    var model: CategoryCellModel? {
         didSet {
-            if model != nil {
-                self.categoryNameLabel.text = model!.name
-                self.categoryInfoLabel.text = "\(model!.numberOfItems) Items"
-                if model!.objId == nil {
-                    self.editingControls.hidden = true
-                } else {
-                    self.editingControls.hidden = !(model!.showsEditingControls)
-                }
-            } else {
-                self.categoryNameLabel.text = ""
-                self.categoryInfoLabel.text = "0 Items"
-                self.editingControls.hidden = true
+            if let md = model {
+                self.categoryNameLabel.text = md.name
+                self.editButton.hidden = !md.editable
             }
         }
     }
     
     override func awakeFromNib() {
-//        self.layer.borderColor = UIColor.grayColor().CGColor
-//        self.layer.borderWidth = 1
-        self.editingControls.hidden = true
+        self.bgCardView.layer.shadowColor = UIColor.grayColor().CGColor
+        self.bgCardView.layer.shadowOffset = CGSizeMake(1, 1)
+        self.bgCardView.layer.shadowOpacity = 1.0
     }
 
 }

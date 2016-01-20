@@ -10,11 +10,8 @@ import Foundation
 import CoreData
 import DQuery
 
-class TodoCategoryDataController {
-    private var categoryIds = [NSManagedObjectID]()
-    private var categoryOrder = [NSManagedObjectID: Int]()
-    private var totalItems = 0
-    
+class TodoCategoryDataSource {
+    private var categoryList = [CategoryCellModel]()
     private var shouldAutoReload = false
     
     enum Change {
@@ -49,54 +46,56 @@ class TodoCategoryDataController {
         
         DQ.query(TodoItemCategory.self).orderBy("displayOrder").execute { (context, objectIds) in
             // TODO fix DQuery to make completion run on main thread
-            let count = DQ.query(TodoItem.self, context: context).count()
+            
+            var categoryList: [CategoryCellModel] = objectIds.map { objId in
+                let category: TodoItemCategory = context.dq_objectWithID(objId)
+                let cat = CategoryCellModel()
+                cat.name = category.name ?? ""
+                cat.numberOfItems = category.items?.count ?? 0
+                cat.objId = objId
+                cat.editable = true
+                return cat
+            }
+            
+            // the "All" pseudo category
+            let catAll = CategoryCellModel()
+            catAll.name = "all"
+            let totalItems = DQ.query(TodoItem.self, context: context).count()
+            catAll.numberOfItems = totalItems
+            catAll.editable = false
+            categoryList.insert(catAll, atIndex: 0)
+            
+            // set indexPaths to view model
+            for (idx, cat) in self.categoryList.enumerate() {
+                cat.indexPath = NSIndexPath(forRow: idx, inSection: 0)
+            }
+            
             dispatch_async(dispatch_get_main_queue(), {
-                self.categoryIds = objectIds
-                self.categoryOrder.removeAll()
-                for (idx, id) in objectIds.enumerate() {
-                    self.categoryOrder[id] = idx
-                }
-                self.totalItems = count
+                self.categoryList = categoryList
                 completion?()
             })
         }
         
-        // TODO let DQuery provide async count
-//        DQ.query(TodoItem).execute {
-//            let count = $1.count
-//            dispatch_async(dispatch_get_main_queue(), {
-//                self.totalItems = count
-//            })
-//        }
-    }
-    
-    func orderForCategoryId(categoryId: NSManagedObjectID?) -> Int {
-        if categoryId != nil {
-            return self.categoryOrder[categoryId!]!
-        }
-        return -1
     }
     
     var numberOfCategories: Int {
-        return self.categoryIds.count + 1
+        return self.categoryList.count
     }
     
-    func categoryAtRow(row: Int) -> TodoCategoryViewModel {
-        let objId: NSManagedObjectID? = (row == 0 ? nil : self.categoryIds[row-1])
-        let vm = TodoCategoryViewModel()
-        vm.objId = objId
-        if let categoryId = objId {
-            let category: TodoItemCategory = DQ.objectWithID(categoryId)
-            vm.name = category.name ?? ""
-            vm.numberOfItems = category.items?.count ?? 0
-        } else {
-            vm.name = "All"
-            vm.numberOfItems = self.totalItems
+    func indexPathForCategoryId(categoryId: NSManagedObjectID?) -> NSIndexPath {
+        for (idx, cat) in self.categoryList.enumerate() {
+            if cat.objId == categoryId {
+                return NSIndexPath(forRow: idx, inSection: 0)
+            }
         }
-        return vm
+        return NSIndexPath(forRow: 0, inSection: 0)
     }
     
-    func insertNewCategory(name: String, completion: (()->())? = nil) {
+    func categoryAtIndexPath(indexPath: NSIndexPath) -> CategoryCellModel {
+        return self.categoryList[indexPath.row]
+    }
+    
+    func insertNewCategory(name: String) {
         self.isChanging = true
         DQ.insertObject(TodoItemCategory.self,
             block: { (context, category) in
@@ -104,14 +103,16 @@ class TodoCategoryDataController {
                 category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
             },
             completion: { categoryId in
-                self.categoryIds.append(categoryId)
-                self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: self.categoryIds.count, inSection: 0)])])
-                completion?()
+                let vm = CategoryCellModel()
+                vm.name = name
+                vm.numberOfItems = 0
+                self.categoryList.append(vm)
+                self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: self.categoryList.count, inSection: 0)])])
                 self.isChanging = false
         })
     }
     
-    func editCategory(item: TodoCategoryViewModel, newName: String, completion: (()->())? = nil) {
+    func editCategory(item: CategoryCellModel, newName: String) {
         DQ.write(
             { context in
                 let item: TodoItemCategory = context.dq_objectWithID(item.objId!)
@@ -119,13 +120,12 @@ class TodoCategoryDataController {
             },
             sync: false,
             completion:  {
-                completion?()
         })
     }
     
-    func deleteCategoryAtRow(row: Int, completion: (()->())? = nil) {
-        let r = row - 1
-        let categoryId = self.categoryIds[r]
+    func deleteCategory(item: CategoryCellModel) {
+        let categoryId = item.objId!
+        let row = item.indexPath?.row ?? 0
         self.isChanging = true
         DQ.write(
             { context in
@@ -134,8 +134,7 @@ class TodoCategoryDataController {
             },
             sync: false,
             completion: {
-                completion?()
-                self.categoryIds.removeAtIndex(r)
+                self.categoryList.removeAtIndex(row)
                 self.onChange?([.Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 0)])])
                 self.isChanging = false
         })
