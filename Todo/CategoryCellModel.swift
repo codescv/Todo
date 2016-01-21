@@ -14,5 +14,5 @@ class CategoryCellModel {
     var name = ""
     var objId: NSManagedObjectID?
     var indexPath: NSIndexPath?
-    var editable = false
+    var editable = true
 }

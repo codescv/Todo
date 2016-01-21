@@ -106,20 +106,37 @@ class TodoCategoryDataSource {
                 let vm = CategoryCellModel()
                 vm.name = name
                 vm.numberOfItems = 0
+                vm.editable = true
                 self.categoryList.append(vm)
-                self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: self.categoryList.count, inSection: 0)])])
+                let lastItem = self.categoryList.count-1
+                self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: lastItem, inSection: 0)])])
                 self.isChanging = false
         })
     }
     
     func editCategory(item: CategoryCellModel, newName: String) {
+        self.editCategoryWithId(item.objId!, newName: newName)
+    }
+    
+    func editCategoryWithId(categoryId: NSManagedObjectID, newName: String) {
         DQ.write(
             { context in
-                let item: TodoItemCategory = context.dq_objectWithID(item.objId!)
+                let item: TodoItemCategory = context.dq_objectWithID(categoryId)
                 item.name = newName
             },
             sync: false,
             completion:  {
+        })
+    }
+    
+    func deleteCategoryWithId(categoryId: NSManagedObjectID) {
+        DQ.write(
+            { context in
+                let obj: TodoItemCategory = context.dq_objectWithID(categoryId)
+                obj.dq_delete()
+            },
+            sync: false,
+            completion: {
         })
     }
     

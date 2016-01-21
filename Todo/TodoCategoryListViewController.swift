@@ -25,18 +25,34 @@ class TodoCategoryListViewController: UIViewController {
         }
     }
     
+    // cancel select category
     func cancel(sender: AnyObject) {
-        //self.dismissViewControllerAnimated(true, completion:{})
         self.performSegueWithIdentifier("cancelMoveToCategory", sender: nil)
     }
     
-    // unwind from editing/creating new category
+    // unwind from EditCategoryViewController
     @IBAction func cancelEditingCategory(segue: UIStoryboardSegue) {
     
     }
     
     @IBAction func saveCategory(segue: UIStoryboardSegue) {
+        if let editCategoryVC = segue.sourceViewController as? EditCategoryViewController {
+            let name = editCategoryVC.categoryName
+            //let color = editCategoryVC.categoryColor
+            if let categoryId = editCategoryVC.categoryId {
+                self.innerCollectionViewController?.categoryDataSource.editCategoryWithId(categoryId, newName: name)
+            } else {
+                self.innerCollectionViewController?.categoryDataSource.insertNewCategory(name)
+            }
+        }
+    }
     
+    @IBAction func deleteCategory(segue: UIStoryboardSegue) {
+        if let editCategoryVC = segue.sourceViewController as? EditCategoryViewController {
+            if let categoryId = editCategoryVC.categoryId {
+                self.innerCollectionViewController?.categoryDataSource.deleteCategoryWithId(categoryId)
+            }
+        }
     }
     
 }
@@ -62,6 +78,7 @@ extension TodoCategoryListViewController: UINavigationControllerDelegate {
 class TodoCategoryCollectionViewController: UICollectionViewController {
     let selectCategorySegueIdentifier = "SelectCategoryIdentifier"
     let showTodoListSegueIdentifier = "showTodoListWithNoAnimation"
+    let editCategorySegueIdentifier = "editCategory"
     
     let categoryDataSource = TodoCategoryDataSource()
     var selectedCellRect = CGRectZero
@@ -144,6 +161,27 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
                 }
             }
         }
+        
+        if segue.identifier == editCategorySegueIdentifier {
+            if let navVC = segue.destinationViewController as? UINavigationController {
+                if let editVC = navVC.topViewController as? EditCategoryViewController {
+                    if let cell = sender as? CategoryCell {
+                        editVC.categoryId = cell.model?.objId
+                    }
+                }
+            }
+        }
+    }
+    
+    override func shouldPerformSegueWithIdentifier(identifier: String, sender: AnyObject?) -> Bool {
+        if identifier == selectCategorySegueIdentifier {
+            if let parent = self.parentViewController as? TodoCategoryListViewController {
+                if parent.readonly {
+                    return false
+                }
+            }
+        }
+        return true
     }
 }
 
@@ -166,6 +204,14 @@ extension TodoCategoryCollectionViewController {
             }
         }
         cell.model = model
+        cell.actionTriggered = { (cell, action) in
+            switch action {
+            case .Delete:
+                self.deleteCategoryForCell(cell)
+            case .Edit:
+                self.editCategoryForCell(cell)
+            }
+        }
         return cell
     }
     
@@ -185,7 +231,9 @@ extension TodoCategoryCollectionViewController {
     }
     
     func editCategoryForCell(cell: CategoryCell) {
-        
+        self.performSegueWithIdentifier(editCategorySegueIdentifier, sender: cell)
     }
+    
+    
     
 }

@@ -76,7 +76,7 @@
                                 </constraints>
                                 <state key="normal" image="add"/>
                                 <connections>
-                                    <segue destination="lQU-fh-kci" kind="presentation" id="Bxb-En-qgc"/>
+                                    <segue destination="lQU-fh-kci" kind="presentation" identifier="newCategory" id="Bxb-En-qgc"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -325,6 +325,9 @@
                                                                 <constraint firstAttribute="width" constant="18" id="x9f-Iv-Kjm"/>
                                                             </constraints>
                                                             <state key="normal" image="edit-white"/>
+                                                            <connections>
+                                                                <action selector="editAction:" destination="zFV-1O-zqx" eventType="touchUpInside" id="cLr-8t-AoJ"/>
+                                                            </connections>
                                                         </button>
                                                     </subviews>
                                                     <color key="backgroundColor" red="0.062745098040000002" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -368,6 +371,9 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" title="Lists" id="Je3-s0-F8r"/>
+                    <connections>
+                        <segue destination="lQU-fh-kci" kind="presentation" identifier="editCategory" id="aTj-JU-8eO"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qmQ-QX-UM4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -909,7 +915,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <view key="tableFooterView" contentMode="scaleToFill" id="6Aj-Il-Fi4" userLabel="footer">
-                            <rect key="frame" x="0.0" y="299" width="600" height="0.0"/>
+                            <rect key="frame" x="0.0" y="279" width="600" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </view>
@@ -917,7 +923,7 @@
                             <tableViewSection id="Rn7-Yq-FJl">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="chooseColorCell" rowHeight="54" id="xQt-zc-d2E">
-                                        <rect key="frame" x="0.0" y="99" width="600" height="54"/>
+                                        <rect key="frame" x="0.0" y="79" width="600" height="54"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="xQt-zc-d2E" id="Tcm-wg-blT">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="53"/>
@@ -980,7 +986,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="titleCell" rowHeight="54" id="4eU-QC-tPX">
-                                        <rect key="frame" x="0.0" y="153" width="600" height="54"/>
+                                        <rect key="frame" x="0.0" y="133" width="600" height="54"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="4eU-QC-tPX" id="1Hz-nm-bsG">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="53"/>
@@ -1001,7 +1007,7 @@
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="deleteButtonCell" rowHeight="54" id="PPy-y3-Wui">
-                                        <rect key="frame" x="0.0" y="207" width="600" height="54"/>
+                                        <rect key="frame" x="0.0" y="187" width="600" height="54"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="PPy-y3-Wui" id="KW6-z3-qVh">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="53"/>
@@ -1015,7 +1021,7 @@
                                                         <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                     </state>
                                                     <connections>
-                                                        <action selector="doDelete:" destination="4Wx-mg-QUR" eventType="touchUpInside" id="tHD-lz-d7G"/>
+                                                        <segue destination="hW8-Qo-quD" kind="unwind" identifier="deleteCategory" unwindAction="deleteCategory:" id="ROJ-OF-2N6"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -1038,12 +1044,12 @@
                     <navigationItem key="navigationItem" title="Edit List" id="jjp-P9-M8c">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="qUY-b7-wXd">
                             <connections>
-                                <segue destination="hW8-Qo-quD" kind="unwind" unwindAction="cancelEditingCategory:" id="IFH-H1-nCG"/>
+                                <segue destination="hW8-Qo-quD" kind="unwind" identifier="cancelEditingCategory" unwindAction="cancelEditingCategory:" id="IFH-H1-nCG"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" systemItem="save" id="fAv-rr-y4y">
                             <connections>
-                                <segue destination="hW8-Qo-quD" kind="unwind" unwindAction="saveCategory:" id="mRv-2e-uch"/>
+                                <segue destination="hW8-Qo-quD" kind="unwind" identifier="saveCategory" unwindAction="saveCategory:" id="mRv-2e-uch"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -1068,5 +1074,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="gw9-Nk-1NP"/>
+        <segue reference="aTj-JU-8eO"/>
     </inferredMetricsTieBreakers>
 </document>
