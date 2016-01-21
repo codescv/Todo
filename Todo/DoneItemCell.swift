@@ -30,7 +30,7 @@ class DoneItemCell: UITableViewCell {
     var actionTriggered: ((DoneItemCell, Action)->())?
     var isTableViewDragging: (()->Bool)?
     
-    var model: DoneItemViewModel? {
+    var model: TodoItemCellModel? {
         didSet {
             if model != nil {
                 let attributes = [

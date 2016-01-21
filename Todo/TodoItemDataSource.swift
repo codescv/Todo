@@ -1,5 +1,5 @@
 //
-//  TodoItemViewModel.swift
+//  TodoItemCellModel.swift
 //  Todo
 //
 //  Created by Chi Zhang on 1/3/16.
@@ -10,10 +10,10 @@ import Foundation
 import CoreData
 import DQuery
 
-class TodoItemDataController {
-    private var todoItemIds = [NSManagedObjectID]()
-    private var doneItemIds = [NSManagedObjectID]()
-    var categoryId: NSManagedObjectID?
+class TodoItemDataSource {
+    private var items = [[TodoItemCellModel]]()
+    
+    private var categoryId: NSManagedObjectID?
     
     enum Change {
         case Delete(indexPaths: [NSIndexPath])
@@ -47,18 +47,21 @@ class TodoItemDataController {
         print("deinit todo item data controller")
     }
     
-    var todoItemsCount: Int {
-        return self.todoItemIds.count
+    var numberOfSections: Int {
+        return self.items.count
     }
     
-    var doneItemsCount: Int {
-        return self.doneItemIds.count
+    func numberOfItemsInSection(section: Int) -> Int {
+        return self.items[section].count
     }
     
-    func todoItemAtRow(row: Int) -> TodoItemViewModel {
-        let itemId = self.todoItemIds[row]
-        let item: TodoItem = DQ.objectWithID(itemId)
-        let vm = TodoItemViewModel()
+    func itemAtIndexPath(indexPath: NSIndexPath) -> TodoItemCellModel {
+        return self.items[indexPath.section][indexPath.row]
+    }
+    
+    func itemForId(itemId: NSManagedObjectID, inContext context: NSManagedObjectContext? = nil) -> TodoItemCellModel {
+        let item = (context == nil ? DQ.objectWithID(itemId) : context!.dq_objectWithID(itemId)) as! TodoItem
+        let vm = TodoItemCellModel()
         vm.title = item.title ?? ""
         vm.objId = item.objectID
         vm.categoryName = item.category?.name ?? ""
@@ -77,14 +80,6 @@ class TodoItemDataController {
         return vm
     }
     
-    func doneItemAtRow(row: Int) -> DoneItemViewModel {
-        let itemId = self.doneItemIds[row]
-        let item: TodoItem = DQ.objectWithID(itemId)
-        let vm = DoneItemViewModel()
-        vm.title = item.title ?? ""
-        return vm
-    }
-
     func reloadDataFromDB(completion: (() -> ())? = nil) {
         var query = DQ.query(TodoItem).orderBy("displayOrder")
         if let categoryId = self.categoryId {
@@ -106,28 +101,28 @@ class TodoItemDataController {
                     return item1.doneDate!.compare(item2.doneDate!) == .OrderedDescending
                 }
             }
+            let items = [todoItemIds.map { self.itemForId($0) }, doneItemIds.map { self.itemForId($0) }]
             print("reloaded items from DB")
             dispatch_async(dispatch_get_main_queue(), {
-                self.todoItemIds = todoItemIds
-                self.doneItemIds = doneItemIds
+                self.items = items
                 completion?()
             })
         }
     }
     
-    func moveTodoItem(fromRow srcRow: Int, toRow destRow: Int, completion: (()->())? = nil) {
+    func moveTodoItem(fromRow srcRow: Int, toRow destRow: Int) {
         if srcRow == destRow {
             return
         }
         
-        var todoItemIds = self.todoItemIds
+        var todoItems = self.items[0]
         DQ.write (
             { context in
                 let exchangeWithBelow = { (row: Int) in
-                    let item: TodoItem = context.dq_objectWithID(todoItemIds[row])
-                    let nextItem: TodoItem = context.dq_objectWithID(todoItemIds[row+1])
+                    let item: TodoItem = context.dq_objectWithID(todoItems[row].objId!)
+                    let nextItem: TodoItem = context.dq_objectWithID(todoItems[row+1].objId!)
                     swap(&item.displayOrder, &nextItem.displayOrder)
-                    swap(&todoItemIds[row], &todoItemIds[row+1])
+                    swap(&todoItems[row], &todoItems[row+1])
                 }
                 
                 if srcRow < destRow {
@@ -142,14 +137,12 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                self.todoItemIds = todoItemIds
-                completion?()
+                self.items[0] = todoItems
         })
     }
     
-    func deleteTodoItemAtRow(row: Int, completion: (()->())? = nil) {
-        let objId = self.todoItemIds[row]
-        
+    func deleteItemAtIndexPath(indexPath: NSIndexPath) {
+        let objId = self.itemAtIndexPath(indexPath).objId!
         self.isChanging = true
         DQ.write(
             {context in
@@ -158,57 +151,39 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                self.todoItemIds.removeAtIndex(row)
-                self.onChange?([.Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 0)])])
-                completion?()
+                self.items[indexPath.section].removeAtIndex(indexPath.row)
+                self.onChange?([.Delete(indexPaths: [indexPath])])
                 self.isChanging = false
         })
     }
     
-    func deleteDoneItemAtRow(row: Int, completion: (()->())? = nil) {
-        let objId = self.doneItemIds[row]
+    func undoItemAtRow(row: Int) {
+        let objId = self.items[1][row].objId!
         
         self.isChanging = true
         DQ.write(
             {context in
                 let item: TodoItem = context.dq_objectWithID(objId)
-                item.dq_delete()
-            },
-            sync: false,
-            completion: {
-                self.doneItemIds.removeAtIndex(row)
-                self.onChange?([.Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 1)])])
-                completion?()
-                self.isChanging = false
-        })
-    }
-    
-    func undoItemAtRow(row: Int, completion: (()->())? = nil) {
-        let objId = self.doneItemIds[row]
-        
-        self.isChanging = true
-        DQ.write(
-            {context in
-                let item: TodoItem = context.dq_objectWithID(objId)
+                item.displayOrder = TodoItem.topDisplayOrder(context)
                 item.isDone = false
             },
             sync: false,
             completion: {
-                self.doneItemIds.removeAtIndex(row)
-                self.todoItemIds.insert(objId, atIndex: 0)
+                let item = self.items[1][row]
+                self.items[1].removeAtIndex(row)
+                self.items[0].insert(item, atIndex: 0)
                 let changes: [Change] = [
                     .Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 1)]),
                     .Insert(indexPaths: [NSIndexPath(forRow: row, inSection: 0)])
                 ]
                 self.onChange?(changes)
-                completion?()
                 self.isChanging = false
         })
     }
 
     
-    func markTodoItemAsDoneAtRow(row: Int, completion: (()->())? = nil) {
-        let objId = self.todoItemIds[row]
+    func markTodoItemAsDoneAtRow(row: Int) {
+        let objId = self.items[0][row].objId!
         
         self.isChanging = true
         DQ.write(
@@ -219,20 +194,20 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                self.todoItemIds.removeAtIndex(row)
-                self.doneItemIds.insert(objId, atIndex: 0)
+                let item = self.items[0][row]
+                self.items[0].removeAtIndex(row)
+                self.items[1].insert(item, atIndex: 0)
                 let changes: [Change] = [
                     .Delete(indexPaths: [NSIndexPath(forRow: row, inSection: 0)]),
                     .Insert(indexPaths: [NSIndexPath(forRow: 0, inSection: 1)])
                 ]
                 self.onChange?(changes)
-                completion?()
                 self.isChanging = false
         })
     }
 
     
-    func insertTodoItem(title title: String, completion: (()->())? = nil) {
+    func insertTodoItem(title title: String) {
         self.isChanging = true
         DQ.insertObject(TodoItem.self,
             block: {context, item in
@@ -246,36 +221,40 @@ class TodoItemDataController {
             },
             sync: false,
             completion: { objId in
-                self.todoItemIds.insert(objId, atIndex: 0)
+                // FIXME: fetch on main thread
+                let item = self.itemForId(objId)
+                self.items[0].insert(item, atIndex: 0)
                 self.onChange?([.Insert(indexPaths:[NSIndexPath(forRow: 0, inSection: 0)])])
-                completion?()
                 self.isChanging = false
         })
     }
     
-    func editTodoItem(model:TodoItemViewModel, title: String, completion: (()->())? = nil) {
+    func editTodoItem(model:TodoItemCellModel, title: String) {
         var index: Int = 0
         self.isChanging = true
         DQ.write(
             { context in
                 let objId = model.objId!
-                index = self.todoItemIds.indexOf(objId)!
+                for (idx, item) in self.items[0].enumerate() {
+                    if item.objId == objId {
+                        index = idx
+                    }
+                }
                 let item: TodoItem = context.dq_objectWithID(objId)
                 item.title = title
             },
             sync: false,
             completion:  {
                 self.onChange?([.Update(indexPaths:[NSIndexPath(forRow: index, inSection: 0)])])
-                completion?()
                 self.isChanging = false
         })
     }
     
-    func changeCategory(model: TodoItemViewModel, category: CategoryCellModel, completion: (()->())? = nil) {
+    func changeCategory(model: TodoItemCellModel, categoryId: NSManagedObjectID?) {
         DQ.write(
             { context in
                 let item: TodoItem = context.dq_objectWithID(model.objId!)
-                if let objId = category.objId {
+                if let objId = categoryId {
                     let categoryObj: TodoItemCategory = context.dq_objectWithID(objId)
                     item.category = categoryObj
                 }else {
@@ -284,11 +263,10 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                completion?()
         })
     }
     
-    func editReminder<T>(model: TodoItemViewModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: RepeatType?, repeatValue: T, completion: (()->())? = nil) {
+    func editReminder<T>(model: TodoItemCellModel, hasReminder: Bool, reminderDate: NSDate, isRepeated: Bool, repeatType: RepeatType?, repeatValue: T) {
         DQ.write(
             { context in
                 let item: TodoItem = context.dq_objectWithID(model.objId!)
@@ -302,7 +280,6 @@ class TodoItemDataController {
             },
             sync: false,
             completion: {
-                completion?()
         })
     }
 }

@@ -11,17 +11,22 @@ import CoreData
 import DQuery
 
 class TodoListViewController: UIViewController {
-    var category: CategoryCellModel? {
+    var categoryId: NSManagedObjectID? {
         didSet {
-            innerTableViewController?.categoryId = category?.objId
-            self.title = category?.name
+            innerTableViewController?.categoryId = categoryId
+            if let catId = categoryId {
+                let category: TodoItemCategory = DQ.objectWithID(catId)
+                self.title = category.name
+            } else {
+                self.title = "All"
+            }
         }
     }
     
     var innerTableViewController: TodoListTableViewController?
     
     @IBAction func newTodoItemButtonTouched(sender: UIButton) {
-        self.innerTableViewController?.startComposingNewTodoItem()
+        self.innerTableViewController?.beginEditingNewTodoItem()
     }
     
     @IBAction func cancelMoveToCategory(segue: UIStoryboardSegue) {
@@ -30,7 +35,7 @@ class TodoListViewController: UIViewController {
 }
 
 class TodoListTableViewController: UITableViewController {
-    // MARK: properties
+    // MARK: constants
     enum CellType: String{
         case ItemCell = "TodoItemCellIdentifier"
         case DoneItemCell = "DoneItemCellIdentifier"
@@ -59,21 +64,21 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    // MARK: properties
+    
+    // segue ids
     let moveToCategorySegue = "SelectCategorySegue"
     let editReminderSegue = "editReminderSegue"
     
-    deinit {
-        print("deinit todolist table vc")
-    }
     
     // the category id
     var categoryId: NSManagedObjectID? {
         didSet {
-            self.todoItemsDataController = TodoItemDataController(categoryId: self.categoryId)
-            self.todoItemsDataController.reloadDataFromDB {
+            self.todoItemsDataSource = TodoItemDataSource(categoryId: self.categoryId)
+            self.todoItemsDataSource.reloadDataFromDB {
                 self.tableView.reloadData()
             }
-            self.todoItemsDataController.onChange = { [weak self] changes in
+            self.todoItemsDataSource.onChange = { [weak self] changes in
                 if let myself = self {
                     if changes.count == 0 {
                         myself.tableView.reloadData()
@@ -83,9 +88,9 @@ class TodoListTableViewController: UITableViewController {
                     for change in changes {
                         switch change {
                         case .Insert(indexPaths: let indexPaths):
-                            myself.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+                            myself.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .Left)
                         case .Delete(indexPaths: let indexPaths):
-                            myself.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
+                            myself.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: .Right)
                         case .Update(indexPaths: let indexPaths):
                             myself.tableView.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: .Automatic)
                         case .Move(fromIndexPath: let fromIndexPath, toIndexPath: let toIndexPath):
@@ -98,23 +103,25 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
-    // the cell expanded
-    var selectedIndexPath: NSIndexPath?
-    // the cell to be moved
+    // index path for the expanded cell
+    var expandedIndexPath: NSIndexPath?
+    
+    // index path for the cell moving at the beginning
     var firstMovingIndexPath: NSIndexPath?
+    // current index path for the moving cell
     var currentMovingIndexPath: NSIndexPath?
     // snapshot of current moving cell
     var sourceCellSnapshot: UIView?
     
-    // view model
-    var todoItemsDataController = TodoItemDataController()
-    
-    // current editing item
-    var editingIndexPath: NSIndexPath?
-    
+    // data source for the table
+    var todoItemsDataSource = TodoItemDataSource()
+
     // is tableview dragging
     var isDragging = false
     
+    // index path for current editing cell
+    var editingIndexPath: NSIndexPath?
+    // is current editing a new item
     var isComposingNewTodoItem = false {
         didSet {
             if isComposingNewTodoItem {
@@ -123,14 +130,18 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    // MARK: viewcontroller
+    deinit {
+        print("deinit todolist table vc")
+    }
+
     override func didMoveToParentViewController(parent: UIViewController?) {
         if let parentVC = parent as? TodoListViewController {
             parentVC.innerTableViewController = self
-            self.categoryId = parentVC.category?.objId
+            self.categoryId = parentVC.categoryId
         }
     }
     
-    // MARK: viewcontroller lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -141,6 +152,32 @@ class TodoListTableViewController: UITableViewController {
         let longPress = UILongPressGestureRecognizer(target: self, action:"longPressGestureRecognized:")
         tableView.addGestureRecognizer(longPress)
     }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == self.moveToCategorySegue {
+            //let model = (sender as! TodoItemCell).model!
+            if let toVC = segue.destinationViewController as? UINavigationController {
+                if let categoryVC = toVC.topViewController as? TodoCategoryListViewController,
+                    let cell = sender as? TodoItemCell {
+                        categoryVC.readonly = true
+                        categoryVC.onSelectCategory = { [weak categoryVC] categoryId in
+                            self.todoItemsDataSource.changeCategory(cell.model!, categoryId: categoryId)
+                            categoryVC?.dismissViewControllerAnimated(true, completion: {})
+                        }
+                        categoryVC.title = "Pick A List"
+                        self.expandedIndexPath = nil
+                        self.tableView.reloadData()
+                }
+            }
+        } else if segue.identifier == self.editReminderSegue {
+            if let cell = sender as? TodoItemCell {
+                if let reminderVC = segue.destinationViewController as? ReminderViewController {
+                    reminderVC.item = cell.model
+                }
+            }
+        }
+    }
+
     
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
@@ -191,8 +228,8 @@ class TodoListTableViewController: UITableViewController {
                 }
             }
             
-            if selectedIndexPath != nil {
-                selectedIndexPath = nil
+            if expandedIndexPath != nil {
+                expandedIndexPath = nil
                 tableView.reloadData()
                 dispatch_async(dispatch_get_main_queue(), {
                     blk();
@@ -253,7 +290,7 @@ class TodoListTableViewController: UITableViewController {
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
                     if state == .Ended {
-                        self.todoItemsDataController.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
+                        self.todoItemsDataSource.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
                         self.firstMovingIndexPath = nil
                         self.currentMovingIndexPath = nil
                     } else {
@@ -265,24 +302,17 @@ class TodoListTableViewController: UITableViewController {
         }
     }
 
-    // MARK: datasource
+    // MARK: table datasource
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return Section.count()
+        return self.todoItemsDataSource.numberOfSections
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch Section(rawValue: section)! {
-        case .TodoSection:
-            let itemCount = self.todoItemsDataController.todoItemsCount
-            
-            if self.isComposingNewTodoItem {
-                return itemCount + 1
-            }
-            
-            return itemCount
-        case .DoneSection:
-            return self.todoItemsDataController.doneItemsCount
+        let itemCount = self.todoItemsDataSource.numberOfItemsInSection(section)
+        if Section(rawValue: section)! == .TodoSection && self.isComposingNewTodoItem {
+            return itemCount + 1
         }
+        return itemCount
     }
     
     override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -290,70 +320,122 @@ class TodoListTableViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        // new/edit item cell
-        if indexPath.isEqual(self.editingIndexPath) {
-            let editItemCell = tableView.dequeueReusableCellWithIdentifier(CellType.EditItemCell.identifier()) as! EditTodoItemCell
-            if self.isComposingNewTodoItem {
-                editItemCell.model = nil
-            } else {
-                let item = self.todoItemsDataController.todoItemAtRow(indexPath.row)
-                editItemCell.model = item
-            }
-            dispatch_async(dispatch_get_main_queue(), {
-                editItemCell.textView.becomeFirstResponder()
-            })
-            editItemCell.actionTriggered = { [unowned self] (cell, action) in
-                    switch action {
-                    case .OK:
-                        self.endEditingCell(cell, save: true)
-                    case .Cancel:
-                        self.endEditingCell(cell, save: false)
-                    default:
-                        break
-                    }
-                
-            }
-            return editItemCell
-        }
+        var model: TodoItemCellModel?
+        let section = Section(rawValue: indexPath.section)!
         
-        // done item cell
-        if indexPath.section == Section.DoneSection.rawValue {
-            let doneCell = tableView.dequeueReusableCellWithIdentifier(CellType.DoneItemCell.identifier()) as! DoneItemCell
-            let item = self.todoItemsDataController.doneItemAtRow(indexPath.row)
-            doneCell.model = item
-            doneCell.actionTriggered = { [unowned self] cell, action in
-                switch action {
-                case .Delete:
-                    self.deleteDoneItemForCell(cell)
-                case .Undo:
-                    self.undoDoneItemForCell(cell)
+        if section == .TodoSection {
+            if indexPath.isEqual(self.editingIndexPath) {
+                // new/edit
+                if !self.isComposingNewTodoItem {
+                    model = self.todoItemsDataSource.itemAtIndexPath(indexPath)
                 }
+                let cell = tableView.dequeueReusableCellWithIdentifier(CellType.EditItemCell.identifier()) as! EditTodoItemCell
+                cell.model = model
+                self.configureEditCell(cell)
+                return cell
+            } else {
+                // todo
+                var dataIndexPath = indexPath
+                if self.isComposingNewTodoItem {
+                    dataIndexPath = NSIndexPath(forRow: indexPath.row-1, inSection: indexPath.section)
+                }
+                model = self.todoItemsDataSource.itemAtIndexPath(dataIndexPath)
+                let cell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
+                cell.model = model
+                self.configureTodoCell(cell)
+                return cell
             }
-            doneCell.isTableViewDragging = { [unowned self] in
-                return self.isDragging
-            }
-            return doneCell
-        }
-        
-        // todo item cell
-        var row = indexPath.row
-        if self.isComposingNewTodoItem {
-            row -= 1
-        }
-        
-        let item = self.todoItemsDataController.todoItemAtRow(row)
-        let itemCell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
-        if selectedIndexPath?.compare(indexPath) == .OrderedSame {
-            item.isExpanded = true
+            
         } else {
-            item.isExpanded = false
+            // done
+            model = self.todoItemsDataSource.itemAtIndexPath(indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(CellType.DoneItemCell.identifier()) as! DoneItemCell
+            cell.model = model
+            self.configureDoneCell(cell)
+            return cell
         }
-        // only show category name inside the "all" list
-        if self.categoryId != nil {
-            item.categoryName = nil
+    }
+    
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return UITableViewAutomaticDimension
+    }
+    
+    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        self.todoItemsDataSource.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
+    }
+    
+    // MARK: table delegate
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if self.isComposingNewTodoItem {
+            return
         }
-        itemCell.model = item
-        itemCell.actionTriggered = { [unowned self] (cell, action) in
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        
+        if let selected = expandedIndexPath {
+            if selected.compare(indexPath) == .OrderedSame {
+                // fold
+                expandedIndexPath = nil
+                let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+                cell?.hideActionsAnimated()
+                
+            } else {
+                // fold old and expand new
+                expandedIndexPath = indexPath
+                let oldCell = tableView.cellForRowAtIndexPath(selected) as? TodoItemCell
+                let newCell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+                oldCell?.hideActionsAnimated()
+                newCell?.expandActionsAnimated()
+            }
+        } else {
+            // expand new
+            expandedIndexPath = indexPath
+            let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
+            cell?.expandActionsAnimated()
+        }
+        
+        tableView.beginUpdates()
+        tableView.endUpdates()
+    }
+    
+    // MARK: track table dragging state
+    override func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        self.isDragging = true
+    }
+    
+    override func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        self.isDragging = false
+    }
+    
+    // MARK: configure cell
+    func configureEditCell(cell: EditTodoItemCell) {
+        dispatch_async(dispatch_get_main_queue(), {
+            cell.textView.becomeFirstResponder()
+        })
+        cell.actionTriggered = { [unowned self] (cell, action) in
+            switch action {
+            case .OK:
+                self.endEditingCell(cell, save: true)
+            case .Cancel:
+                self.endEditingCell(cell, save: false)
+            default:
+                break
+            }
+            
+        }
+    }
+    
+    func configureTodoCell(cell: TodoItemCell) {
+        // keep view model in sync
+        if let indexPath = self.tableView.indexPathForCell(cell) {
+            if expandedIndexPath?.compare(indexPath) == .OrderedSame {
+                cell.model?.isExpanded = true
+            } else {
+                cell.model?.isExpanded = false
+            }
+        }
+        
+        cell.actionTriggered = { [unowned self] (cell, action) in
             switch action {
             case .Delete:
                 self.deleteItemForCell(cell)
@@ -369,120 +451,75 @@ class TodoListTableViewController: UITableViewController {
                 break
             }
         }
-        itemCell.isTableViewDragging = { [unowned self] in
+        cell.isTableViewDragging = { [unowned self] in
             return self.isDragging
         }
-        return itemCell
-    }
-    
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
-    }
-    
-    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
-        self.todoItemsDataController.moveTodoItem(fromRow: sourceIndexPath.row, toRow: destinationIndexPath.row)
-    }
-    
-    // delegate
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if self.isComposingNewTodoItem {
-            return
-        }
         
-        tableView.deselectRowAtIndexPath(indexPath, animated: false)
-        
-        if let selected = selectedIndexPath {
-            if selected.compare(indexPath) == .OrderedSame {
-                // fold
-                selectedIndexPath = nil
-                let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
-                cell?.hideActionsAnimated()
-                
-            } else {
-                // fold old and expand new
-                selectedIndexPath = indexPath
-                let oldCell = tableView.cellForRowAtIndexPath(selected) as? TodoItemCell
-                let newCell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
-                oldCell?.hideActionsAnimated()
-                newCell?.expandActionsAnimated()
+    }
+    
+    func configureDoneCell(cell: DoneItemCell) {
+        cell.actionTriggered = { [unowned self] cell, action in
+            switch action {
+            case .Delete:
+                self.deleteItemForCell(cell)
+            case .Undo:
+                self.undoDoneItemForCell(cell)
             }
-        } else {
-            // expand new
-            selectedIndexPath = indexPath
-            let cell = tableView.cellForRowAtIndexPath(indexPath) as? TodoItemCell
-            cell?.expandActionsAnimated()
         }
-        
-        tableView.beginUpdates()
-        tableView.endUpdates()
-    }
-    
-    override func scrollViewWillBeginDragging(scrollView: UIScrollView) {
-        self.isDragging = true
-    }
-    
-    override func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        self.isDragging = false
-    }
-    
-    // table cell actions
-    func deleteItemForCell(cell: TodoItemCell) {
-        if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.selectedIndexPath = nil
-            self.tableView.reloadData()
-            self.todoItemsDataController.deleteTodoItemAtRow(indexPath.row)
+        cell.isTableViewDragging = { [unowned self] in
+            return self.isDragging
         }
     }
     
-    func deleteDoneItemForCell(cell: DoneItemCell) {
+    // MARK: cell actions
+    func deleteItemForCell(cell: UITableViewCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.selectedIndexPath = nil
+            self.expandedIndexPath = nil
             self.tableView.reloadData()
-            self.todoItemsDataController.deleteDoneItemAtRow(indexPath.row)
+            self.todoItemsDataSource.deleteItemAtIndexPath(indexPath)
         }
     }
     
     func undoDoneItemForCell(cell: DoneItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.selectedIndexPath = nil
+            self.expandedIndexPath = nil
             self.tableView.reloadData()
-            self.todoItemsDataController.undoItemAtRow(indexPath.row)
+            self.todoItemsDataSource.undoItemAtRow(indexPath.row)
         }
     }
     
     func markItemAsDoneForCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.selectedIndexPath = nil
+            self.expandedIndexPath = nil
             self.tableView.reloadData()
-            self.todoItemsDataController.markTodoItemAsDoneAtRow(indexPath.row)
+            self.todoItemsDataSource.markTodoItemAsDoneAtRow(indexPath.row)
         }
+    }
+    
+    
+    func beginEditingNewTodoItem() {
+        guard !self.isComposingNewTodoItem else { return }
+        
+        self.isComposingNewTodoItem = true
+        let indexPath = NSIndexPath(forRow: 0, inSection: 0)
+        self.editingIndexPath = indexPath
+        self.tableView.beginUpdates()
+        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+        if self.expandedIndexPath != nil {
+            self.tableView.reloadRowsAtIndexPaths([self.expandedIndexPath!], withRowAnimation: .Automatic)
+            self.expandedIndexPath = nil
+        }
+        self.tableView.endUpdates()
     }
     
     func beginEditingCell(cell: TodoItemCell) {
         if let indexPath = self.tableView.indexPathForCell(cell) {
-            self.selectedIndexPath = nil
+            self.expandedIndexPath = nil
             self.editingIndexPath = indexPath
             self.tableView.beginUpdates()
             self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             self.tableView.endUpdates()
         }
-    }
-    
-    func startComposingNewTodoItem() {
-        if self.isComposingNewTodoItem {
-            return
-        }
-        
-        let indexPath = NSIndexPath(forRow: 0, inSection: 0)
-        self.isComposingNewTodoItem = true
-        self.editingIndexPath = indexPath
-        self.tableView.beginUpdates()
-        self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        if self.selectedIndexPath != nil {
-            self.tableView.reloadRowsAtIndexPaths([self.selectedIndexPath!], withRowAnimation: .Automatic)
-            self.selectedIndexPath = nil
-        }
-        self.tableView.endUpdates()
     }
     
     func endEditingCell(cell: EditTodoItemCell, save: Bool) {
@@ -496,16 +533,16 @@ class TodoListTableViewController: UITableViewController {
         if let item = cell.model {
             // edit item
             if save {
-                self.todoItemsDataController.editTodoItem(item, title: title)
+                self.todoItemsDataSource.editTodoItem(item, title: title)
             } else {
                 self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
             }
         } else {
             // new item
             // remove the editing cell
-            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Right)
             if save {
-                self.todoItemsDataController.insertTodoItem(title: title)
+                self.todoItemsDataSource.insertTodoItem(title: title)
             }
         }
     }
@@ -518,29 +555,6 @@ class TodoListTableViewController: UITableViewController {
         self.performSegueWithIdentifier(self.editReminderSegue, sender: cell)
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == self.moveToCategorySegue {
-            //let model = (sender as! TodoItemCell).model!
-            if let toVC = segue.destinationViewController as? UINavigationController {
-                if let categoryVC = toVC.topViewController as? TodoCategoryListViewController,
-                   let cell = sender as? TodoItemCell {
-                    categoryVC.readonly = true
-                    categoryVC.onSelectCategory = { [weak categoryVC] category in
-                        self.todoItemsDataController.changeCategory(cell.model!, category: category) {
-                            categoryVC?.dismissViewControllerAnimated(true, completion: {})
-                        }
-                    }
-                    categoryVC.title = "Pick A List"
-                }
-            }
-        } else if segue.identifier == self.editReminderSegue {
-            if let cell = sender as? TodoItemCell {
-                if let reminderVC = segue.destinationViewController as? ReminderViewController {
-                    reminderVC.item = cell.model
-                }
-            }
-        }
-    }
     
     // unwind from edit reminder
     @IBAction func editReminder(segue: UIStoryboardSegue) {
@@ -552,7 +566,7 @@ class TodoListTableViewController: UITableViewController {
                 let repeatValue = model.repeatValue
                 let hasReminder = model.hasReminder
                 let reminderDate = model.reminderDate
-                self.todoItemsDataController.editReminder(model, hasReminder: hasReminder,
+                self.todoItemsDataSource.editReminder(model, hasReminder: hasReminder,
                     reminderDate: reminderDate, isRepeated: isRepeated,
                     repeatType: repeatType, repeatValue: repeatValue)
             }

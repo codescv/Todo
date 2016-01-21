@@ -14,7 +14,7 @@ import DQuery
 class TodoCategoryListViewController: UIViewController {
     var innerCollectionViewController: TodoCategoryCollectionViewController?
     var readonly = false
-    var onSelectCategory: ((CategoryCellModel)->())?
+    var onSelectCategory: ((NSManagedObjectID?)->())?
     @IBOutlet weak var newCategoryButton: UIButton!
     
     override func viewDidLoad() {
@@ -62,12 +62,12 @@ extension TodoCategoryListViewController: UINavigationControllerDelegate {
     func navigationController(navigationController: UINavigationController, animationControllerForOperation operation: UINavigationControllerOperation, fromViewController fromVC: UIViewController, toViewController toVC: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         if operation == .Push {
             if let todoListVC = toVC as? TodoListViewController {
-                let categoryId = todoListVC.category?.objId
+                let categoryId = todoListVC.categoryId
                 return RectZoomAnimator(direction: .ZoomIn, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
             }
         } else {
             if let todoListVC = fromVC as? TodoListViewController {
-                let categoryId = todoListVC.category?.objId
+                let categoryId = todoListVC.categoryId
                 return RectZoomAnimator(direction: .ZoomOut, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
             }
         }
@@ -157,7 +157,7 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
             if let todoListVC = segue.destinationViewController as? TodoListViewController,
                let cell = sender as? CategoryCell {
                 if let indexPath = self.collectionView?.indexPathForCell(cell) {
-                    todoListVC.category = self.categoryDataSource.categoryAtIndexPath(indexPath)
+                    todoListVC.categoryId = self.categoryDataSource.categoryAtIndexPath(indexPath).objId
                 }
             }
         }
@@ -222,7 +222,7 @@ extension TodoCategoryCollectionViewController {
     override func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         if let parent = self.parentViewController as? TodoCategoryListViewController {
             let item = self.categoryDataSource.categoryAtIndexPath(indexPath)
-            parent.onSelectCategory?(item)
+            parent.onSelectCategory?(item.objId)
         }
     }
     

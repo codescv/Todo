@@ -1,5 +1,5 @@
 //
-//  TodoItemViewModel.swift
+//  TodoItemCellModel.swift
 //  Todo
 //
 //  Created by 陳小晶 on 16/1/14.
@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-class TodoItemViewModel {
+class TodoItemCellModel {
     var title: String = ""
     var categoryName: String?
     var isExpanded: Bool = false

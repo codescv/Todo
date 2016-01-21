@@ -68,7 +68,7 @@ class TodoItemCell: UITableViewCell {
         self.actionTriggered?(self, .Delete)
     }
     
-    var model: TodoItemViewModel? {
+    var model: TodoItemCellModel? {
         didSet {
             if let vm = model {
                 self.titleLabel.text = vm.title

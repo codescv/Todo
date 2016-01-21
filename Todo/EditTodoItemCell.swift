@@ -26,7 +26,7 @@ class EditTodoItemCell: UITableViewCell {
         case Unknown
     }
     
-    var model: TodoItemViewModel? {
+    var model: TodoItemCellModel? {
         didSet {
             self.textView.text = model?.title
         }

@@ -12,7 +12,7 @@ class ReminderViewController: UITableViewController {
     let editReminderSegue = "editReminderSegue"
     let cancelEditSegue = "cancelEditSegue"
     
-    var item: TodoItemViewModel!
+    var item: TodoItemCellModel!
     
     var hasReminder: Bool {
         get {
