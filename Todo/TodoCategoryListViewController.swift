@@ -41,11 +41,11 @@ class TodoCategoryListViewController: UIViewController {
     @IBAction func saveCategory(segue: UIStoryboardSegue) {
         if let editCategoryVC = segue.sourceViewController as? EditCategoryViewController {
             let name = editCategoryVC.categoryName
-            //let color = editCategoryVC.categoryColor
+            let color = editCategoryVC.categoryColor
             if let categoryId = editCategoryVC.categoryId {
-                self.innerCollectionViewController?.categoryDataSource.editCategoryWithId(categoryId, newName: name)
+                self.innerCollectionViewController?.categoryDataSource.editCategoryWithId(categoryId, newName: name, newColor: color)
             } else {
-                self.innerCollectionViewController?.categoryDataSource.insertNewCategory(name)
+                self.innerCollectionViewController?.categoryDataSource.insertNewCategory(name, color: color)
             }
         }
     }

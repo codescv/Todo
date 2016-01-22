@@ -14,7 +14,9 @@ class TodoItemCellModel {
     var categoryName: String?
     var isExpanded: Bool = false
     var objId: NSManagedObjectID?
+    var showsCategoryName: Bool = true
     
+    // reminder
     var hasReminder = false
     var reminderDate = NSDate()
     var isRepeated = false

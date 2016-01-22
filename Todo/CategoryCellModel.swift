@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 class CategoryCellModel {
     var numberOfItems: Int = 0
@@ -15,4 +16,5 @@ class CategoryCellModel {
     var objId: NSManagedObjectID?
     var indexPath: NSIndexPath?
     var editable = true
+    var color: UIColor!
 }

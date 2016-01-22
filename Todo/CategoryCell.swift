@@ -38,6 +38,7 @@ class CategoryCell: UICollectionViewCell {
             if let md = model {
                 self.categoryNameLabel.text = md.name
                 self.editButton.hidden = !md.editable
+                self.topBar.backgroundColor = md.color
             }
         }
     }

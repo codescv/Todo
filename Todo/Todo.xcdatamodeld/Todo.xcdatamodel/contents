@@ -15,7 +15,7 @@
         <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="TodoItemCategory" inverseName="items" inverseEntity="TodoItemCategory" syncable="YES"/>
     </entity>
     <entity name="TodoItemCategory" representedClassName=".TodoItemCategory" syncable="YES">
-        <attribute name="color" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="colorType" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
         <attribute name="displayOrder" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TodoItem" inverseName="category" inverseEntity="TodoItem" syncable="YES"/>

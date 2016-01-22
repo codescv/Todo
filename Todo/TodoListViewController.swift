@@ -23,6 +23,16 @@ class TodoListViewController: UIViewController {
         }
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        if let catId = categoryId {
+            let category: TodoItemCategory = DQ.objectWithID(catId)
+            self.navigationController?.navigationBar.barTintColor = category.color
+        } else {
+            self.navigationController?.navigationBar.barTintColor = CategoryColor.Blue.color()
+        }
+    }
+    
     var innerTableViewController: TodoListTableViewController?
     
     @IBAction func newTodoItemButtonTouched(sender: UIButton) {
@@ -340,6 +350,7 @@ class TodoListTableViewController: UITableViewController {
                     dataIndexPath = NSIndexPath(forRow: indexPath.row-1, inSection: indexPath.section)
                 }
                 model = self.todoItemsDataSource.itemAtIndexPath(dataIndexPath)
+                model!.showsCategoryName = self.categoryId == nil // only show category name in "All" list
                 let cell = tableView.dequeueReusableCellWithIdentifier(CellType.ItemCell.identifier()) as! TodoItemCell
                 cell.model = model
                 self.configureTodoCell(cell)

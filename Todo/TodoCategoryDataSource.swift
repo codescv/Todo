@@ -54,6 +54,7 @@ class TodoCategoryDataSource {
                 cat.numberOfItems = category.items?.count ?? 0
                 cat.objId = objId
                 cat.editable = true
+                cat.color = category.color
                 return cat
             }
             
@@ -63,6 +64,7 @@ class TodoCategoryDataSource {
             let totalItems = DQ.query(TodoItem.self, context: context).count()
             catAll.numberOfItems = totalItems
             catAll.editable = false
+            catAll.color = CategoryColor.Blue.color()
             categoryList.insert(catAll, atIndex: 0)
             
             // set indexPaths to view model
@@ -95,18 +97,20 @@ class TodoCategoryDataSource {
         return self.categoryList[indexPath.row]
     }
     
-    func insertNewCategory(name: String) {
+    func insertNewCategory(name: String, color: Int = 0) {
         self.isChanging = true
         DQ.insertObject(TodoItemCategory.self,
             block: { (context, category) in
                 category.name = name
                 category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
+                category.colorType = color
             },
             completion: { categoryId in
                 let vm = CategoryCellModel()
                 vm.name = name
                 vm.numberOfItems = 0
                 vm.editable = true
+                vm.color = CategoryColor(rawValue: color)?.color()
                 self.categoryList.append(vm)
                 let lastItem = self.categoryList.count-1
                 self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: lastItem, inSection: 0)])])
@@ -114,15 +118,16 @@ class TodoCategoryDataSource {
         })
     }
     
-    func editCategory(item: CategoryCellModel, newName: String) {
-        self.editCategoryWithId(item.objId!, newName: newName)
+    func editCategory(item: CategoryCellModel, newName: String, newColor: Int? = nil) {
+        self.editCategoryWithId(item.objId!, newName: newName, newColor: newColor)
     }
     
-    func editCategoryWithId(categoryId: NSManagedObjectID, newName: String) {
+    func editCategoryWithId(categoryId: NSManagedObjectID, newName: String, newColor: Int? = nil) {
         DQ.write(
             { context in
                 let item: TodoItemCategory = context.dq_objectWithID(categoryId)
                 item.name = newName
+                item.colorType = newColor
             },
             sync: false,
             completion:  {

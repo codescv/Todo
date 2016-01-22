@@ -14,7 +14,7 @@ import CoreData
 
 extension TodoItemCategory {
 
-    @NSManaged var color: NSNumber?
+    @NSManaged var colorType: NSNumber?
     @NSManaged var name: String?
     @NSManaged var displayOrder: NSNumber?
     @NSManaged var items: NSSet?

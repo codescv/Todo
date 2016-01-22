@@ -78,9 +78,9 @@ class TodoItemCell: UITableViewCell {
                     self.hideActionsAnimated(false)
                 }
                 
-                if let categoryName = vm.categoryName {
+                if vm.showsCategoryName {
                     self.categoryLabel.hidden = false
-                    self.categoryLabel.text = categoryName
+                    self.categoryLabel.text = vm.categoryName ?? ""
                 } else {
                     self.categoryLabel.hidden = true
                 }
