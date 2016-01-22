@@ -15,6 +15,7 @@ class TodoCategoryListViewController: UIViewController {
     var innerCollectionViewController: TodoCategoryCollectionViewController?
     var readonly = false
     var onSelectCategory: ((NSManagedObjectID?)->())?
+    
     @IBOutlet weak var newCategoryButton: UIButton!
     
     override func viewDidLoad() {
@@ -23,6 +24,8 @@ class TodoCategoryListViewController: UIViewController {
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: "cancel:")
             self.newCategoryButton.hidden = true
         }
+        self.paddingLeftConstrant.constant = 4
+        self.paddingRightConstraint.constant = 4
     }
     
     // cancel select category
@@ -55,6 +58,8 @@ class TodoCategoryListViewController: UIViewController {
         }
     }
     
+    @IBOutlet weak var paddingLeftConstrant: NSLayoutConstraint!
+    @IBOutlet weak var paddingRightConstraint: NSLayoutConstraint!
 }
 
 extension TodoCategoryListViewController: UINavigationControllerDelegate {
@@ -119,12 +124,13 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
             
         }
         
-        self.collectionView!.backgroundColor = UIColor.whiteColor()
-        
         let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
-        layout.itemSize = CGSizeMake(self.view.frame.width/2, self.view.frame.width/2)
+        print("view: \(self.view.frame) \(collectionView!.frame)")
+        let width = self.view.frame.width/2 - 6
+        layout.itemSize = CGSizeMake(width, width)
         layout.minimumInteritemSpacing = 0
-        layout.minimumLineSpacing = 0
+        layout.minimumLineSpacing = 4
+                
     }
     
     override func viewWillAppear(animated: Bool) {

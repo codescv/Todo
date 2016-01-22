@@ -43,9 +43,11 @@ class CategoryCell: UICollectionViewCell {
     }
     
     override func awakeFromNib() {
-        self.bgCardView.layer.shadowColor = UIColor.grayColor().CGColor
-        self.bgCardView.layer.shadowOffset = CGSizeMake(1, 1)
-        self.bgCardView.layer.shadowOpacity = 1.0
+//        self.bgCardView.layer.shadowColor = UIColor.grayColor().CGColor
+//        self.bgCardView.layer.shadowOffset = CGSizeMake(1, 1)
+//        self.bgCardView.layer.shadowOpacity = 1.0
+        self.bgCardView.layer.cornerRadius = 10.0
+        self.bgCardView.clipsToBounds = true
     }
 
 }
