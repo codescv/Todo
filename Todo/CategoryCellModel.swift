@@ -17,4 +17,5 @@ class CategoryCellModel {
     var indexPath: NSIndexPath?
     var editable = true
     var color: UIColor!
+    var summaryItems: [String]?
 }

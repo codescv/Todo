@@ -11,12 +11,11 @@ import UIKit
 class CategoryCell: UICollectionViewCell {
 
     @IBOutlet weak var categoryNameLabel: UILabel!
-    //@IBOutlet weak var categoryInfoLabel: UILabel!
-    //@IBOutlet weak var editingControls: UIStackView!
     @IBOutlet weak var editButton: UIButton!
-    
     @IBOutlet weak var topBar: UIView!
     @IBOutlet weak var bgCardView: UIView!
+    
+    @IBOutlet weak var summaryStackView: UIStackView!
     
     @IBAction func editAction(sender: AnyObject) {
         self.actionTriggered?(self, .Edit)
@@ -36,9 +35,19 @@ class CategoryCell: UICollectionViewCell {
     var model: CategoryCellModel? {
         didSet {
             if let md = model {
-                self.categoryNameLabel.text = md.name
+                self.categoryNameLabel.text = "\(md.name)(\(md.numberOfItems))"
                 self.editButton.hidden = !md.editable
                 self.topBar.backgroundColor = md.color
+                let summaryCount = md.summaryItems?.count ?? 0
+                for (idx, view) in self.summaryStackView.subviews.enumerate() {
+                    if let label = view as? UILabel {
+                        if idx < summaryCount {
+                            label.text = md.summaryItems![idx]
+                        } else {
+                            label.text = ""
+                        }
+                    }
+                }
             }
         }
     }

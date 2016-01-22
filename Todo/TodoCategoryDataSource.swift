@@ -55,6 +55,9 @@ class TodoCategoryDataSource {
                 cat.objId = objId
                 cat.editable = true
                 cat.color = category.color
+                if let items = category.items?.allObjects as? [TodoItem] {
+                    cat.summaryItems = items[0..<min(4, items.count)].map { $0.title ?? "" }
+                }
                 return cat
             }
             
@@ -65,6 +68,9 @@ class TodoCategoryDataSource {
             catAll.numberOfItems = totalItems
             catAll.editable = false
             catAll.color = CategoryColor.Blue.color()
+            let summaryItems = DQ.query(TodoItem.self, context: context).limit(4).all()
+            catAll.summaryItems = summaryItems.map { $0.title ?? "" }
+            
             categoryList.insert(catAll, atIndex: 0)
             
             // set indexPaths to view model
