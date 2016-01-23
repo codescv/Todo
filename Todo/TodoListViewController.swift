@@ -31,6 +31,8 @@ class TodoListViewController: UIViewController {
         } else {
             self.navigationController?.navigationBar.barTintColor = CategoryColor.Blue.color()
         }
+        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
+        self.navigationController?.navigationBar.tintColor = UIColor.whiteColor()
     }
     
     var innerTableViewController: TodoListTableViewController?

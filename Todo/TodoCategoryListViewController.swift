@@ -68,12 +68,16 @@ extension TodoCategoryListViewController: UINavigationControllerDelegate {
         if operation == .Push {
             if let todoListVC = toVC as? TodoListViewController {
                 let categoryId = todoListVC.categoryId
-                return RectZoomAnimator(direction: .ZoomIn, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
+                return RectZoomAnimator(direction: .ZoomIn, rect: {
+                    self.innerCollectionViewController!.view.convertRect(self.innerCollectionViewController!.cellRectForCategoryId(categoryId), toView: self.view)
+                })
             }
         } else {
             if let todoListVC = fromVC as? TodoListViewController {
                 let categoryId = todoListVC.categoryId
-                return RectZoomAnimator(direction: .ZoomOut, rect: {self.innerCollectionViewController!.cellRectForCategoryId(categoryId)})
+                return RectZoomAnimator(direction: .ZoomOut, rect: {
+                    self.innerCollectionViewController!.view.convertRect(self.innerCollectionViewController!.cellRectForCategoryId(categoryId), toView: self.view)
+                })
             }
         }
         return nil
@@ -125,7 +129,6 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         }
         
         let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
-        print("view: \(self.view.frame) \(collectionView!.frame)")
         let width = self.view.frame.width/2 - 6
         layout.itemSize = CGSizeMake(width, width)
         layout.minimumInteritemSpacing = 0
