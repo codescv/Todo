@@ -227,12 +227,10 @@ class CategoryCellLayout: UICollectionViewLayout {
         }
     }
     
-//    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
-//        let attr = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
-//        attr.frame = CGRectMake(0, 0, 160, 160)
-//        print("attr: \(attr)")
-//        return attr
-//    }
+    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+        let attr = self.layoutInfo[indexPath]
+        return attr
+    }
     
     override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         return self.layoutInfo.values.filter { value in
