@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 class TodoItemCellModel {
     var title: String = ""
@@ -15,6 +16,7 @@ class TodoItemCellModel {
     var isExpanded: Bool = false
     var objId: NSManagedObjectID?
     var showsCategoryName: Bool = true
+    var categoryColor: UIColor?
     
     // reminder
     var hasReminder = false

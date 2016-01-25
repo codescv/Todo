@@ -81,6 +81,7 @@ class TodoItemCell: UITableViewCell {
                 if vm.showsCategoryName {
                     self.categoryLabel.hidden = false
                     self.categoryLabel.text = vm.categoryName ?? ""
+                    self.categoryLabel.textColor = vm.categoryColor
                 } else {
                     self.categoryLabel.hidden = true
                 }

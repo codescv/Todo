@@ -65,6 +65,7 @@ class TodoItemDataSource {
         vm.title = item.title ?? ""
         vm.objId = item.objectID
         vm.categoryName = item.category?.name ?? ""
+        vm.categoryColor = item.category?.color
         vm.hasReminder = item.hasReminder == true
         vm.reminderDate = item.reminderDate ?? NSDate()
         vm.isRepeated = item.isRepeated == true

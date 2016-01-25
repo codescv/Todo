@@ -24,8 +24,6 @@ class TodoCategoryListViewController: UIViewController {
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: "cancel:")
             self.newCategoryButton.hidden = true
         }
-        self.paddingLeftConstrant.constant = 4
-        self.paddingRightConstraint.constant = 4
     }
     
     // cancel select category
@@ -57,9 +55,6 @@ class TodoCategoryListViewController: UIViewController {
             }
         }
     }
-    
-    @IBOutlet weak var paddingLeftConstrant: NSLayoutConstraint!
-    @IBOutlet weak var paddingRightConstraint: NSLayoutConstraint!
 }
 
 extension TodoCategoryListViewController: UINavigationControllerDelegate {
@@ -84,7 +79,7 @@ extension TodoCategoryListViewController: UINavigationControllerDelegate {
     }
 }
 
-class TodoCategoryCollectionViewController: UICollectionViewController {
+class TodoCategoryCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     let selectCategorySegueIdentifier = "SelectCategoryIdentifier"
     let showTodoListSegueIdentifier = "showTodoListWithNoAnimation"
     let editCategorySegueIdentifier = "editCategory"
@@ -128,17 +123,19 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
             
         }
         
-        let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
-        let width = self.view.frame.width/2 - 6
-        layout.itemSize = CGSizeMake(width, width)
-        layout.minimumInteritemSpacing = 0
-        layout.minimumLineSpacing = 4
-                
+//        let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
+//        let width = self.view.frame.width/2 - 6
+        //layout.itemSize = CGSizeMake(width, width)
+        //layout.estimatedItemSize = CGSizeMake(width, 60)
+        //layout.minimumInteritemSpacing = 0
+//        layout.minimumLineSpacing = 4
+        
+        
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        self.collectionView!.reloadData()
+        //self.collectionView!.reloadData()
     }
     
     override func didMoveToParentViewController(parent: UIViewController?) {
@@ -147,11 +144,6 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         }
     }
     
-    override func setEditing(editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: false)
-        self.collectionView?.reloadData()
-    }
-
     func cellRectForCategoryId(categoryId: NSManagedObjectID?) -> CGRect {
         // compute for category rect
         let indexPath = self.categoryDataSource.indexPathForCategoryId(categoryId)
@@ -192,7 +184,54 @@ class TodoCategoryCollectionViewController: UICollectionViewController {
         }
         return true
     }
+    
+    
 }
+
+
+class CategoryCellLayout: UICollectionViewLayout {
+    var layoutInfo = [NSIndexPath: UICollectionViewLayoutAttributes]()
+    
+    var margin: CGFloat = 10
+    var leadingMargin: CGFloat = 10
+    var topMargin: CGFloat = 10
+    
+    override func prepareLayout() {
+        if let collectionView = self.collectionView {
+            let count = collectionView.numberOfItemsInSection(0)
+            var x:CGFloat = leadingMargin, y: CGFloat = topMargin
+            let width = (collectionView.frame.size.width - margin * 3) / 2
+            for i in 0..<count {
+                let indexPath = NSIndexPath(forItem: i, inSection: 0)
+                let attr = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
+                attr.frame = CGRectMake(x, y, width, width)
+                self.layoutInfo[indexPath] = attr
+                if x <= leadingMargin {
+                    x += width + margin
+                } else {
+                    x = leadingMargin
+                    y += width + margin
+                }
+            }
+        }
+    }
+    
+//    override func layoutAttributesForItemAtIndexPath(indexPath: NSIndexPath) -> UICollectionViewLayoutAttributes? {
+//        let attr = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
+//        attr.frame = CGRectMake(0, 0, 160, 160)
+//        print("attr: \(attr)")
+//        return attr
+//    }
+    
+    override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        return self.layoutInfo.values.map {$0}
+    }
+    
+    override func collectionViewContentSize() -> CGSize {
+        return CGSizeMake(320, 900);
+    }
+}
+
 
 extension TodoCategoryCollectionViewController {
 
