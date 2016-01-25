@@ -43,10 +43,10 @@ class CategoryCell: UICollectionViewCell {
                     if let label = view as? UILabel {
                         if idx < summaryCount {
                             label.text = md.summaryItems![idx]
-                            label.hidden = false
+                            //label.hidden = false
                         } else {
                             label.text = ""
-                            label.hidden = true
+                            //label.hidden = true
                         }
                     }
                 }

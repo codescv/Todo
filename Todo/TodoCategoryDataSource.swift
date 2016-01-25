@@ -117,6 +117,7 @@ class TodoCategoryDataSource {
                 vm.numberOfItems = 0
                 vm.editable = true
                 vm.color = CategoryColor(rawValue: color)?.color()
+                vm.objId = categoryId
                 self.categoryList.append(vm)
                 let lastItem = self.categoryList.count-1
                 self.onChange?([.Insert(indexPaths: [NSIndexPath(forRow: lastItem, inSection: 0)])])

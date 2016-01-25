@@ -19,6 +19,8 @@ class TodoCategoryListViewController: UIViewController {
     @IBOutlet weak var newCategoryButton: UIButton!
     
     override func viewDidLoad() {
+        super.viewDidLoad()
+        
         self.navigationController?.delegate = self
         if self.readonly {
             self.navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Cancel, target: self, action: "cancel:")
@@ -26,6 +28,13 @@ class TodoCategoryListViewController: UIViewController {
         }
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.barTintColor = CategoryColor.Blue.color()
+        self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
+        self.navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+    }
+
     // cancel select category
     func cancel(sender: AnyObject) {
         self.performSegueWithIdentifier("cancelMoveToCategory", sender: nil)
@@ -123,14 +132,6 @@ class TodoCategoryCollectionViewController: UICollectionViewController, UICollec
             
         }
         
-//        let layout = self.collectionView!.collectionViewLayout as! UICollectionViewFlowLayout
-//        let width = self.view.frame.width/2 - 6
-        //layout.itemSize = CGSizeMake(width, width)
-        //layout.estimatedItemSize = CGSizeMake(width, 60)
-        //layout.minimumInteritemSpacing = 0
-//        layout.minimumLineSpacing = 4
-        
-        
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -195,23 +196,33 @@ class CategoryCellLayout: UICollectionViewLayout {
     var margin: CGFloat = 10
     var leadingMargin: CGFloat = 10
     var topMargin: CGFloat = 10
+    var bottomMargin: CGFloat = 10
+    
+    var totalHeight: CGFloat = 0
+    
+    //var heightForIndexPath: ((NSIndexPath)->CGFloat)?
     
     override func prepareLayout() {
+        self.totalHeight = 0
         if let collectionView = self.collectionView {
             let count = collectionView.numberOfItemsInSection(0)
             var x:CGFloat = leadingMargin, y: CGFloat = topMargin
-            let width = (collectionView.frame.size.width - margin * 3) / 2
+            let cellWidth = (collectionView.frame.size.width - margin * 3) / 2
+            let cellHeight = cellWidth
             for i in 0..<count {
                 let indexPath = NSIndexPath(forItem: i, inSection: 0)
                 let attr = UICollectionViewLayoutAttributes(forCellWithIndexPath: indexPath)
-                attr.frame = CGRectMake(x, y, width, width)
+                attr.frame = CGRectMake(x, y, cellWidth, cellHeight)
+                self.totalHeight = y + cellHeight + bottomMargin
+                    
                 self.layoutInfo[indexPath] = attr
                 if x <= leadingMargin {
-                    x += width + margin
+                    x += cellWidth + margin
                 } else {
                     x = leadingMargin
-                    y += width + margin
+                    y += cellHeight + margin
                 }
+                
             }
         }
     }
@@ -224,11 +235,13 @@ class CategoryCellLayout: UICollectionViewLayout {
 //    }
     
     override func layoutAttributesForElementsInRect(rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return self.layoutInfo.values.map {$0}
+        return self.layoutInfo.values.filter { value in
+            return value.indexPath.row < self.collectionView?.numberOfItemsInSection(0) && CGRectIntersectsRect(rect, value.frame)
+        }
     }
     
     override func collectionViewContentSize() -> CGSize {
-        return CGSizeMake(320, 900);
+        return CGSizeMake(self.collectionView?.frame.size.width ?? 0, self.totalHeight);
     }
 }
 

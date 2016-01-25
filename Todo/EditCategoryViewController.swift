@@ -55,6 +55,8 @@ class EditCategoryViewController: UITableViewController {
         }
         
         self.selectColorAtIndex(colorType)
+        
+        self.categoryNameTextfield.becomeFirstResponder()
     }
     
     private func unselectAllColors() {
