@@ -424,6 +424,7 @@ class TodoListTableViewController: UITableViewController {
     func configureEditCell(cell: EditTodoItemCell) {
         dispatch_async(dispatch_get_main_queue(), {
             cell.textView.becomeFirstResponder()
+            cell.textView.delegate = self
         })
         cell.actionTriggered = { [unowned self] (cell, action) in
             switch action {
@@ -592,6 +593,47 @@ class TodoListTableViewController: UITableViewController {
 
 }
 
+extension TodoListTableViewController: UITextViewDelegate {
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        let textAfterChange = (textView.text as NSString).stringByReplacingCharactersInRange(range, withString: text)
+        let recognizer = ReminderRecognizer(string: textAfterChange)
+        let ranges = recognizer.highlightedRanges()
+        
+        let attributedText = NSMutableAttributedString(string: textAfterChange)
+        for range in ranges {
+            attributedText.addAttribute(NSBackgroundColorAttributeName, value: UIColor.redColor(), range: range)
+        }
+        textView.attributedText = attributedText
+        return false
+    }
+}
+
+class ReminderRecognizer {
+    var string: String
+    
+    let patterns = [
+        "(:?[0-2])?[0-9](?:a|p)m",
+        "tomorrow",
+        "every (day|monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekday|month|year)",
+        "next week",
+        "next month",
+        "next year",
+    ]
+    
+    init(string: String) {
+        self.string = string
+    }
+    
+    func highlightedRanges() -> [NSRange] {
+        var result = [NSRange]()
+        for pattern in patterns {
+            if let regexp = try? NSRegularExpression(pattern: pattern, options: []) {
+                result.append(regexp.rangeOfFirstMatchInString(self.string, options: [], range: NSMakeRange(0, self.string.characters.count)))
+            }
+        }
+        return result
+    }
+}
 
 
 

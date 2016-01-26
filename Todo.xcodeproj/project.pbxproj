@@ -201,10 +201,7 @@
 				C2E24ED01C2E490D00890992 /* Utils */,
 				C23765331C25103C0009219D /* UI */,
 				C2AC0B6E1C1F03D10014A959 /* Model */,
-				C2AC0B3D1C1F02620014A959 /* AppDelegate.swift */,
-				C2AC0B471C1F02620014A959 /* Assets.xcassets */,
-				C2AC0B4C1C1F02620014A959 /* Info.plist */,
-				C2AC0B441C1F02620014A959 /* Todo.xcdatamodeld */,
+				C80CEB3E1C57B4100044D28F /* Support */,
 			);
 			path = Todo;
 			sourceTree = "<group>";
@@ -251,6 +248,17 @@
 				C2E7EE9B1C26CA5D00476051 /* RectZoomAnimator.swift */,
 			);
 			name = Animators;
+			sourceTree = "<group>";
+		};
+		C80CEB3E1C57B4100044D28F /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				C2AC0B3D1C1F02620014A959 /* AppDelegate.swift */,
+				C2AC0B471C1F02620014A959 /* Assets.xcassets */,
+				C2AC0B4C1C1F02620014A959 /* Info.plist */,
+				C2AC0B441C1F02620014A959 /* Todo.xcdatamodeld */,
+			);
+			name = Support;
 			sourceTree = "<group>";
 		};
 		C8B1F4F41C47DCB8002F1B65 /* TodoCategoryList */ = {
