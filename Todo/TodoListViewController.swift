@@ -23,6 +23,43 @@ class TodoListViewController: UIViewController {
         }
     }
     
+    @IBOutlet weak var categoryViewTopConstraint: NSLayoutConstraint!
+    
+    func showCategoryViewControllerAnimated(animated: Bool = true) {
+        if animated {
+            self.categoryCollectionViewController?.view.hidden = false
+            self.categoryViewTopConstraint.constant = -44
+            self.view.layoutIfNeeded()
+            UIView.animateWithDuration(0.3,
+                animations: {
+                    self.categoryViewTopConstraint.constant = 0
+                    self.view.layoutIfNeeded()
+                }, completion: { _ in
+            })
+        } else {
+            self.categoryViewTopConstraint.constant = 0
+            self.categoryCollectionViewController?.view.hidden = false
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    func hideCategoryViewControllerAnimated(animated: Bool = true) {
+        if animated {
+            self.categoryViewTopConstraint.constant = 0
+            self.view.layoutIfNeeded()
+            UIView.animateWithDuration(0.3, animations: {
+                self.categoryViewTopConstraint.constant = -44
+                self.view.layoutIfNeeded()
+                }, completion: { _ in
+                    self.categoryCollectionViewController?.view.hidden = true
+            })
+        } else {
+            self.categoryViewTopConstraint.constant = -44
+            self.categoryCollectionViewController?.view.hidden = true
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         if let catId = categoryId {
@@ -33,9 +70,11 @@ class TodoListViewController: UIViewController {
         }
         self.navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName:UIColor.whiteColor()]
         self.navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+        self.hideCategoryViewControllerAnimated(false)
     }
     
     var innerTableViewController: TodoListTableViewController?
+    var categoryCollectionViewController: CategorySelectionViewController?
     
     @IBAction func newTodoItemButtonTouched(sender: UIButton) {
         self.innerTableViewController?.beginEditingNewTodoItem()
@@ -43,6 +82,62 @@ class TodoListViewController: UIViewController {
     
     @IBAction func cancelMoveToCategory(segue: UIStoryboardSegue) {
     
+    }
+}
+
+class CategorySelectionViewController: UICollectionViewController {
+    let dataSource = TodoCategoryDataSource()
+    var selectedIndexPath: NSIndexPath?
+    
+    func selectIndexPath(indexPath: NSIndexPath) {
+        self.selectedIndexPath = indexPath
+        self.collectionView?.reloadData()
+    }
+    
+    func deselectAll() {
+        self.selectedIndexPath = nil
+        self.collectionView?.reloadData()
+    }
+    
+    func categoryIdAtIndexPath(indexPath: NSIndexPath) -> NSManagedObjectID? {
+        return self.dataSource.categoryAtIndexPath(indexPath).objId
+    }
+    
+    override func didMoveToParentViewController(parent: UIViewController?) {
+        if let todoListVC = parent as? TodoListViewController {
+            todoListVC.categoryCollectionViewController = self
+        }
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        self.dataSource.reloadDataFromDB() {
+            self.collectionView?.reloadData()
+        }
+    }
+    
+    override func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        return 1
+    }
+    
+    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.dataSource.numberOfCategories
+    }
+    
+    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("CategoryCell", forIndexPath: indexPath)
+        let cat = self.dataSource.categoryAtIndexPath(indexPath)
+        cell.backgroundColor = cat.color
+        if let label = cell.contentView.viewWithTag(1) as? UILabel {
+            label.text = cat.name
+            if indexPath.isEqual(self.selectedIndexPath) {
+                label.layer.borderColor = UIColor.whiteColor().CGColor
+                label.layer.borderWidth = 1
+            } else {
+                label.layer.borderWidth = 0
+            }
+        }
+        
+        return cell
     }
 }
 
@@ -142,6 +237,11 @@ class TodoListTableViewController: UITableViewController {
         }
     }
     
+    // reference to the "move to category" shortcut
+    var categoryViewController: CategorySelectionViewController? {
+        return (parentViewController as? TodoListViewController)?.categoryCollectionViewController
+    }
+    
     // MARK: viewcontroller
     deinit {
         print("deinit todolist table vc")
@@ -189,7 +289,20 @@ class TodoListTableViewController: UITableViewController {
             }
         }
     }
+    
+    
+    func showCategoryViewController() {
+        if let parent = parentViewController as? TodoListViewController {
+            parent.showCategoryViewControllerAnimated()
+        }
+    }
+    
+    func hideCategoryViewController() {
+        if let parent = parentViewController as? TodoListViewController {
+            parent.hideCategoryViewControllerAnimated()
+        }
 
+    }
     
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
@@ -201,14 +314,18 @@ class TodoListTableViewController: UITableViewController {
         let location = longPress.locationInView(tableView)
         let indexPath = tableView.indexPathForRowAtPoint(location)
         
+        
         switch (state) {
         case .Began:
             
             let blk = {
                 if let pressedIndexPath = indexPath {
+                    self.showCategoryViewController()
                     self.firstMovingIndexPath = pressedIndexPath
                     self.currentMovingIndexPath = pressedIndexPath
                     let cell = self.tableView.cellForRowAtIndexPath(pressedIndexPath) as! TodoItemCell
+                    cell.swipeGestureRecognizer?.enabled = false
+                    cell.swipeGestureRecognizer?.enabled = true
                     let rect = cell.cardBackgroundView.convertRect(cell.cardBackgroundView.bounds, toView: self.view)
                     // using cell to create snapshot can sometimes lead to error
                     self.sourceCellSnapshot = self.view.resizableSnapshotViewFromRect(rect, afterScreenUpdates: true, withCapInsets: UIEdgeInsetsZero)
@@ -262,6 +379,13 @@ class TodoListTableViewController: UITableViewController {
             let center = snapshot.center
             snapshot.center = CGPointMake(center.x, location.y);
             
+            if let catPath = self.categoryViewController?.collectionView?.indexPathForItemAtPoint(location) {
+                // move to category
+                self.categoryViewController?.selectIndexPath(catPath)
+                return
+            }
+            self.categoryViewController?.deselectAll()
+            
             if let targetIndexPath = indexPath {
                 if targetIndexPath.section != Section.TodoSection.rawValue {
                     return
@@ -274,6 +398,7 @@ class TodoListTableViewController: UITableViewController {
             
 
         default:
+            self.hideCategoryViewController()
             guard
                 currentMovingIndexPath != nil &&
                 firstMovingIndexPath != nil
@@ -302,7 +427,16 @@ class TodoListTableViewController: UITableViewController {
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
                     if state == .Ended {
-                        self.todoItemsDataSource.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
+                        if let categoryPath = self.categoryViewController?.selectedIndexPath {
+                            // move to category
+                            let item = self.todoItemsDataSource.itemAtIndexPath(self.firstMovingIndexPath!)
+                            let categoryId = self.categoryViewController?.categoryIdAtIndexPath(categoryPath)
+                            self.categoryViewController?.deselectAll()
+                            self.todoItemsDataSource.changeCategory(item, categoryId: categoryId)
+                        } else {
+                            // reorder
+                            self.todoItemsDataSource.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
+                        }
                         self.firstMovingIndexPath = nil
                         self.currentMovingIndexPath = nil
                     } else {

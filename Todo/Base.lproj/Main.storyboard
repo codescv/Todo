@@ -10,7 +10,7 @@
         <!--Todo List Container-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController title="Todo" definesPresentationContext="YES" providesPresentationContextTransitionStyle="YES" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Todo" automaticallyAdjustsScrollViewInsets="NO" definesPresentationContext="YES" providesPresentationContextTransitionStyle="YES" id="BYZ-38-t0r" userLabel="Todo List Container" customClass="TodoListViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -19,7 +19,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nL8-Nd-Mhz">
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nL8-Nd-Mhz" userLabel="Todo List">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <connections>
                                     <segue destination="9TU-RN-1vG" kind="embed" id="Afs-iI-IjX"/>
@@ -36,18 +36,33 @@
                                     <action selector="newTodoItemButtonTouched:" destination="BYZ-38-t0r" eventType="touchUpInside" id="s3u-F0-YhG"/>
                                 </connections>
                             </button>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MqY-pj-536" userLabel="Category">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="Fy1-7j-I2E"/>
+                                </constraints>
+                                <connections>
+                                    <segue destination="oui-Pa-vp9" kind="embed" id="AbV-FY-lUc"/>
+                                </connections>
+                            </containerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="nL8-Nd-Mhz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="CSP-mN-0Sh"/>
-                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="Dkf-UA-fgr"/>
                             <constraint firstItem="nL8-Nd-Mhz" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="OOs-AB-V5N"/>
+                            <constraint firstAttribute="trailing" secondItem="MqY-pj-536" secondAttribute="trailing" id="PPn-em-ulo"/>
+                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="V2e-Ld-dQQ"/>
                             <constraint firstAttribute="trailing" secondItem="nL8-Nd-Mhz" secondAttribute="trailing" id="h5X-r8-Cuf"/>
+                            <constraint firstItem="MqY-pj-536" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="lAr-oz-BT8"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Z4O-2j-7ra" secondAttribute="bottom" constant="20" id="mtz-ru-Mgb"/>
+                            <constraint firstItem="MqY-pj-536" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="sip-XO-Y51"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Z4O-2j-7ra" secondAttribute="trailing" id="yi2-V8-LO2"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Todo" id="Mq3-f8-xgR"/>
+                    <connections>
+                        <outlet property="categoryViewTopConstraint" destination="lAr-oz-BT8" id="vjT-l3-PnR"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -1138,6 +1153,55 @@
                 <exit id="hW8-Qo-quD" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="2835" y="-1995"/>
+        </scene>
+        <!--Category Selection View Controller-->
+        <scene sceneID="JmY-O4-frc">
+            <objects>
+                <collectionViewController id="oui-Pa-vp9" customClass="CategorySelectionViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="4m5-VP-Ide">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UP1-am-76A">
+                            <size key="itemSize" width="44" height="44"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells>
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryCell" id="NG2-Pg-cqc">
+                                <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                    <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" tag="1" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="a92-U4-tep">
+                                            <rect key="frame" x="2" y="13" width="40" height="17"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                </view>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstItem="a92-U4-tep" firstAttribute="centerY" secondItem="NG2-Pg-cqc" secondAttribute="centerY" id="8zw-0g-602"/>
+                                    <constraint firstItem="a92-U4-tep" firstAttribute="leading" secondItem="NG2-Pg-cqc" secondAttribute="leading" constant="2" id="DaV-p8-Pwa"/>
+                                    <constraint firstAttribute="trailing" secondItem="a92-U4-tep" secondAttribute="trailing" constant="2" id="p5U-ib-CZF"/>
+                                </constraints>
+                            </collectionViewCell>
+                        </cells>
+                        <connections>
+                            <outlet property="dataSource" destination="oui-Pa-vp9" id="1eq-cM-eKp"/>
+                            <outlet property="delegate" destination="oui-Pa-vp9" id="2Rq-rf-TcS"/>
+                        </connections>
+                    </collectionView>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rpa-zK-7q9" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1399" y="-635"/>
         </scene>
     </scenes>
     <resources>

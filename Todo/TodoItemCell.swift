@@ -27,6 +27,9 @@ class TodoItemCell: UITableViewCell {
     @IBOutlet weak var doneLabelWidthConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var cardBackgroundView: UIView!
+    
+    var swipeGestureRecognizer: UIPanGestureRecognizer?
+    
     let animationDuration = 0.3
     
     // MARK: action buttons
@@ -120,6 +123,7 @@ class TodoItemCell: UITableViewCell {
         let gestureRecognizer = UIPanGestureRecognizer(target: self, action: "pan:")
         gestureRecognizer.delegate = self
         self.contentView.addGestureRecognizer(gestureRecognizer)
+        self.swipeGestureRecognizer = gestureRecognizer
     }
     
     override func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -139,12 +143,14 @@ class TodoItemCell: UITableViewCell {
         case .Began:
             if self.isTableViewDragging?() == true {
                 gesture.enabled = false
+                gesture.enabled = true
                 return
             }
             panStartPos = gesture.locationInView(self.contentView)
         case .Changed:
             if self.isTableViewDragging?() == true {
                 gesture.enabled = false
+                gesture.enabled = true
                 return
             }
             let pos = gesture.locationInView(self.contentView)
@@ -172,7 +178,6 @@ class TodoItemCell: UITableViewCell {
             }
             self.panDistance = 0
             panStartPos = nil
-            gesture.enabled = true
         }
     }
     
