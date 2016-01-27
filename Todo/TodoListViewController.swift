@@ -728,18 +728,23 @@ class TodoListTableViewController: UITableViewController {
 }
 
 extension TodoListTableViewController: UITextViewDelegate {
-    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
-        let textAfterChange = (textView.text as NSString).stringByReplacingCharactersInRange(range, withString: text)
-        let recognizer = ReminderRecognizer(string: textAfterChange)
+    func textViewDidChange(textView: UITextView) {
+        if textView.markedTextRange != nil {
+            // if input methods are marking, wait for it
+            return
+        }
+        
+        let text = textView.text
+        let recognizer = ReminderRecognizer(string: text)
         let ranges = recognizer.highlightedRanges()
         
-        let attributedText = NSMutableAttributedString(string: textAfterChange)
+        let attributedText = NSMutableAttributedString(string: text)
         for range in ranges {
             attributedText.addAttribute(NSBackgroundColorAttributeName, value: UIColor.redColor(), range: range)
         }
         textView.attributedText = attributedText
-        return false
     }
+    
 }
 
 class ReminderRecognizer {
