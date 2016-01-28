@@ -23,21 +23,25 @@ class TodoListViewController: UIViewController {
         }
     }
     
-    @IBOutlet weak var categoryViewTopConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var categoryLeadingConstraint: NSLayoutConstraint!
+    
+    @IBOutlet weak var categoryWidthConstraint: NSLayoutConstraint!
+    
     
     func showCategoryViewControllerAnimated(animated: Bool = true) {
         if animated {
             self.categoryCollectionViewController?.view.hidden = false
-            self.categoryViewTopConstraint.constant = -44
+            self.categoryLeadingConstraint.constant = -self.categoryWidthConstraint.constant
             self.view.layoutIfNeeded()
             UIView.animateWithDuration(0.3,
                 animations: {
-                    self.categoryViewTopConstraint.constant = 0
+                    self.categoryLeadingConstraint.constant = 0
                     self.view.layoutIfNeeded()
                 }, completion: { _ in
             })
         } else {
-            self.categoryViewTopConstraint.constant = 0
+            self.categoryLeadingConstraint.constant = 0
             self.categoryCollectionViewController?.view.hidden = false
             self.view.layoutIfNeeded()
         }
@@ -45,16 +49,16 @@ class TodoListViewController: UIViewController {
     
     func hideCategoryViewControllerAnimated(animated: Bool = true) {
         if animated {
-            self.categoryViewTopConstraint.constant = 0
+            self.categoryLeadingConstraint.constant = 0
             self.view.layoutIfNeeded()
             UIView.animateWithDuration(0.3, animations: {
-                self.categoryViewTopConstraint.constant = -44
+                self.categoryLeadingConstraint.constant = -self.categoryWidthConstraint.constant
                 self.view.layoutIfNeeded()
                 }, completion: { _ in
                     self.categoryCollectionViewController?.view.hidden = true
             })
         } else {
-            self.categoryViewTopConstraint.constant = -44
+            self.categoryLeadingConstraint.constant = -self.categoryWidthConstraint.constant
             self.categoryCollectionViewController?.view.hidden = true
             self.view.layoutIfNeeded()
         }
@@ -379,10 +383,13 @@ class TodoListTableViewController: UITableViewController {
             let center = snapshot.center
             snapshot.center = CGPointMake(center.x, location.y);
             
-            if let catPath = self.categoryViewController?.collectionView?.indexPathForItemAtPoint(location) {
-                // move to category
-                self.categoryViewController?.selectIndexPath(catPath)
-                return
+            if let categoryView = self.categoryViewController?.collectionView {
+                let locationInCategory = longPress.locationInView(categoryView)
+                if let catPath = self.categoryViewController?.collectionView?.indexPathForItemAtPoint(locationInCategory) {
+                    // move to category
+                    self.categoryViewController?.selectIndexPath(catPath)
+                    return
+                }
             }
             self.categoryViewController?.deselectAll()
             

@@ -37,9 +37,9 @@
                                 </connections>
                             </button>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MqY-pj-536" userLabel="Category">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                                <rect key="frame" x="-70" y="0.0" width="70" height="600"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="Fy1-7j-I2E"/>
+                                    <constraint firstAttribute="width" constant="70" id="HhL-AR-jwh"/>
                                 </constraints>
                                 <connections>
                                     <segue destination="oui-Pa-vp9" kind="embed" id="AbV-FY-lUc"/>
@@ -48,20 +48,21 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="CSP-mN-0Sh"/>
+                            <constraint firstItem="nL8-Nd-Mhz" firstAttribute="leading" secondItem="MqY-pj-536" secondAttribute="trailing" id="3fp-QL-D0v"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="MqY-pj-536" secondAttribute="bottom" id="9Uu-z4-hwZ"/>
                             <constraint firstItem="nL8-Nd-Mhz" firstAttribute="bottom" secondItem="wfy-db-euE" secondAttribute="top" id="OOs-AB-V5N"/>
-                            <constraint firstAttribute="trailing" secondItem="MqY-pj-536" secondAttribute="trailing" id="PPn-em-ulo"/>
                             <constraint firstItem="nL8-Nd-Mhz" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="V2e-Ld-dQQ"/>
                             <constraint firstAttribute="trailing" secondItem="nL8-Nd-Mhz" secondAttribute="trailing" id="h5X-r8-Cuf"/>
                             <constraint firstItem="MqY-pj-536" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="lAr-oz-BT8"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Z4O-2j-7ra" secondAttribute="bottom" constant="20" id="mtz-ru-Mgb"/>
-                            <constraint firstItem="MqY-pj-536" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="sip-XO-Y51"/>
+                            <constraint firstItem="MqY-pj-536" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="-70" id="sip-XO-Y51"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Z4O-2j-7ra" secondAttribute="trailing" id="yi2-V8-LO2"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Todo" id="Mq3-f8-xgR"/>
                     <connections>
-                        <outlet property="categoryViewTopConstraint" destination="lAr-oz-BT8" id="vjT-l3-PnR"/>
+                        <outlet property="categoryLeadingConstraint" destination="sip-XO-Y51" id="4XP-qM-INX"/>
+                        <outlet property="categoryWidthConstraint" destination="HhL-AR-jwh" id="PCS-bj-atf"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -1159,10 +1160,10 @@
             <objects>
                 <collectionViewController id="oui-Pa-vp9" customClass="CategorySelectionViewController" customModule="Todo" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="4m5-VP-Ide">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="70" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UP1-am-76A">
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UP1-am-76A">
                             <size key="itemSize" width="44" height="44"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
                             <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -1170,7 +1171,7 @@
                         </collectionViewFlowLayout>
                         <cells>
                             <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="CategoryCell" id="NG2-Pg-cqc">
-                                <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
+                                <rect key="frame" x="13" y="0.0" width="44" height="44"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                     <rect key="frame" x="0.0" y="0.0" width="44" height="44"/>
@@ -1201,7 +1202,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rpa-zK-7q9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1399" y="-635"/>
+            <point key="canvasLocation" x="1375" y="-519"/>
         </scene>
     </scenes>
     <resources>
