@@ -34,12 +34,53 @@ class TodoListViewController: UIViewController {
             self.categoryCollectionViewController?.view.hidden = false
             self.categoryLeadingConstraint.constant = -self.categoryWidthConstraint.constant
             self.view.layoutIfNeeded()
-            UIView.animateWithDuration(0.3,
+            
+            UIView.animateWithDuration(0.1,
                 animations: {
                     self.categoryLeadingConstraint.constant = 0
                     self.view.layoutIfNeeded()
                 }, completion: { _ in
             })
+            
+            if let cells = self.categoryCollectionViewController?.collectionView?.visibleCells() {
+                let sortedCells = cells.sort { cell1, cell2 in
+                    let indexPath1 = self.categoryCollectionViewController?.collectionView?.indexPathForCell(cell1)
+                    let indexPath2 = self.categoryCollectionViewController?.collectionView?.indexPathForCell(cell2)
+                    return indexPath1!.compare(indexPath2!) == .OrderedAscending
+                }
+                
+                for cell in sortedCells {
+                    var identity = CATransform3DIdentity
+                    identity.m34 = -1.0/1000
+                    cell.layer.anchorPoint.x = 0
+                    cell.layer.position.x -= cell.frame.size.width/2
+                    
+                    let rotation = CATransform3DRotate(identity, CGFloat(-M_PI_2), 0.0, 1.0, 0.0)
+                    cell.layer.transform = rotation
+                }
+                
+                let interval = 1.0 / Double(cells.count)
+                let duration = Double(cells.count) * 0.1
+                var time = 0.0
+                
+                UIView.animateKeyframesWithDuration(duration, delay: 0, options: [],
+                    animations: {
+                        for cell in sortedCells {
+                            UIView.addKeyframeWithRelativeStartTime(time, relativeDuration: interval, animations: {
+                                cell.layer.transform = CATransform3DIdentity
+                            })
+                            time += interval
+                        }
+                    },
+                    completion: { _ in
+                        for cell in sortedCells {
+                            cell.layer.anchorPoint.x = 0.5
+                            cell.layer.position.x += cell.frame.size.width/2
+                        }
+                })
+                
+            }
+
         } else {
             self.categoryLeadingConstraint.constant = 0
             self.categoryCollectionViewController?.view.hidden = false
@@ -311,6 +352,8 @@ class TodoListTableViewController: UITableViewController {
     // MARK: gesture recognizer
     func longPressGestureRecognized(longPress: UILongPressGestureRecognizer!) {
         if self.editingIndexPath != nil {
+            longPress.enabled = false
+            longPress.enabled = true
             return
         }
         
@@ -321,9 +364,14 @@ class TodoListTableViewController: UITableViewController {
         
         switch (state) {
         case .Began:
-            
             let blk = {
                 if let pressedIndexPath = indexPath {
+                    if pressedIndexPath.section != Section.TodoSection.rawValue {
+                        longPress.enabled = false
+                        longPress.enabled = true
+                        return
+                    }
+                    
                     self.showCategoryViewController()
                     self.firstMovingIndexPath = pressedIndexPath
                     self.currentMovingIndexPath = pressedIndexPath
@@ -340,21 +388,23 @@ class TodoListTableViewController: UITableViewController {
                     let snapshot: UIView! = self.sourceCellSnapshot
                     snapshot.center = center
                     snapshot.alpha = 1.0
-                    snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
                     self.tableView.addSubview(snapshot)
+                    cell.hidden = true
                     
                     UIView.animateWithDuration(0.25,
                         animations: {
                             // Offset for gesture location.
                             snapshot.center = CGPointMake(center.x, location.y)
                             snapshot.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                            
+                            
                             snapshot.alpha = 0.98
                             
                             // Fade out.
-                            cell.alpha = 0.0
+                            //cell.alpha = 0.0
                         },
                         completion: { (success) in
-                            cell.hidden = true
+                            //cell.hidden = true
                         }
                     )
                     
@@ -405,7 +455,6 @@ class TodoListTableViewController: UITableViewController {
             
 
         default:
-            self.hideCategoryViewController()
             guard
                 currentMovingIndexPath != nil &&
                 firstMovingIndexPath != nil
@@ -413,6 +462,7 @@ class TodoListTableViewController: UITableViewController {
                     print("error! current index path \(currentMovingIndexPath) first index path \(firstMovingIndexPath)")
                     return
             }
+            self.hideCategoryViewController()
             
             let cell = tableView.cellForRowAtIndexPath(currentMovingIndexPath!) as! TodoItemCell
             cell.hidden = false
@@ -428,9 +478,9 @@ class TodoListTableViewController: UITableViewController {
                     
                     // Undo fade out.
                     cell.alpha = 1.0
-
                 },
                 completion: { (success) in
+                    cell.alpha = 1.0
                     self.sourceCellSnapshot?.removeFromSuperview()
                     self.sourceCellSnapshot = nil
                     if state == .Ended {
@@ -440,14 +490,18 @@ class TodoListTableViewController: UITableViewController {
                             let categoryId = self.categoryViewController?.categoryIdAtIndexPath(categoryPath)
                             self.categoryViewController?.deselectAll()
                             self.todoItemsDataSource.changeCategory(item, categoryId: categoryId)
+                            //self.tableView.reloadData()
                         } else {
                             // reorder
+                            self.categoryViewController?.deselectAll()
                             self.todoItemsDataSource.moveTodoItem(fromRow: self.firstMovingIndexPath!.row, toRow: self.currentMovingIndexPath!.row)
+//                            if self.firstMovingIndexPath!.isEqual(self.currentMovingIndexPath) {
+//                                self.tableView.reloadData()
+//                            }
                         }
                         self.firstMovingIndexPath = nil
                         self.currentMovingIndexPath = nil
                     } else {
-                        print("state: \(state)")
                         self.tableView.reloadData()
                     }
             })

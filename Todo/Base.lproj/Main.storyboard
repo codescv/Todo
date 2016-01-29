@@ -644,7 +644,7 @@
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="sectionIndexBackgroundColor" red="1" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                         <view key="tableFooterView" contentMode="scaleToFill" id="XVV-zu-xut" userLabel="footer">
-                            <rect key="frame" x="0.0" y="373" width="600" height="0.0"/>
+                            <rect key="frame" x="0.0" y="367" width="600" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         </view>
@@ -782,15 +782,15 @@
                                     <outlet property="titleLabel" destination="OsV-qI-Pg5" id="JRR-bO-m25"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EditTodoItemIdentifier" rowHeight="134" id="Nn1-bU-bhu" customClass="EditTodoItemCell" customModule="Todo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="136" width="600" height="134"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="EditTodoItemIdentifier" rowHeight="128" id="Nn1-bU-bhu" customClass="EditTodoItemCell" customModule="Todo" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="136" width="600" height="128"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Nn1-bU-bhu" id="VjI-SW-7KQ">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="133"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="127"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LP0-iM-BQO" userLabel="Background">
-                                            <rect key="frame" x="8" y="12" width="584" height="121"/>
+                                            <rect key="frame" x="8" y="12" width="584" height="115"/>
                                             <subviews>
                                                 <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="706-zW-Iv3">
                                                     <rect key="frame" x="0.0" y="0.0" width="584" height="75"/>
@@ -802,18 +802,26 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                                 </textView>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nwR-Ix-g4V">
-                                                    <rect key="frame" x="546" y="83" width="30" height="30"/>
-                                                    <state key="normal" title="OK"/>
-                                                    <connections>
-                                                        <action selector="okTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="fPR-Fr-wFF"/>
-                                                    </connections>
-                                                </button>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zB4-du-nCz">
-                                                    <rect key="frame" x="490" y="83" width="48" height="30"/>
-                                                    <state key="normal" title="Cancel"/>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zB4-du-nCz">
+                                                    <rect key="frame" x="508" y="83" width="24" height="24"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="24" id="Guu-fx-0L8"/>
+                                                        <constraint firstAttribute="width" constant="24" id="tCO-Lp-chq"/>
+                                                    </constraints>
+                                                    <state key="normal" image="edit-cancel"/>
                                                     <connections>
                                                         <action selector="cancelTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="25G-uA-62P"/>
+                                                    </connections>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nwR-Ix-g4V">
+                                                    <rect key="frame" x="552" y="83" width="24" height="24"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="24" id="404-Re-Rd4"/>
+                                                        <constraint firstAttribute="width" constant="24" id="htC-RC-4s8"/>
+                                                    </constraints>
+                                                    <state key="normal" image="edit-check"/>
+                                                    <connections>
+                                                        <action selector="okTouched:" destination="Nn1-bU-bhu" eventType="touchUpInside" id="fPR-Fr-wFF"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -821,7 +829,7 @@
                                             <constraints>
                                                 <constraint firstItem="706-zW-Iv3" firstAttribute="leading" secondItem="LP0-iM-BQO" secondAttribute="leading" id="2S2-VG-PXT"/>
                                                 <constraint firstAttribute="bottom" secondItem="nwR-Ix-g4V" secondAttribute="bottom" constant="8" id="DBt-7V-Bzc"/>
-                                                <constraint firstItem="nwR-Ix-g4V" firstAttribute="leading" secondItem="zB4-du-nCz" secondAttribute="trailing" constant="8" id="L72-Rj-dcM"/>
+                                                <constraint firstItem="nwR-Ix-g4V" firstAttribute="leading" secondItem="zB4-du-nCz" secondAttribute="trailing" constant="20" id="L72-Rj-dcM"/>
                                                 <constraint firstItem="nwR-Ix-g4V" firstAttribute="top" secondItem="706-zW-Iv3" secondAttribute="bottom" constant="8" id="LZp-cJ-KjC"/>
                                                 <constraint firstItem="706-zW-Iv3" firstAttribute="top" secondItem="LP0-iM-BQO" secondAttribute="top" id="TAM-9r-PvS"/>
                                                 <constraint firstAttribute="trailing" secondItem="nwR-Ix-g4V" secondAttribute="trailing" constant="8" id="XOB-ke-XLm"/>
@@ -844,7 +852,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="DoneItemCellIdentifier" rowHeight="65" id="u5R-LQ-f1y" customClass="DoneItemCell" customModule="Todo" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="270" width="600" height="65"/>
+                                <rect key="frame" x="0.0" y="264" width="600" height="65"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="u5R-LQ-f1y" id="VWW-ys-rYA">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="64"/>
@@ -1211,6 +1219,8 @@
         <image name="delete" width="19" height="20"/>
         <image name="done" width="21" height="19"/>
         <image name="edit" width="22" height="22"/>
+        <image name="edit-cancel" width="32" height="32"/>
+        <image name="edit-check" width="32" height="32"/>
         <image name="edit-white" width="32" height="32"/>
         <image name="reminder" width="19" height="21"/>
     </resources>
