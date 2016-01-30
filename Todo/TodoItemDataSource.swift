@@ -102,7 +102,7 @@ class TodoItemDataSource {
                     return item1.doneDate!.compare(item2.doneDate!) == .OrderedDescending
                 }
             }
-            let items = [todoItemIds.map { self.itemForId($0) }, doneItemIds.map { self.itemForId($0) }]
+            let items = [todoItemIds.map { self.itemForId($0, inContext: context) }, doneItemIds.map { self.itemForId($0, inContext: context) }]
             print("reloaded items from DB")
             dispatch_async(dispatch_get_main_queue(), {
                 self.items = items
