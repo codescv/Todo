@@ -246,7 +246,10 @@ class TodoItemDataSource {
             },
             sync: false,
             completion:  {
-                self.onChange?([.Update(indexPaths:[NSIndexPath(forRow: index, inSection: 0)])])
+                let indexPath = NSIndexPath(forRow: index, inSection: 0)
+                let model = self.itemAtIndexPath(indexPath)
+                model.title = title
+                self.onChange?([.Update(indexPaths:[indexPath])])
                 self.isChanging = false
         })
     }
