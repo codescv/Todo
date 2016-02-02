@@ -28,6 +28,8 @@ class TodoListViewController: UIViewController {
     
     @IBOutlet weak var categoryWidthConstraint: NSLayoutConstraint!
     
+    var isAnimating = false
+    
     
     func showCategoryViewControllerAnimated(animated: Bool = true) {
         if animated {
@@ -43,11 +45,18 @@ class TodoListViewController: UIViewController {
             })
             
             if let cells = self.categoryCollectionViewController?.collectionView?.visibleCells() {
+                if cells.count == 0 {
+                    return
+                }
+                
                 let sortedCells = cells.sort { cell1, cell2 in
                     let indexPath1 = self.categoryCollectionViewController?.collectionView?.indexPathForCell(cell1)
                     let indexPath2 = self.categoryCollectionViewController?.collectionView?.indexPathForCell(cell2)
                     return indexPath1!.compare(indexPath2!) == .OrderedAscending
                 }
+                
+                // save position before animation
+                let oldX: CGFloat = sortedCells[0].layer.position.x
                 
                 for cell in sortedCells {
                     var identity = CATransform3DIdentity
@@ -63,9 +72,11 @@ class TodoListViewController: UIViewController {
                 let duration = Double(cells.count) * 0.1
                 var time = 0.0
                 
+                self.categoryCollectionViewController?.isAnimating = true
                 UIView.animateKeyframesWithDuration(duration, delay: 0, options: [],
                     animations: {
                         for cell in sortedCells {
+                            
                             UIView.addKeyframeWithRelativeStartTime(time, relativeDuration: interval, animations: {
                                 cell.layer.transform = CATransform3DIdentity
                             })
@@ -75,8 +86,9 @@ class TodoListViewController: UIViewController {
                     completion: { _ in
                         for cell in sortedCells {
                             cell.layer.anchorPoint.x = 0.5
-                            cell.layer.position.x += cell.frame.size.width/2
+                            cell.layer.position.x = oldX
                         }
+                        self.categoryCollectionViewController?.isAnimating = false
                 })
                 
             }
@@ -133,15 +145,24 @@ class TodoListViewController: UIViewController {
 class CategorySelectionViewController: UICollectionViewController {
     let dataSource = TodoCategoryDataSource()
     var selectedIndexPath: NSIndexPath?
+    var isAnimating = false
     
     func selectIndexPath(indexPath: NSIndexPath) {
-        self.selectedIndexPath = indexPath
-        self.collectionView?.reloadData()
+        if !indexPath.isEqual(self.selectedIndexPath) {
+            self.selectedIndexPath = indexPath
+            if !self.isAnimating {
+                self.collectionView?.reloadData()
+            }
+        }
     }
     
     func deselectAll() {
-        self.selectedIndexPath = nil
-        self.collectionView?.reloadData()
+        if self.selectedIndexPath != nil {
+            self.selectedIndexPath = nil
+            if !self.isAnimating {
+                self.collectionView?.reloadData()
+            }
+        }
     }
     
     func categoryIdAtIndexPath(indexPath: NSIndexPath) -> NSManagedObjectID? {
@@ -172,14 +193,13 @@ class CategorySelectionViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("CategoryCell", forIndexPath: indexPath)
         let cat = self.dataSource.categoryAtIndexPath(indexPath)
         cell.backgroundColor = cat.color
+        if indexPath.isEqual(self.selectedIndexPath) {
+            cell.transform = CGAffineTransformMakeScale(1.07, 1.07)
+        } else {
+            cell.transform = CGAffineTransformIdentity
+        }
         if let label = cell.contentView.viewWithTag(1) as? UILabel {
             label.text = cat.name
-            if indexPath.isEqual(self.selectedIndexPath) {
-                label.layer.borderColor = UIColor.whiteColor().CGColor
-                label.layer.borderWidth = 1
-            } else {
-                label.layer.borderWidth = 0
-            }
         }
         
         return cell
