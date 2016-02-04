@@ -27,11 +27,11 @@ class TutorialItems {
     
     private func loadTutorialItemsIntoDB() {
         // create sample categories
-        for (categoryName, categoryColor) in self.categories {
+        for (idx, (categoryName, categoryColor)) in self.categories.enumerate() {
             DQ.insertObject(TodoItemCategory.self, block: { (context, category) -> Void in
                 category.name = categoryName
                 category.colorType = categoryColor.rawValue
-                category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
+                category.displayOrder = idx
             }, completion:nil)
         }
         
@@ -40,7 +40,7 @@ class TutorialItems {
             block: { (context, category) -> Void in
                 category.name = "Tutorial"
                 category.colorType = CategoryColor.Green.rawValue
-                category.displayOrder = TodoItemCategory.lastDisplayOrder(context)
+                category.displayOrder = self.categories.count
             }, completion: { categoryId in
                 DQ.write({ context in
                     let category: TodoItemCategory = context.dq_objectWithID(categoryId)
